@@ -422,7 +422,8 @@ def run_searches():
     df_oa.to_csv(RAW/"openalex.csv", index=False)
 
     df_cr = search_crossref(QUERY_PLAIN, *YEARS); df_cr.to_csv(RAW/"crossref.csv", index=False)
-    df_ss = search_semanticscholar_multi(QUERY_PLAIN, *YEARS); df_ss.to_csv(RAW/"semanticscholar.csv", index=False)
+    df_ss = search_semanticscholar_multi(*YEARS);
+    df_ss.to_csv(RAW / "semanticscholar.csv", index=False)
 
     df_sch = search_scholar(QUERY_PLAIN, max_n=50); df_sch.to_csv(RAW/"scholar.csv", index=False)
     df_acm = search_acm(QUERY_PLAIN, max_n=50); df_acm.to_csv(RAW/"acm.csv", index=False)
