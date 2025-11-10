@@ -24,7 +24,7 @@ BLOCK_A_TERMS = [
 ]
 
 BLOCK_B_TERMS = [
-    r"\bxai\b", r"explainab.*", r"explainab.*", r"\battribution\b", r"feature attribution", r"\btcav\b"
+    r"\bxai\b", r"explainab.*", r"\battribution\b", r"feature attribution", r"\btcav\b"
 ]
 
 BLOCK_C_TERMS = [
@@ -108,6 +108,51 @@ def apply_block_filter(df: pd.DataFrame) -> pd.DataFrame:
     df["__ok"] = df.apply(lambda r: matches_blocks(r.get("title"), r.get("abstract")), axis=1)
     return df[df["__ok"]].drop(columns=["__ok"], errors="ignore")
 
+# ---------- Module-level helpers for PRISMA + screening ----------
+
+def is_english_row(row) -> bool:
+    langs = row.get("_languages_list")
+    if isinstance(langs, list) and len(langs) > 0:
+        return any(_s(x) == "en" for x in langs)
+    lang = _s(row.get("language"))
+    if not lang:    # default-to-English if missing
+        return True
+    return any(_s(p.strip()) == "en" for p in lang.split(","))
+
+def is_arxiv_like(row) -> bool:
+    v = _s(row.get("venue"))
+    d = _s(row.get("doi"))
+    u = _s(row.get("url"))
+    return ("arxiv" in v) or d.startswith("10.48550") or ("arxiv.org" in u)
+
+def is_non_peer_row(row) -> bool:
+    # Your rule: non-peer if arXiv-like OR missing/empty venue
+    return is_arxiv_like(row) or (len(_s(row.get("venue"))) == 0)
+
+def dedupe_df(df: pd.DataFrame) -> pd.DataFrame:
+    df = df.copy()
+    df["doi_norm"]   = df["doi"].str.lower().str.strip()
+    df["title_norm"] = df["title"].str.lower().str.replace(r"\s+", " ", regex=True).str.strip()
+    df = (df.sort_values(["doi_norm","year"], na_position="last")
+            .drop_duplicates(subset=["doi_norm"], keep="first"))
+    no_doi  = df[df["doi_norm"].isna()].drop_duplicates(subset=["title_norm","year"], keep="first")
+    with_doi = df[~df["doi_norm"].isna()]
+    out = pd.concat([with_doi, no_doi], ignore_index=True).drop(columns=["doi_norm","title_norm"])
+    return out
+
+# A∧B∧C matches – title-only vs abstract-only
+def _any(rx_list, text):
+    return any(r.search(text or "") for r in rx_list)
+
+def match_title_A_and_B_and_C(row) -> bool:
+    t = _s(row.get("title"))
+    return _any(RX_A, t) and _any(RX_B, t) and _any(RX_C, t)
+
+def match_abstract_A_and_B_and_C(row) -> bool:
+    a = _s(row.get("abstract"))
+    return _any(RX_A, a) and _any(RX_B, a) and _any(RX_C, a)
+
+
 def lens_smoke():
     """Quick sanity check that your token & basic fields work."""
     url = "https://api.lens.org/scholarly/search"
@@ -140,106 +185,65 @@ def lens_smoke():
 def tag_inclusions_exclusions(df: pd.DataFrame) -> pd.DataFrame:
     df = df.copy()
 
-    # Consider these explicit non-peer types (very similar to preprints)
     NON_PEER_TYPES = {
         "preprint", "working paper", "working-paper", "workshop paper",
         "technical report", "report", "white paper", "white-paper"
     }
 
     def I1(row):
-        """
-        Peer-reviewed if:
-          - doc_type indicates a journal or proceedings article, OR
-          - venue looks like a journal/proceedings/conference/publisher.
-        Non-peer only for preprint-like types (arXiv handled separately).
-        """
         t = _s(row.get("doc_type"))
         v = _s(row.get("venue"))
-
         if t in NON_PEER_TYPES:
             return False
-
-        # Positive journal/proceedings signals
-        if any(k in t for k in [
-            "journal-article", "proceedings-article", "conference-article", "article"
-        ]):
+        if any(k in t for k in ["journal-article","proceedings-article","conference-article","article"]):
             return True
-
         if any(k in v for k in [
-            "journal", "transactions", "proceedings", "conference",
-            "acm", "ieee", "springer", "elsevier", "aaai",
-            "neurips", "icml", "acl", "emnlp", "coling", "naacl"
+            "journal","transactions","proceedings","conference",
+            "acm","ieee","springer","elsevier","aaai","neurips","icml","acl","emnlp","coling","naacl"
         ]):
             return True
-
-        # Unknown types default to False (will still be counted if venue matches)
         return False
 
-    def is_arxiv_like(row):
-        """Detect arXiv/DOI mirror as non-peer bucket."""
-        v = _s(row.get("venue"))
-        d = _s(row.get("doi"))
-        u = _s(row.get("url"))
-        return ("arxiv" in v) or d.startswith("10.48550") or ("arxiv.org" in u)
+    # Reuse module-level English/arXiv detectors
+    df["I1_peer_reviewed"] = df.apply(I1, axis=1)
+    df["I2_english"]       = df.apply(is_english_row, axis=1)
 
-    # I2 English
-    def I2(row):
-        """
-        English if:
-          - languages list contains 'en', OR
-          - languages string contains 'en' (comma-separated), OR
-          - language is missing/empty (default-to-English policy)
-        """
-        langs = row.get("_languages_list")
-        if isinstance(langs, list) and len(langs) > 0:
-            return any(_s(x) == "en" for x in langs)
-
-        lang = _s(row.get("language"))
-        if lang:
-            parts = [p.strip() for p in lang.split(",")]
-            return any(_s(p) == "en" for p in parts)
-
-        # Missing language → consider English (your requested policy)
-        return True
-
-    # I3 LLM-context
     def I3(row):
         txt = (_s(row.get("title")) + " " + _s(row.get("abstract")))
         return any(k in txt for k in ["llm","large language model","gpt","transformer"])
 
-    # I4 Fairness nexus
     def I4(row):
         txt = (_s(row.get("title")) + " " + _s(row.get("abstract")))
-        return any(k in txt for k in ["fairness","bias","equalized odds","demographic parity","representational harm","toxicity","stereotyp","non-discrimination"])
+        return any(k in txt for k in [
+            "fairness","bias","equalized odds","demographic parity","representational harm",
+            "toxicity","stereotyp","non-discrimination"
+        ])
 
-    # I5 XAI nexus
     def I5(row):
         txt = (_s(row.get("title")) + " " + _s(row.get("abstract")))
-        return any(k in txt for k in ["explainab","interpretab","attribution","counterfactual","example-based","prototype","tcav","model card","datasheet","concept activation","influence","probe","probing"])
+        return any(k in txt for k in [
+            "explainab","interpretab","attribution","counterfactual","example-based",
+            "prototype","tcav","model card","datasheet","concept activation","influence","probe","probing"
+        ])
 
-    df["I1_peer_reviewed"] = df.apply(I1, axis=1)
-    df["I2_english"]       = df.apply(I2, axis=1)
-    df["I3_llm"]           = df.apply(I3, axis=1)
-    df["I4_fairness"]      = df.apply(I4, axis=1)
-    df["I5_xai"]           = df.apply(I5, axis=1)
-
-
+    df["I3_llm"]      = df.apply(I3, axis=1)
+    df["I4_fairness"] = df.apply(I4, axis=1)
+    df["I5_xai"]      = df.apply(I5, axis=1)
 
     df["arxiv_like"] = df.apply(is_arxiv_like, axis=1)
 
-    # Exclusions (heuristic ANY rule)
+    # Exclusions (any)
     def E1(row):  # non-archival only
         return (row["arxiv_like"] and not row["I1_peer_reviewed"])
 
     def E2(row):  # pure safety/jailbreak without fairness constructs
         txt = (_s(row.get("title")) + " " + _s(row.get("abstract")))
         safetyish = any(k in txt for k in ["safety policy","jailbreak","red team"])
-        fairnessish = row["I4_fairness"]
-        return safetyish and not fairnessish
+        return safetyish and not row["I4_fairness"]
 
     def E3(row):  # pure interpretability/mechanistic without fairness goal
         txt = (_s(row.get("title")) + " " + _s(row.get("abstract")))
-        interp = any(k in txt for k in ["mechanistic interpretability","mechanistic", "circuit", "feature visualization"])
+        interp = any(k in txt for k in ["mechanistic interpretability","mechanistic","circuit","feature visualization"])
         return interp and not row["I4_fairness"]
 
     def E4(row):  # wrong modality (no obvious LLM context)
@@ -257,7 +261,6 @@ def tag_inclusions_exclusions(df: pd.DataFrame) -> pd.DataFrame:
     df["E4_non_llm_modality"]    = df.apply(E4, axis=1)
     df["E5_no_eval"]             = df.apply(E5, axis=1)
 
-    # convenience columns
     df["I_all"] = df[["I1_peer_reviewed","I2_english","I3_llm","I4_fairness","I5_xai"]].all(axis=1)
     df["E_any"] = df[["E1_non_archival_only","E2_pure_safety","E3_pure_interpret_only","E4_non_llm_modality","E5_no_eval"]].any(axis=1)
 
@@ -363,88 +366,10 @@ def _map_lens_record(rec: Dict[str, Any]) -> Dict[str, Any]:
         "is_arxiv_like": is_arxiv
     }
 
-# === REPLACE search_lens_api WITH THIS ===
-def search_lens_api(y1: int, y2: int, max_n: int = 500000) -> pd.DataFrame:
-    """
-    Fetch all results via Lens Scholarly API using scroll pagination.
-    Requires LENS_API_TOKEN.
-    """
-    if not LENS_API_TOKEN:
-        print("LENS_API_TOKEN not set; skipping API and falling back to CSV import.")
-        return pd.DataFrame(columns=CANON_COLS)
-
-    url = "https://api.lens.org/scholarly/search"
-    headers = {
-        "Authorization": f"Bearer {LENS_API_TOKEN}",
-        "Content-Type": "application/json",
-        "Accept": "application/json",
-        "User-Agent": "FAIR-LEARN-SLR"
-    }
-
-    body = _lens_query_body(y1, y2)
-    rows, fetched = [], 0
-
-    # first request
-    r = requests.post(url, headers=headers, json=body, timeout=120)
-    if r.status_code == 204:
-        print("[Lens] No results.")
-        return pd.DataFrame(columns=CANON_COLS)
-    if r.status_code != 200:
-        raise RuntimeError(f"[Lens] HTTP {r.status_code}: {r.text[:400]}")
-    js = r.json()
-    scroll_id = js.get("scroll_id")  # <-- underscore
-    data = js.get("data", []) or []
-    for rec in data:
-        rows.append(_map_lens_record(rec))
-    fetched += len(data)
-    print(f"[Lens] +{len(data)} (total {fetched})")
-
-    # scroll loop (size is fixed by first call)
-    while True:
-        if not scroll_id or fetched >= max_n:
-            break
-        payload = {"scroll_id": scroll_id, "scroll": "2m"}
-        r = requests.post(url, headers=headers, json=payload, timeout=120)
-        if r.status_code == 204:
-            break
-        if r.status_code != 200:
-            raise RuntimeError(f"[Lens] Scroll HTTP {r.status_code}: {r.text[:400]}")
-        js = r.json()
-        scroll_id = js.get("scroll_id")
-        data = js.get("data", []) or []
-        if not data:
-            break
-        for rec in data:
-            rows.append(_map_lens_record(rec))
-        fetched += len(data)
-        print(f"[Lens] +{len(data)} (total {fetched})")
-        time.sleep(0.2)
-
-    df = normalize(rows, "lens")
-    # Year filter (belt-and-suspenders)
-    df = df[(df["year"].fillna(0).astype(int) >= y1) & (df["year"].fillna(0).astype(int) <= y2)]
-    # Apply your A∧B∧C blocks again on title+abstract
-    df = apply_block_filter(df)
-
-    # in-provider dedupe by DOI then by (lower(title), year)
-    df["doi_norm"] = df["doi"].str.lower().str.strip()
-    df["title_norm"] = df["title"].str.lower().str.replace(r"\s+", " ", regex=True).str.strip()
-    df = (df.sort_values(["doi_norm","year"], na_position="last")
-            .drop_duplicates(subset=["doi_norm"], keep="first"))
-    no_doi = df[df["doi_norm"].isna()].drop_duplicates(subset=["title_norm","year"], keep="first")
-    with_doi = df[~df["doi_norm"].isna()]
-    df = pd.concat([with_doi, no_doi], ignore_index=True).drop(columns=["doi_norm","title_norm"])
-    return df
-
-
 # -------------------------
 # CSV fallback (UI exports)
 # -------------------------
 def import_lens_exports() -> pd.DataFrame:
-    """
-    Ingest all CSVs in data/lens/exports/*.csv (as downloaded from Lens UI)
-    and map columns. We try common Lens headers and ignore unknown columns.
-    """
     files = sorted(EXPORTS.glob("*.csv"))
     if not files:
         print("No Lens CSVs found in data/lens/exports; returning empty frame.")
@@ -453,9 +378,6 @@ def import_lens_exports() -> pd.DataFrame:
     frames = []
     for f in files:
         df = pd.read_csv(f, dtype=str, keep_default_na=False)
-        # Common Lens CSV headers we map into our schema:
-        # Title, Authors, Publication Year, Source Title, Abstract,
-        # DOI, Link, Document Type, Language
         mapped = pd.DataFrame({
             "source_db": "lens",
             "title": df.get("Title") or df.get("title"),
@@ -473,19 +395,7 @@ def import_lens_exports() -> pd.DataFrame:
         frames.append(mapped[CANON_COLS])
 
     out = pd.concat(frames, ignore_index=True)
-    # Basic cleanup
-    out["year"] = pd.to_numeric(out["year"], errors="coerce")
-    out = out[(out["year"].fillna(0).astype(int) >= YEARS[0]) & (out["year"].fillna(0).astype(int) <= YEARS[1])]
-    out = apply_block_filter(out)
-
-    # in-provider dedupe
-    out["doi_norm"] = out["doi"].str.lower().str.strip()
-    out["title_norm"] = out["title"].str.lower().str.replace(r"\s+", " ", regex=True).str.strip()
-    out = (out.sort_values(["doi_norm","year"], na_position="last")
-             .drop_duplicates(subset=["doi_norm"], keep="first"))
-    no_doi = out[out["doi_norm"].isna()].drop_duplicates(subset=["title_norm","year"], keep="first")
-    with_doi = out[~out["doi_norm"].isna()]
-    out = pd.concat([with_doi, no_doi], ignore_index=True).drop(columns=["doi_norm","title_norm"])
+    # DO NOT block-filter or dedupe here; just return mapped rows.
     return out
 
 # -------------------------
@@ -505,7 +415,6 @@ def run_lens(y1: int = YEARS[0], y2: int = YEARS[1]) -> pd.DataFrame:
       S0_raw_api            = all results returned by Lens API (pre-year enforcement rechecked)
       S1_year               = after year window (belt & suspenders)
       S2_blockfilter        = after A∧B∧C (title+abstract) screen (proxy for title/abstract screening)
-      S3_dedupe             = after in-provider dedup (DOI then title+year)
       S4_tagged             = after inclusion/exclusion tagging (for descriptive reporting)
     """
     (LENS_DIR / "stages").mkdir(parents=True, exist_ok=True)
@@ -513,9 +422,7 @@ def run_lens(y1: int = YEARS[0], y2: int = YEARS[1]) -> pd.DataFrame:
     if LENS_API_TOKEN:
         lens_smoke()
         print("Using Lens API…")
-        df_raw = search_lens_api(y1, y2, max_n=500000)  # already does year + block filter + dedupe
-        # To expose each stage explicitly, re-run the internals on the raw rows from the fetch loop.
-        # We'll call the fetch again but with minimal transforms to expose real counts.
+
 
         # 1) Fetch again but WITHOUT local filters/dedupe to expose S0/S1
         #    (Reuse search but copy its fetch body.)
@@ -560,51 +467,116 @@ def run_lens(y1: int = YEARS[0], y2: int = YEARS[1]) -> pd.DataFrame:
         df_s1 = df_s0[(df_s0["year"].fillna(0).astype(int) >= y1) & (df_s0["year"].fillna(0).astype(int) <= y2)]
         S1 = _save_stage(df_s1, LENS_DIR / "stages", "S1_year")
 
-        # S2: A∧B∧C over title+abstract
-        df_s2 = apply_block_filter(df_s1)
+        # ===== PRISMA block you asked for (placed after S1) =====
+        # 0) Total identified (2016–2025)
+        total_identified = len(df_s1)
+
+        # 1) Duplicates
+        df_after_dedup = dedupe_df(df_s1)
+        n_duplicates = total_identified - len(df_after_dedup)
+
+        # 2) Non-English (per your rule)
+        mask_en = df_after_dedup.apply(is_english_row, axis=1)
+        n_non_english = int((~mask_en).sum())
+
+        # 3) Non-peer-reviewed (arXiv OR missing venue)
+        mask_peer = ~df_after_dedup.apply(is_non_peer_row, axis=1)
+        n_non_peer = int((~mask_peer).sum())
+
+        df_for_screen = df_after_dedup[mask_en & mask_peer].copy()
+
+        print("[PRISMA] Total identified (2016–2025) =", total_identified)
+        print("[PRISMA] Removed before screening:")
+        print("         Duplicates =", n_duplicates)
+        print("         Non-English =", n_non_english)
+        print("         Non-peer-reviewed (arXiv or missing venue) =", n_non_peer)
+        print("[PRISMA] Records to screen (after removals) =", len(df_for_screen))
+
+        # ---- Title/Abstract screening ONCE (A∧B∧C) ----
+        df_for_screen["match_title"] = df_for_screen.apply(match_title_A_and_B_and_C, axis=1)
+        df_for_screen["match_abs"] = df_for_screen.apply(match_abstract_A_and_B_and_C, axis=1)
+
+        n_title = int(df_for_screen["match_title"].sum())
+        n_abs = int(df_for_screen["match_abs"].sum())
+        n_both = int((df_for_screen["match_title"] & df_for_screen["match_abs"]).sum())
+        screened_in = df_for_screen[df_for_screen["match_title"] | df_for_screen["match_abs"]].copy()
+        n_union = len(screened_in)
+
+        print("[PRISMA] Screening (title/abstract only):")
+        print(f"         Title matches = {n_title}")
+        print(f"         Abstract matches = {n_abs}")
+        print(f"         Both = {n_both}")
+        print(f"         Kept after screening (union) = {n_union}")
+        print(f"         Excluded at screening = {len(df_for_screen) - n_union}")
+
+        # S2: save the screened-in set
+        df_s2 = screened_in
         S2 = _save_stage(df_s2, LENS_DIR / "stages", "S2_blockfilter")
 
-        # S3: in-provider dedupe
-        df_s3 = df_s2.copy()
-        df_s3["doi_norm"] = df_s3["doi"].str.lower().str.strip()
-        df_s3["title_norm"] = df_s3["title"].str.lower().str.replace(r"\s+", " ", regex=True).str.strip()
-        df_s3 = (df_s3.sort_values(["doi_norm","year"], na_position="last")
-                    .drop_duplicates(subset=["doi_norm"], keep="first"))
-        no_doi = df_s3[df_s3["doi_norm"].isna()].drop_duplicates(subset=["title_norm","year"], keep="first")
-        with_doi = df_s3[~df_s3["doi_norm"].isna()]
-        df_s3 = pd.concat([with_doi, no_doi], ignore_index=True).drop(columns=["doi_norm","title_norm"])
-        S3 = _save_stage(df_s3, LENS_DIR / "stages", "S3_dedupe")
-
-        # S4: tag and save final canonical for downstream synthesis
-        df_tagged = tag_inclusions_exclusions(df_s3)
+        # S4: tag for descriptive reporting
+        df_tagged = tag_inclusions_exclusions(df_s2)
         S4 = _save_stage(df_tagged, LENS_DIR / "stages", "S4_tagged")
-
-        src_mode = "api"
         tagged = df_tagged
+        src_mode = "api"
 
     else:
         print("Using Lens CSV imports (no token)…")
-        df0 = import_lens_exports()
-        # mirror stages for CSV path
-        df_s1 = df0  # CSV imports are assumed already within year; keep naming consistent
+        df0 = import_lens_exports()  # raw import (no filtering here)
+
+        # S1: apply the same year guard used in the API branch
+        df_s1 = df0[(df0["year"].fillna(0).astype(int) >= y1) &
+                    (df0["year"].fillna(0).astype(int) <= y2)]
         S1 = _save_stage(df_s1, LENS_DIR / "stages", "S1_year")
-        df_s2 = apply_block_filter(df_s1); S2 = _save_stage(df_s2, LENS_DIR / "stages", "S2_blockfilter")
-        # dedupe
-        df_s3 = df_s2.copy()
-        df_s3["doi_norm"] = df_s3["doi"].str.lower().str.strip()
-        df_s3["title_norm"] = df_s3["title"].str.lower().str.replace(r"\s+", " ", regex=True).str.strip()
-        df_s3 = (df_s3.sort_values(["doi_norm","year"], na_position="last")
-                    .drop_duplicates(subset=["doi_norm"], keep="first"))
-        no_doi = df_s3[df_s3["doi_norm"].isna()].drop_duplicates(subset=["title_norm","year"], keep="first")
-        with_doi = df_s3[~df_s3["doi_norm"].isna()]
-        df_s3 = pd.concat([with_doi, no_doi], ignore_index=True).drop(columns=["doi_norm","title_norm"])
-        S3 = _save_stage(df_s3, LENS_DIR / "stages", "S3_dedupe")
-        df_tagged = tag_inclusions_exclusions(df_s3)
+
+        # ---- PRISMA counts (same order as API branch) ----
+        total_identified = len(df_s1)
+
+        df_after_dedup = dedupe_df(df_s1)
+        n_duplicates = total_identified - len(df_after_dedup)
+
+        mask_en = df_after_dedup.apply(is_english_row, axis=1)
+        n_non_english = int((~mask_en).sum())
+
+        mask_peer = ~df_after_dedup.apply(is_non_peer_row, axis=1)
+        n_non_peer = int((~mask_peer).sum())
+
+        df_for_screen = df_after_dedup[mask_en & mask_peer].copy()
+
+        print("[PRISMA] Total identified (2016–2025) =", total_identified)
+        print("[PRISMA] Removed before screening:")
+        print("         Duplicates =", n_duplicates)
+        print("         Non-English =", n_non_english)
+        print("         Non-peer-reviewed (arXiv or missing venue) =", n_non_peer)
+        print("[PRISMA] Records to screen (after removals) =", len(df_for_screen))
+
+        # Title/Abstract screening ONCE
+        df_for_screen["match_title"] = df_for_screen.apply(match_title_A_and_B_and_C, axis=1)
+        df_for_screen["match_abs"] = df_for_screen.apply(match_abstract_A_and_B_and_C, axis=1)
+
+        n_title = int(df_for_screen["match_title"].sum())
+        n_abs = int(df_for_screen["match_abs"].sum())
+        n_both = int((df_for_screen["match_title"] & df_for_screen["match_abs"]).sum())
+        screened_in = df_for_screen[df_for_screen["match_title"] | df_for_screen["match_abs"]].copy()
+        n_union = len(screened_in)
+
+        print("[PRISMA] Screening (title/abstract only):")
+        print(f"         Title matches = {n_title}")
+        print(f"         Abstract matches = {n_abs}")
+        print(f"         Both = {n_both}")
+        print(f"         Kept after screening (union) = {n_union}")
+        print(f"         Excluded at screening = {len(df_for_screen) - n_union}")
+
+        # S2: screened-in set
+        df_s2 = screened_in
+        S2 = _save_stage(df_s2, LENS_DIR / "stages", "S2_blockfilter")
+
+        # S4: tag for descriptive reporting
+        df_tagged = tag_inclusions_exclusions(df_s2)
         S4 = _save_stage(df_tagged, LENS_DIR / "stages", "S4_tagged")
         tagged = df_tagged
         src_mode = "csv"
-        S0 = None  # not applicable
-        S1 = len(df_s1)
+        # If you want S0 symmetry in logs, you can skip or set None
+        S0 = None
 
     # Save canonical CSV for merging with other sources
     out_path = RAW / "lens.csv"
@@ -615,21 +587,30 @@ def run_lens(y1: int = YEARS[0], y2: int = YEARS[1]) -> pd.DataFrame:
     log = {}
     log["source_mode"] = src_mode
     if src_mode == "api":
-        log["S0_raw_api"] = S0               # Records identified via API
-    log["S1_year"] = S1                       # After year window
-    log["S2_blockfilter"] = S2                # After title/abstract A∧B∧C
-    log["S3_dedupe"] = S3                     # After deduplication
-    log["S4_tagged_final"] = S4               # Tagged set used for inclusion decisions
+        log["S0_raw_api"] = S0
+    log["S1_year"] = S1
+    log["S2_blockfilter"] = S2
+    log["S4_tagged_final"] = S4
 
-    # Breakdown (same as before, computed on tagged)
     log["by_year"] = tagged["year"].value_counts(dropna=False).sort_index().to_dict()
     log["peer_reviewed_true"] = int(tagged["I1_peer_reviewed"].sum())
     log["english_true"] = int(tagged["I2_english"].sum())
     log["arxiv_like_only"] = int(((tagged["arxiv_like"]) & ~tagged["I1_peer_reviewed"]).sum())
     log["I_all_true"] = int(tagged["I_all"].sum())
     log["E_any_true"] = int(tagged["E_any"].sum())
-    excl_cols = ["E1_non_archival_only","E2_pure_safety","E3_pure_interpret_only","E4_non_llm_modality","E5_no_eval"]
+    excl_cols = ["E1_non_archival_only", "E2_pure_safety", "E3_pure_interpret_only", "E4_non_llm_modality",
+                 "E5_no_eval"]
     log["exclusions_breakdown"] = {c: int(tagged[c].sum()) for c in excl_cols}
+
+    log["prisma"] = {
+        "total_identified": int(total_identified),
+        "removed_duplicates": int(n_duplicates),
+        "removed_non_english": int(n_non_english),
+        "removed_non_peer": int(n_non_peer),
+        "records_screened": int(len(df_for_screen)),
+        "screen_kept_union": int(n_union),
+        "screen_excluded": int(len(df_for_screen) - n_union)
+    }
 
     with open(LOGS_DIR / "lens_log.json", "w", encoding="utf-8") as f:
         json.dump(log, f, indent=2)
@@ -637,6 +618,7 @@ def run_lens(y1: int = YEARS[0], y2: int = YEARS[1]) -> pd.DataFrame:
     print("Lens logs:")
     print(json.dumps(log, indent=2))
     return tagged
+
 
 if __name__ == "__main__":
     run_lens(*YEARS)
