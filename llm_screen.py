@@ -1,125 +1,127 @@
 #!/usr/bin/env python3
 """
-LLM-powered screening over S4_tagged.csv to find:
-"bias mitigation methods applied to large language models, including XAI".
+Triangle LLM screening with a minimal, content-based pre-exclusion (E0–E2) and no top_k/min_score.
 
-- Reads:  data/lens/stages/S4_tagged.csv  (change --input if needed)
-- Ranks with embeddings (MiniLM) to get top-K candidates
-- Uses local LLM via Ollama (default model: 'mistral') to judge + extract
-- Writes: outputs/bias_mitigation_results.csv and .md
-
-Install deps:
-  pip install pandas numpy sentence-transformers tqdm requests
-
-Install + run a free local LLM:
-  1) Install Ollama: https://ollama.com
-  2) Pull a model:   ollama pull mistral
-  3) (optional) try: ollama pull llama3.2
+Pipeline:
+  1) Load ALL papers from S4_tagged.csv (or data/raw/lens.csv).
+  2) LLM pre-filter (very conservative; content-based):
+        E0 – Not actually about transformer LLMs (GPT-like).
+        E1 – No substantive fairness/bias AND no substantive explainability/XAI.
+        E2 – Commentary-only for our scope (no technical method/eval linking fairness/XAI to LLMs).
+     If uncertain/error, KEEP the paper.
+  3) For every kept paper, ask six directional questions (Q1–Q6) and include ALL relevant ones.
+  4) Outputs:
+        outputs/tri_results_master.csv
+        outputs/tri_results_Q*.csv  (relevant-only per question)
+        outputs/tri_report.md       (counts; no thresholds)
 
 Run:
-  python llm_screen_bias_mitigation.py \
-    --input data/lens/stages/S4_tagged.csv \
-    --model mistral \
-    --top_k 80 \
-    --min_score 70
+  python llm_screen_triangles_full.py --input data/lens/stages/S4_tagged.csv --model mistral
+Deps:
+  pip install pandas numpy tqdm requests
+(Local LLM via Ollama: https://ollama.com — e.g., `ollama pull mistral`)
 """
 
 import argparse
 import json
-import os
 import re
 import sys
 from pathlib import Path
 from typing import Dict, Any, List, Tuple
 
-import numpy as np
 import pandas as pd
 import requests
 from tqdm import tqdm
 
-# Embeddings
-from sentence_transformers import SentenceTransformer
+# ---------------------------
+# Triangle questions (strict, directional opposites)
+# ---------------------------
+QUESTIONS: List[Dict[str, str]] = [
+    # Cluster 1: Fairness/Bias ↔ Explainability
+    {"id": "Q1", "cluster": "Fairness↔Explainability", "subcluster": "F→E",
+     "query": "Does the paper show or argue that fairness/bias concerns motivate, drive, or shape explainability/XAI methods (i.e., explanations developed in response to fairness/bias needs)?"},
+    {"id": "Q2", "cluster": "Fairness↔Explainability", "subcluster": "E→F",
+     "query": "Does the paper show that explainability/XAI techniques are used to detect, measure, or mitigate bias/unfairness (i.e., explanations applied to fairness evaluation/mitigation)?"},
+    # Cluster 2: Fairness/Bias ↔ LLMs
+    {"id": "Q3", "cluster": "Fairness↔LLMs", "subcluster": "F→L",
+     "query": "Does the paper define or operationalize fairness/bias concerns specifically for LLMs (e.g., fairness metrics/datasets/harms/constraints in LLM settings)?"},
+    {"id": "Q4", "cluster": "Fairness↔LLMs", "subcluster": "L→F",
+     "query": "Does the paper show LLMs affecting, amplifying, or addressing fairness/bias/discrimination (measured effects or mitigation on LLM outputs/behaviors)?"},
+    # Cluster 3: Explainability/XAI ↔ LLMs
+    {"id": "Q5", "cluster": "Explainability↔LLMs", "subcluster": "E→L",
+     "query": "Does the paper apply explainability/interpretability methods to analyze or interpret LLM behavior (e.g., attribution, counterfactuals, probing, TCAV)?"},
+    {"id": "Q6", "cluster": "Explainability↔LLMs", "subcluster": "L→E",
+     "query": "Does the paper show LLMs advancing or challenging explainability (e.g., self-explanations/CoT, attribution faithfulness, explanation generation limits)?"},
+]
 
-
-DEFAULT_QUERY = (
-    "Identify papers that discuss bias mitigation methods applied to large language models "
-    "(e.g., GPT/LLM/transformers) AND explicitly involve or mention explainable AI (XAI) "
-    "or interpretability (e.g., feature attribution, counterfactuals, TCAV, model cards). "
-    "Focus on concrete mitigation techniques, evaluation with fairness metrics, datasets, and LLMs."
+# ---------------------------
+# Minimal, content-based exclusion (E0–E2)
+# ---------------------------
+EXCLUSION_CRITERIA_TEXT = (
+    "Exclude ONLY if an item clearly matches at least ONE:\n"
+    "E0: Not actually about transformer large language models (GPT-like; transformer LMs). "
+    "Examples: rule-based/chatbot systems, non-ML uses of 'language model', non-transformer systems without LLMs.\n"
+    "E1: No substantive fairness/bias AND no substantive explainability/XAI. Mentions alone are insufficient—look for operationalization "
+    "(methods, metrics, experiments, datasets, or concrete tasks).\n"
+    "E2: Commentary-only for our scope (editorial/opinion/news/tutorial/ethics-only) with NO technical method/evaluation linking fairness/XAI to LLMs.\n"
+    "If uncertain, do NOT exclude."
 )
 
-SYSTEM_PROMPT = """You are an expert research assistant screening academic papers.
-Given the title and abstract of a paper, decide if it discusses BIAS MITIGATION METHODS APPLIED TO LARGE LANGUAGE MODELS (LLMs),
-*and* whether it involves EXPLAINABLE AI (XAI) or interpretability concepts.
+PREFILTER_SYSTEM_PROMPT = f"""You are filtering papers conservatively before a focused review.
 
-Return a STRICT JSON object with these fields:
-{
-  "relevant": true/false,
-  "reason": "<one concise sentence>",
-  "mentions_xai": true/false,
-  "mitigation_methods": ["<method1>", "<method2>", ...],  // empty if none
-  "llms_or_models": ["<LLM/model names>", ...],           // empty if none
-  "fairness_metrics": ["<metric names>", ...],            // empty if none
-  "datasets": ["<dataset names>", ...],                   // empty if none
-  "score": <0-100 integer>                                // confidence of relevance
-}
+Return a STRICT JSON with fields:
+{{
+  "exclude": true/false,                 // true only if it clearly hits ≥1 exclusion
+  "reasons": ["E0"|"E1"|"E2", ...],      // list of matched codes; empty if none
+  "note": "<very short justification>"
+}}
 
-Relevance definition:
-- The paper must address LLMs (e.g., GPT, transformer-based, instruction-tuned models), not CV/audio-only models.
-- It must include bias mitigation (e.g., debiasing prompts, data curation, counterfactual data augmentation, RLHF variants, representation balancing, post-processing, fairness-constrained decoding).
-- Prefer papers that also use or discuss XAI/interpretability (e.g., feature attribution, counterfactual explanations, influence functions, TCAV, probing) in service of mitigation.
+Content-based rules:
+{EXCLUSION_CRITERIA_TEXT}
 
-If unclear, set "relevant": false and explain why in "reason".
-Output ONLY the JSON. No extra text.
+Operationalization signals to KEEP:
+- Presence of technical method(s), algorithms, datasets, metrics, experiments, or evaluation tied to fairness/XAI/LLMs.
+
+If uncertain, set "exclude": false.
+Output ONLY the JSON.
 """
 
-USER_PROMPT_TEMPLATE = """Paper:
+PREFILTER_USER_TEMPLATE = """Paper:
+Title: {title}
+Abstract: {abstract}
+Apply the exclusion rules and respond with the STRICT JSON schema."""
+
+SYSTEM_PROMPT = """You are an expert research assistant screening academic papers by directional questions.
+
+Return a STRICT JSON object:
+{
+  "question_id": "Q1|Q2|Q3|Q4|Q5|Q6",
+  "relevant": true/false,                      // true only if the paper answers THIS question's direction
+  "reason": "<one concise sentence>",          // why/why not for THIS direction
+  "mentions_fairness": true/false,
+  "mentions_xai": true/false,
+  "mentions_llm": true/false,
+  "directional_claim": "<short directional summary if relevant>"
+}
+Rules:
+- Be directional: for Q1 it's fairness→explainability; for Q2 it's explainability→fairness; Q3 fairness→LLMs; Q4 LLMs→fairness; Q5 explainability→LLMs; Q6 LLMs→explainability.
+- If unclear, set relevant=false.
+- Output ONLY the JSON. No extra text.
+"""
+
+USER_PROMPT_TEMPLATE = """QUESTION: {qid} ({cluster} / {subc})
+Q-text: {qtext}
+
+Paper:
 Title: {title}
 Abstract: {abstract}
 
-Task: Does this paper describe *bias mitigation methods applied to LLMs*, and does it involve XAI/interpretability?
 Respond with the STRICT JSON schema specified by the system message.
 """
 
-def load_dataframe(path: Path) -> pd.DataFrame:
-    if not path.exists():
-        print(f"[ERROR] Input CSV not found: {path}", file=sys.stderr)
-        sys.exit(1)
-    df = pd.read_csv(path)
-    # Ensure expected columns are present
-    required = {"title", "abstract", "year", "venue", "url"}
-    missing = required - set(df.columns)
-    if missing:
-        print(f"[WARN] Missing expected columns {missing} — continuing with what we have.")
-        for m in missing:
-            df[m] = ""
-    return df
-
-def build_corpus(df: pd.DataFrame) -> List[str]:
-    texts = (df["title"].fillna("") + ". " + df["abstract"].fillna("")).tolist()
-    return texts
-
-def embed_texts(texts: List[str], model_name: str = "sentence-transformers/all-MiniLM-L6-v2") -> np.ndarray:
-    model = SentenceTransformer(model_name)
-    emb = model.encode(texts, show_progress_bar=True, convert_to_numpy=True, normalize_embeddings=True)
-    return emb
-
-def top_k_indices(query: str, corpus_emb: np.ndarray, embed_model: SentenceTransformer, k: int = 80) -> List[int]:
-    q = embed_model.encode([query], convert_to_numpy=True, normalize_embeddings=True)[0]
-    sims = (corpus_emb @ q)
-    idx = np.argsort(-sims)[:k]
-    return idx.tolist()
-
-def call_ollama(prompt: str, model: str = "mistral", url: str = "http://localhost:11434/api/generate", timeout: int = 90) -> str:
-    """
-    Calls Ollama's /api/generate endpoint with a single prompt.
-    Returns the concatenated response text.
-    """
-    payload = {
-        "model": model,
-        "prompt": prompt,
-        "stream": False
-    }
+def call_ollama(prompt: str, model: str = "mistral",
+                url: str = "http://localhost:11434/api/generate", timeout: int = 120) -> str:
+    payload = {"model": model, "prompt": prompt, "stream": False}
     try:
         r = requests.post(url, json=payload, timeout=timeout)
         r.raise_for_status()
@@ -128,167 +130,166 @@ def call_ollama(prompt: str, model: str = "mistral", url: str = "http://localhos
     except Exception as e:
         return f"__ERROR__: {e}"
 
-def extract_json_block(text: str) -> Dict[str, Any]:
-    """
-    Try to extract a JSON object from the LLM output robustly.
-    """
+def parse_json(text: str, fallback: Dict[str, Any]) -> Dict[str, Any]:
     if text.startswith("__ERROR__"):
-        return {"relevant": False, "reason": text, "mentions_xai": False,
-                "mitigation_methods": [], "llms_or_models": [], "fairness_metrics": [],
-                "datasets": [], "score": 0}
-
-    # Try a simple JSON parse first
+        return fallback
     try:
         return json.loads(text)
     except Exception:
         pass
-
-    # Find the first {...} block
     m = re.search(r"\{.*\}", text, flags=re.S)
     if m:
         candidate = m.group(0)
-        try:
-            return json.loads(candidate)
-        except Exception:
-            # Try to sanitize typical trailing commas
-            candidate2 = re.sub(r",\s*}", "}", candidate)
-            candidate2 = re.sub(r",\s*]", "]", candidate2)
+        for cand in [candidate,
+                     re.sub(r",\s*}", "}", candidate),
+                     re.sub(r",\s*]", "]", candidate)]:
             try:
-                return json.loads(candidate2)
+                return json.loads(cand)
             except Exception:
-                return {"relevant": False, "reason": f"Could not parse JSON. Raw: {text[:400]}",
-                        "mentions_xai": False, "mitigation_methods": [], "llms_or_models": [],
-                        "fairness_metrics": [], "datasets": [], "score": 0}
-    # Fallback
-    return {"relevant": False, "reason": f"No JSON found. Raw: {text[:400]}",
-            "mentions_xai": False, "mitigation_methods": [], "llms_or_models": [],
-            "fairness_metrics": [], "datasets": [], "score": 0}
+                continue
+    return fallback
 
-def screen_with_llm(
-    df: pd.DataFrame,
-    indices: List[int],
-    model: str = "mistral",
-) -> List[Dict[str, Any]]:
-    rows = []
-    for i in tqdm(indices, desc="LLM screening"):
-        row = df.iloc[i]
+def load_dataframe(path: Path) -> pd.DataFrame:
+    if not path.exists():
+        print(f"[ERROR] Input CSV not found: {path}", file=sys.stderr)
+        sys.exit(1)
+    df = pd.read_csv(path)
+    for col in ["title", "abstract", "year", "venue", "url"]:
+        if col not in df.columns:
+            df[col] = ""
+    return df
+
+def prefilter_rows(df: pd.DataFrame, model: str) -> pd.DataFrame:
+    """Minimal, content-based exclusion with LLM (E0–E2). Errors/uncertainty => keep."""
+    keep_flags = []
+    reasons = []
+    for _, row in tqdm(df.iterrows(), total=len(df), desc="Pre-filter (content-based E0–E2)"):
         title = str(row.get("title", ""))[:8000]
         abstract = str(row.get("abstract", ""))[:12000]
-
-        user_prompt = USER_PROMPT_TEMPLATE.format(title=title, abstract=abstract)
-        # Compose a single prompt (Ollama supports just 'prompt' — we prepend system)
-        full_prompt = f"<<SYS>>\n{SYSTEM_PROMPT}\n<</SYS>>\n\n{user_prompt}"
-
+        user_prompt = PREFILTER_USER_TEMPLATE.format(title=title, abstract=abstract)
+        full_prompt = f"<<SYS>>\n{PREFILTER_SYSTEM_PROMPT}\n<</SYS>>\n\n{user_prompt}"
         resp = call_ollama(full_prompt, model=model)
-        parsed = extract_json_block(resp)
+        parsed = parse_json(resp, {"exclude": False, "reasons": [], "note": "LLM error/uncertain; kept"})
+        exclude = bool(parsed.get("exclude", False))
+        keep_flags.append(not exclude)
+        reasons.append(",".join(parsed.get("reasons", [])) if exclude else "")
+    out = df.copy()
+    out["prefilter_exclusion_codes"] = reasons  # empty string if kept
+    return out[keep_flags]
 
-        # attach bookkeeping
-        parsed["_row_index"] = int(i)
+def ask_all_questions(row: pd.Series, model: str) -> List[Dict[str, Any]]:
+    title = str(row.get("title", ""))[:8000]
+    abstract = str(row.get("abstract", ""))[:12000]
+    res = []
+    for q in QUESTIONS:
+        user_prompt = USER_PROMPT_TEMPLATE.format(
+            qid=q["id"], cluster=q["cluster"], subc=q["subcluster"], qtext=q["query"],
+            title=title, abstract=abstract
+        )
+        full_prompt = f"<<SYS>>\n{SYSTEM_PROMPT}\n<</SYS>>\n\n{user_prompt}"
+        r = call_ollama(full_prompt, model=model)
+        parsed = parse_json(r, {
+            "question_id": q["id"], "relevant": False, "reason": "LLM error",
+            "mentions_fairness": False, "mentions_xai": False, "mentions_llm": False,
+            "directional_claim": ""
+        })
+        parsed["question_id"] = parsed.get("question_id") or q["id"]
+        parsed["_cluster"] = q["cluster"]
+        parsed["_subcluster"] = q["subcluster"]
         parsed["_title"] = row.get("title", "")
         parsed["_abstract"] = row.get("abstract", "")
         parsed["_year"] = row.get("year", "")
         parsed["_venue"] = row.get("venue", "")
         parsed["_url"] = row.get("url", "")
-        rows.append(parsed)
-    return rows
+        res.append(parsed)
+    return res
+
+def screen(df: pd.DataFrame, model: str) -> List[Dict[str, Any]]:
+    results: List[Dict[str, Any]] = []
+    for _, row in tqdm(df.iterrows(), total=len(df), desc="Screening Q1–Q6"):
+        results.extend(ask_all_questions(row, model))
+    return results
 
 def to_bool(x: Any) -> bool:
-    if isinstance(x, bool):
-        return x
-    if isinstance(x, str):
-        return x.strip().lower() in {"true", "yes", "y", "1"}
+    if isinstance(x, bool): return x
+    if isinstance(x, str): return x.strip().lower() in {"true", "yes", "y", "1"}
     return bool(x)
 
-def coerce_list(x: Any) -> List[str]:
-    if x is None or (isinstance(x, float) and np.isnan(x)):
-        return []
-    if isinstance(x, list):
-        return [str(t).strip() for t in x if str(t).strip()]
-    if isinstance(x, str):
-        try:
-            j = json.loads(x)
-            if isinstance(j, list):
-                return [str(t).strip() for t in j if str(t).strip()]
-        except Exception:
-            # split on ; or , as last resort
-            parts = re.split(r"[;,]", x)
-            return [p.strip() for p in parts if p.strip()]
-    return [str(x).strip()]
-
-def write_outputs(
-    results: List[Dict[str, Any]],
-    out_dir: Path,
-    min_score: int = 70
-) -> Tuple[Path, Path]:
+def write_outputs(results: List[Dict[str, Any]], out_dir: Path) -> Tuple[Path, Path, List[Path]]:
     out_dir.mkdir(parents=True, exist_ok=True)
-
-    # Normalize & frame
-    norm_rows = []
+    rows = []
     for r in results:
-        norm_rows.append({
+        rows.append({
+            "question_id": r.get("question_id", ""),
+            "cluster": r.get("_cluster", ""),
+            "subcluster": r.get("_subcluster", ""),
             "relevant": to_bool(r.get("relevant", False)),
             "reason": str(r.get("reason", "")),
+            "directional_claim": str(r.get("directional_claim", "")),
+            "mentions_fairness": to_bool(r.get("mentions_fairness", False)),
             "mentions_xai": to_bool(r.get("mentions_xai", False)),
-            "mitigation_methods": "; ".join(coerce_list(r.get("mitigation_methods", []))),
-            "llms_or_models": "; ".join(coerce_list(r.get("llms_or_models", []))),
-            "fairness_metrics": "; ".join(coerce_list(r.get("fairness_metrics", []))),
-            "datasets": "; ".join(coerce_list(r.get("datasets", []))),
-            "score": int(r.get("score", 0)) if str(r.get("score", "")).isdigit() else 0,
+            "mentions_llm": to_bool(r.get("mentions_llm", False)),
             "title": r.get("_title", ""),
             "abstract": r.get("_abstract", ""),
             "year": r.get("_year", ""),
             "venue": r.get("_venue", ""),
             "url": r.get("_url", "")
         })
-    df = pd.DataFrame(norm_rows)
-    df = df.sort_values(["relevant", "mentions_xai", "score"], ascending=[False, False, False])
+    df = pd.DataFrame(rows)
 
-    # Save CSV
-    csv_path = out_dir / "bias_mitigation_results.csv"
-    df.to_csv(csv_path, index=False)
+    master_csv = out_dir / "tri_results_master.csv"
+    df.to_csv(master_csv, index=False)
 
-    # Markdown report
-    md_path = out_dir / "bias_mitigation_report.md"
+    per_q_paths: List[Path] = []
+    counts = []
+    for q in QUESTIONS:
+        qdf = df[(df["question_id"] == q["id"]) & (df["relevant"] == True)].copy()
+        qpath = out_dir / f"tri_results_{q['id']}.csv"
+        qdf.to_csv(qpath, index=False)
+        per_q_paths.append(qpath)
+        counts.append((q["id"], len(qdf)))
+
+    md_path = out_dir / "tri_report.md"
     with md_path.open("w", encoding="utf-8") as f:
-        f.write("# Bias mitigation in LLMs (screened with local LLM)\n\n")
-        keep = df[(df["relevant"]) & (df["score"] >= min_score)]
-        f.write(f"- Total screened by LLM: {len(df)}\n")
-        f.write(f"- Kept (relevant & score ≥ {min_score}): {len(keep)}\n\n")
+        f.write("# Triangle screening (content-based prefilter; no thresholds)\n\n")
+        f.write("**Minimal content-based exclusions (conservative):**\n\n")
+        f.write("- E0: Not actually about transformer LLMs (GPT-like)\n")
+        f.write("- E1: No substantive fairness/bias and no substantive explainability/XAI\n")
+        f.write("- E2: Commentary-only; no technical method/eval linking fairness/XAI to LLMs\n\n")
 
-        for _, r in keep.iterrows():
-            f.write(f"## {r['title']}\n")
-            meta = []
-            if r["year"]: meta.append(str(r["year"]))
-            if r["venue"]: meta.append(str(r["venue"]))
-            if r["url"]: meta.append(str(r["url"]))
-            if meta:
-                f.write(f"*{' | '.join(meta)}*\n\n")
-            f.write(f"**Score:** {r['score']} | **Mentions XAI:** {r['mentions_xai']}\n\n")
-            if r["mitigation_methods"]:
-                f.write(f"**Mitigation methods:** {r['mitigation_methods']}\n\n")
-            if r["fairness_metrics"]:
-                f.write(f"**Fairness metrics:** {r['fairness_metrics']}\n\n")
-            if r["llms_or_models"]:
-                f.write(f"**LLMs/Models:** {r['llms_or_models']}\n\n")
-            if r["datasets"]:
-                f.write(f"**Datasets:** {r['datasets']}\n\n")
-            if r["reason"]:
-                f.write(f"**LLM justification:** {r['reason']}\n\n")
-            f.write("\n---\n\n")
+        f.write("## Counts per question (all relevant papers included)\n\n")
+        for qid, n in counts:
+            f.write(f"- {qid}: {n} relevant papers\n")
+        f.write("\n")
 
-    return csv_path, md_path
+        f.write("## Clusters\n\n")
+        for cluster in ["Fairness↔Explainability", "Fairness↔LLMs", "Explainability↔LLMs"]:
+            f.write(f"### {cluster}\n\n")
+            sub = (["F→E","E→F"] if cluster == "Fairness↔Explainability"
+                   else ["F→L","L→F"] if cluster == "Fairness↔LLMs"
+                   else ["E→L","L→E"])
+            for s in sub:
+                subdf = df[(df["cluster"] == cluster) & (df["subcluster"] == s) & (df["relevant"] == True)]
+                f.write(f"**{s}** — {len(subdf)} papers\n\n")
+                for _, r in subdf.iterrows():
+                    meta = " | ".join([str(x) for x in [r["year"], r["venue"], r["url"]] if str(x)])
+                    f.write(f"- **{r['title']}**  \n")
+                    if meta: f.write(f"  *{meta}*  \n")
+                    if r["directional_claim"]:
+                        f.write(f"  _Directional claim:_ {r['directional_claim']}  \n")
+                f.write("\n")
 
+    return master_csv, md_path, per_q_paths
+
+# ---------------------------
+# Main
+# ---------------------------
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--input", type=str, default="data/lens/stages/S4_tagged.csv",
-                    help="Path to the curated CSV (S4_tagged.csv or data/raw/lens.csv).")
-    ap.add_argument("--query", type=str, default=DEFAULT_QUERY, help="Semantic search query.")
-    ap.add_argument("--embed_model", type=str, default="sentence-transformers/all-MiniLM-L6-v2",
-                    help="SentenceTransformer model for embeddings.")
+                    help="Path to curated CSV (S4_tagged.csv or data/raw/lens.csv).")
     ap.add_argument("--model", type=str, default="mistral",
-                    help="Ollama model name (e.g., mistral, llama3.2, etc.)")
-    ap.add_argument("--top_k", type=int, default=80, help="Top-K candidates to send to the LLM.")
-    ap.add_argument("--min_score", type=int, default=70, help="Minimum score to mark as strong keep in the report.")
+                    help="Ollama model name (e.g., mistral, llama3.2, qwen2.5:7b).")
     ap.add_argument("--outdir", type=str, default="outputs", help="Output directory.")
     args = ap.parse_args()
 
@@ -297,21 +298,18 @@ def main():
 
     print(f"[INFO] Loading {input_path} …")
     df = load_dataframe(input_path)
-    corpus_texts = build_corpus(df)
 
-    print(f"[INFO] Embedding {len(corpus_texts)} papers with {args.embed_model} …")
-    embed_model = SentenceTransformer(args.embed_model)
-    corpus_emb = embed_texts(corpus_texts, model_name=args.embed_model)
+    print(f"[INFO] Pre-filtering {len(df)} papers with content-based E0–E2 (conservative)…")
+    df_keep = prefilter_rows(df, model=args.model)
+    print(f"[INFO] Kept {len(df_keep)} papers after minimal exclusions.")
 
-    print(f"[INFO] Selecting top-{args.top_k} by semantic similarity for query:\n  {args.query}\n")
-    top_idx = top_k_indices(args.query, corpus_emb, embed_model, k=args.top_k)
+    print(f"[INFO] Screening all kept papers against Q1–Q6 with '{args.model}' …")
+    results = screen(df_keep, model=args.model)
 
-    print(f"[INFO] Screening {len(top_idx)} candidates with Ollama model '{args.model}' …")
-    results = screen_with_llm(df, top_idx, model=args.model)
-
-    csv_path, md_path = write_outputs(results, outdir, min_score=args.min_score)
-    print(f"[DONE] Wrote:\n  - {csv_path}\n  - {md_path}")
-    print("\nTip: open the Markdown report to skim the strongest candidates quickly.")
+    master_csv, md_path, per_q_paths = write_outputs(results, outdir)
+    print(f"[DONE] Wrote:\n  - {master_csv}\n  - {md_path}")
+    for p in per_q_paths:
+        print(f"  - {p}")
 
 if __name__ == "__main__":
     main()
