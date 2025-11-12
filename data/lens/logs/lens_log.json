@@ -1,0 +1,40 @@
+{
+  "source_mode": "api",
+  "S0_raw_api": 54348,
+  "S1_year": 54348,
+  "S2_blockfilter": 487,
+  "S4_tagged_final": 487,
+  "by_year": {
+    "2016": 6,
+    "2017": 6,
+    "2018": 4,
+    "2019": 3,
+    "2020": 6,
+    "2021": 18,
+    "2022": 37,
+    "2023": 88,
+    "2024": 118,
+    "2025": 201
+  },
+  "peer_reviewed_true": 487,
+  "english_true": 487,
+  "arxiv_like_only": 0,
+  "I_all_true": 95,
+  "E_any_true": 288,
+  "exclusions_breakdown": {
+    "E1_non_archival_only": 0,
+    "E2_pure_safety": 1,
+    "E3_pure_interpret_only": 3,
+    "E4_non_llm_modality": 226,
+    "E5_no_eval": 115
+  },
+  "prisma": {
+    "total_identified": 54348,
+    "removed_duplicates": 199,
+    "removed_non_english": 1347,
+    "removed_non_peer": 478,
+    "records_screened": 52326,
+    "screen_kept_union": 487,
+    "screen_excluded": 51839
+  }
+}
