@@ -1,7 +1,8 @@
 # All Venues (unique-paper counts)
 
 - Total unique venues: **136**
-
+- Total unique (paper, venue) pairs: **158**
+- Sum of venue_count column (sanity): **158**
 
 | # | Venue | Number of Papers |
 |---|-------|------------------|
