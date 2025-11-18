@@ -386,8 +386,10 @@ def plot_venue_cloud(df: pd.DataFrame, outdir: Path):
         color_continuous_scale=["#F5EDE2", "#C9D6B8", "#8FB996", "#386641"],
     )
 
+    # Remove color bar
     fig.update_layout(coloraxis_showscale=False)
 
+    # Apply your base styling
     fig = style_plotly(
         fig,
         "Top 15 Venues for Relevant Papers",
@@ -395,9 +397,26 @@ def plot_venue_cloud(df: pd.DataFrame, outdir: Path):
         "Venue",
     )
 
+    # 🔥 KEY CHANGES → Make plot wider & give labels room
     fig.update_layout(
-        yaxis=dict(categoryorder="total ascending")
+        width=1400,        # widen plot
+        height=900,        # increase vertical space
+        margin=dict(
+            l=400,        # more space for long venue names
+            r=200,
+            t=120,
+            b=80
+        ),
+        xaxis=dict(title="Number of Papers", automargin=True),
+        yaxis=dict(
+            title="Venue",
+            automargin=True,
+            categoryorder="total ascending"
+        ),
     )
+
+    # Increase bar thickness
+    fig.update_traces(marker_line_width=1.2)
 
     fig.write_html(outdir / "venues_top.html")
     fig.write_image(outdir / "venues_top.png", scale=2)
