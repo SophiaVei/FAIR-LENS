@@ -502,6 +502,41 @@ const InsightsView: React.FC<InsightsProps> = ({ papers, questionMeta }) => {
     { name: "Explainability ↔ LLMs", value: mentionStats.xaiLlm, fill: "#90be6d" },
   ];
 
+  // Question trends over time
+  const questionTrends = useMemo(() => {
+    const trends: Record<number, Record<QuestionId, number>> = {};
+    papers.forEach((paper) => {
+      if (!paper.year) return;
+      const qid = paper.question_id as QuestionId;
+      if (!questionOrder.includes(qid)) return;
+      if (!trends[paper.year]) {
+        trends[paper.year] = { Q1: 0, Q2: 0, Q3: 0, Q4: 0, Q5: 0, Q6: 0 };
+      }
+      trends[paper.year][qid] = (trends[paper.year][qid] || 0) + 1;
+    });
+    const years = Object.keys(trends)
+      .map(Number)
+      .sort((a, b) => a - b);
+    return years.map((year) => ({
+      year,
+      ...trends[year],
+    }));
+  }, [papers, questionOrder]);
+
+  // Cluster distribution
+  const clusterSeries = useMemo(() => {
+    const counts: Record<string, number> = {};
+    papers.forEach((paper) => {
+      const cluster = paper.cluster?.trim();
+      if (!cluster) return;
+      counts[cluster] = (counts[cluster] || 0) + 1;
+    });
+    return Object.entries(counts).map(([name, value]) => ({
+      name: name.replace("↔", " ↔ "),
+      value,
+    }));
+  }, [papers]);
+
   const totalPapers = papers.length;
   const activeYears = yearSeries.length ? `${yearSeries[0].year}–${yearSeries[yearSeries.length - 1].year}` : "—";
   const avgPerYear = yearSeries.length ? Math.round((totalPapers / yearSeries.length) * 10) / 10 : 0;
@@ -675,6 +710,97 @@ const InsightsView: React.FC<InsightsProps> = ({ papers, questionMeta }) => {
             </div>
             <ul className="insight-list">
               {comboSeries.map((row) => (
+                <li key={row.name}>
+                  <span>{row.name}</span>
+                  <strong>{row.value}</strong>
+                </li>
+              ))}
+            </ul>
+          </article>
+
+          <article className="insight-card wide">
+            <div className="panel-head">
+              <div>
+                <p className="eyebrow">Evolution</p>
+                <h2>Question trends over time</h2>
+              </div>
+            </div>
+            <div className="chart-shell">
+              <ResponsiveContainer width="100%" height={260}>
+                <AreaChart data={questionTrends}>
+                  <defs>
+                    <linearGradient id="q1Gradient" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#f4a261" stopOpacity={0.8} />
+                      <stop offset="95%" stopColor="#f4a261" stopOpacity={0.1} />
+                    </linearGradient>
+                    <linearGradient id="q2Gradient" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#f9844a" stopOpacity={0.8} />
+                      <stop offset="95%" stopColor="#f9844a" stopOpacity={0.1} />
+                    </linearGradient>
+                    <linearGradient id="q3Gradient" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#f9c74f" stopOpacity={0.8} />
+                      <stop offset="95%" stopColor="#f9c74f" stopOpacity={0.1} />
+                    </linearGradient>
+                    <linearGradient id="q4Gradient" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#90be6d" stopOpacity={0.8} />
+                      <stop offset="95%" stopColor="#90be6d" stopOpacity={0.1} />
+                    </linearGradient>
+                    <linearGradient id="q5Gradient" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#43aa8b" stopOpacity={0.8} />
+                      <stop offset="95%" stopColor="#43aa8b" stopOpacity={0.1} />
+                    </linearGradient>
+                    <linearGradient id="q6Gradient" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#577590" stopOpacity={0.8} />
+                      <stop offset="95%" stopColor="#577590" stopOpacity={0.1} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
+                  <XAxis dataKey="year" stroke="rgba(255,255,255,0.5)" />
+                  <YAxis allowDecimals={false} stroke="rgba(255,255,255,0.5)" />
+                  <RechartsTooltip content={<ChartTooltip />} />
+                  <Legend />
+                  <Area type="monotone" dataKey="Q1" stackId="1" stroke="#f4a261" fill="url(#q1Gradient)" />
+                  <Area type="monotone" dataKey="Q2" stackId="1" stroke="#f9844a" fill="url(#q2Gradient)" />
+                  <Area type="monotone" dataKey="Q3" stackId="1" stroke="#f9c74f" fill="url(#q3Gradient)" />
+                  <Area type="monotone" dataKey="Q4" stackId="1" stroke="#90be6d" fill="url(#q4Gradient)" />
+                  <Area type="monotone" dataKey="Q5" stackId="1" stroke="#43aa8b" fill="url(#q5Gradient)" />
+                  <Area type="monotone" dataKey="Q6" stackId="1" stroke="#577590" fill="url(#q6Gradient)" />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          </article>
+
+          <article className="insight-card">
+            <div className="panel-head">
+              <div>
+                <p className="eyebrow">Clusters</p>
+                <h3>Research clusters</h3>
+              </div>
+            </div>
+            <div className="chart-shell">
+              <ResponsiveContainer width="100%" height={260}>
+                <RePieChart>
+                  <RechartsTooltip content={<ChartTooltip />} />
+                  <Pie
+                    data={clusterSeries}
+                    dataKey="value"
+                    nameKey="name"
+                    innerRadius={60}
+                    outerRadius={90}
+                    paddingAngle={2}
+                  >
+                    {clusterSeries.map((entry, index) => (
+                      <Cell
+                        key={`cluster-${index}`}
+                        fill={["#f4a261", "#90be6d", "#43aa8b"][index % 3]}
+                      />
+                    ))}
+                  </Pie>
+                </RePieChart>
+              </ResponsiveContainer>
+            </div>
+            <ul className="insight-list">
+              {clusterSeries.map((row) => (
                 <li key={row.name}>
                   <span>{row.name}</span>
                   <strong>{row.value}</strong>
