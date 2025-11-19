@@ -3,8 +3,10 @@ import pandas as pd
 import json
 from pathlib import Path
 
-INPUT_CSV = Path(r"C:\Users\Sofia\PycharmProjects\FAIR-LEARN\outputs\tri_results_master.csv")
-OUTPUT_JSON = Path("public/fairlens_papers.json")
+# Use relative path from the script location
+SCRIPT_DIR = Path(__file__).parent.parent
+INPUT_CSV = SCRIPT_DIR / "outputs" / "tri_results_master.csv"
+OUTPUT_JSON = Path(__file__).parent / "public" / "fairlens_papers.json"
 
 def main():
     if not INPUT_CSV.exists():
@@ -19,6 +21,13 @@ def main():
     # Build records
     records = []
     for _, row in df.iterrows():
+        # Handle directional_claim: check for NaN and empty strings
+        directional_claim = row.get("directional_claim", "")
+        if pd.isna(directional_claim):
+            directional_claim = ""
+        else:
+            directional_claim = str(directional_claim).strip()
+        
         rec = {
             "question_id": str(row.get("question_id", "")).strip(),   # Q1–Q6
             "cluster": str(row.get("cluster", "")).strip(),
@@ -27,7 +36,7 @@ def main():
             "year": int(row["year"]) if "year" in df.columns and pd.notna(row["year"]) else None,
             "venue": str(row.get("venue", "")).strip(),
             "url": str(row.get("url", "")).strip(),
-            "directional_claim": str(row.get("directional_claim", "")).strip(),
+            "directional_claim": directional_claim,
             "mentions_fairness": bool(row.get("mentions_fairness", False)),
             "mentions_xai": bool(row.get("mentions_xai", False)),
             "mentions_llm": bool(row.get("mentions_llm", False)),

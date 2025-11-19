@@ -72,7 +72,7 @@
     "year": 2025,
     "venue": "Neural Computing and Applications",
     "url": "nan",
-    "directional_claim": "",
+    "directional_claim": "The paper applies explainability/interpretability methods (XAI-Shapley Additive Explanations) to analyze or interpret LLM behavior",
     "mentions_fairness": false,
     "mentions_xai": true,
     "mentions_llm": true
@@ -85,7 +85,7 @@
     "year": 2025,
     "venue": "Neural Computing and Applications",
     "url": "nan",
-    "directional_claim": "",
+    "directional_claim": "The paper shows LLMs (Long Short-Term Memory) advancing explainability through the use of X-double LSTM and SHAP model",
     "mentions_fairness": false,
     "mentions_xai": true,
     "mentions_llm": true
@@ -5051,7 +5051,7 @@
     "year": 2025,
     "venue": "Engineering and Technology Journal",
     "url": "nan",
-    "directional_claim": "nan",
+    "directional_claim": "",
     "mentions_fairness": false,
     "mentions_xai": true,
     "mentions_llm": true
