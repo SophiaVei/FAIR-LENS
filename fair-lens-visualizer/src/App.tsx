@@ -95,6 +95,8 @@ type ExplorerProps = {
   years: YearFilter;
   totalsByQuestion: Record<QuestionId, number>;
   uniqueVenues: number;
+  uniquePapers: number;
+  uniqueFilteredPapers: number;
   handleReset: () => void;
   handleSelectAllQuestions: () => void;
   highlightedPaper?: Paper;
@@ -191,6 +193,8 @@ const ExplorerView: React.FC<ExplorerProps> = ({
   years,
   totalsByQuestion,
   uniqueVenues,
+  uniquePapers,
+  uniqueFilteredPapers,
   handleReset,
   handleSelectAllQuestions,
   highlightedPaper,
@@ -222,16 +226,23 @@ const ExplorerView: React.FC<ExplorerProps> = ({
 
         <div className="stat-grid">
           <div className="stat-card">
-            <span className="stat-label">Total papers</span>
-            <strong className="stat-value">{papers.length || "—"}</strong>
-            <span className="stat-meta">Across {coverageText}</span>
+            <span className="stat-label">Unique relevant papers</span>
+            <strong className="stat-value">{uniquePapers || "—"}</strong>
+            <span className="stat-meta">Distinct papers answering Q1–Q6</span>
           </div>
           <div className="stat-card">
-            <span className="stat-label">Visible now</span>
+            <span className="stat-label">Visible rows</span>
             <strong className="stat-value">{filteredPapers.length}</strong>
             <span className="stat-meta">
-              {activeQuestions.length ? `${activeQuestions.length} focus areas` : "Full compendium"}
+              {activeQuestions.length 
+                ? `${activeQuestions.length} focus areas` 
+                : "All questions. Relevant papers to all Qs presenting the overlaps when no focus area is selected."}
             </span>
+          </div>
+          <div className="stat-card">
+            <span className="stat-label">Unique visible papers</span>
+            <strong className="stat-value">{uniqueFilteredPapers || "—"}</strong>
+            <span className="stat-meta">Distinct papers in current view</span>
           </div>
           <div className="stat-card">
             <span className="stat-label">Distinct venues</span>
@@ -679,6 +690,16 @@ const InsightsView: React.FC<InsightsProps> = ({ papers, questionMeta }) => {
   );
 };
 
+// Helper function to normalize question_id to Q1-Q6 format
+// Extracts Q1-Q6 from strings like "Q4|Fairness↔LLMs" or "Q1|F→E"
+const normalizeQuestionId = (questionId: string): QuestionId | null => {
+  const match = questionId.match(/^(Q[1-6])/);
+  if (match && (match[1] === "Q1" || match[1] === "Q2" || match[1] === "Q3" || match[1] === "Q4" || match[1] === "Q5" || match[1] === "Q6")) {
+    return match[1] as QuestionId;
+  }
+  return null;
+};
+
 const App: React.FC = () => {
   const [papers, setPapers] = useState<Paper[]>([]);
   const [activeQuestions, setActiveQuestions] = useState<QuestionId[]>([]);
@@ -688,7 +709,31 @@ const App: React.FC = () => {
   useEffect(() => {
     fetch("/fairlens_papers.json")
       .then((r) => r.json())
-      .then((data) => setPapers(data))
+      .then((data: Paper[]) => {
+        // Normalize question_id values (extract Q1-Q6 from malformed IDs like "Q4|Fairness↔LLMs")
+        // Keep ALL papers that have a valid Q1-Q6 question_id (even if malformed)
+        const normalizedPapers: Paper[] = [];
+        for (const paper of data) {
+          const normalizedQid = normalizeQuestionId(paper.question_id);
+          if (normalizedQid) {
+            normalizedPapers.push({ ...paper, question_id: normalizedQid });
+          }
+        }
+        
+        // Deduplicate: keep only one entry per (title, question_id) combination
+        // This prevents the same paper from appearing multiple times for the same question
+        const seen = new Set<string>();
+        const deduplicated: Paper[] = [];
+        for (const paper of normalizedPapers) {
+          const key = `${paper.title?.trim()}|${paper.question_id}`;
+          if (!seen.has(key)) {
+            seen.add(key);
+            deduplicated.push(paper);
+          }
+        }
+        
+        setPapers(deduplicated);
+      })
       .catch((err) => console.error("Error loading data:", err));
   }, []);
 
@@ -727,8 +772,10 @@ const App: React.FC = () => {
   const totalsByQuestion = useMemo(() => {
     const base: Record<QuestionId, number> = { Q1: 0, Q2: 0, Q3: 0, Q4: 0, Q5: 0, Q6: 0 };
     papers.forEach((paper) => {
-      const qid = paper.question_id as QuestionId;
-      if (qid in base) base[qid] += 1;
+      // question_id is already normalized, so we can safely use it
+      if (paper.question_id in base) {
+        base[paper.question_id as QuestionId] += 1;
+      }
     });
     return base;
   }, [papers]);
@@ -741,6 +788,20 @@ const App: React.FC = () => {
     );
     return venueSet.size;
   }, [papers]);
+
+  const uniquePapers = useMemo(() => {
+    const titleSet = new Set(
+      papers.map((paper) => paper.title?.trim()).filter((title): title is string => Boolean(title))
+    );
+    return titleSet.size;
+  }, [papers]);
+
+  const uniqueFilteredPapers = useMemo(() => {
+    const titleSet = new Set(
+      filteredPapers.map((paper) => paper.title?.trim()).filter((title): title is string => Boolean(title))
+    );
+    return titleSet.size;
+  }, [filteredPapers]);
 
   const handleReset = () => {
     setActiveQuestions([]);
@@ -785,7 +846,8 @@ const App: React.FC = () => {
           </NavLink>
         </div>
         <div className="nav-meta">
-          <span>{papers.length} papers</span>
+          <span>{papers.length} rows</span>
+          <span>{uniquePapers} papers</span>
           <span>{uniqueVenues} venues</span>
         </div>
       </nav>
@@ -808,6 +870,8 @@ const App: React.FC = () => {
               years={years}
               totalsByQuestion={totalsByQuestion}
               uniqueVenues={uniqueVenues}
+              uniquePapers={uniquePapers}
+              uniqueFilteredPapers={uniqueFilteredPapers}
               handleReset={handleReset}
               handleSelectAllQuestions={() => setActiveQuestions(questionOrder)}
               highlightedPaper={highlightedPaper}
