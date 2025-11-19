@@ -215,10 +215,10 @@ const Triangle: React.FC<TriangleProps> = ({
         <text x="100" y="12" textAnchor="middle" className="vertex-label">
           Fairness / Bias
         </text>
-        <text x="18" y="190" textAnchor="start" className="vertex-label">
+        <text x="35" y="198" textAnchor="middle" className="vertex-label">
           Explainability
         </text>
-        <text x="182" y="190" textAnchor="end" className="vertex-label">
+        <text x="178" y="198" textAnchor="middle" className="vertex-label">
           LLMs
         </text>
       </svg>
