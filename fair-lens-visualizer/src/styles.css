@@ -1,10 +1,12 @@
 /* src/styles.css */
 
+/* ---------- Base layout & theme ---------- */
+
 :root {
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   line-height: 1.5;
-  color: #111827;
-  background-color: #f9fafb;
+  color: #1f2933;
+  background-color: #f4f1ea; /* warm, paper-like background */
 }
 
 * {
@@ -13,131 +15,208 @@
 
 body {
   margin: 0;
+  background-color: #f4f1ea;
 }
 
 .app-root {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  color: #1f2933;
 }
 
+/* ---------- Header ---------- */
+
 .app-header {
-  padding: 1.5rem 2rem;
-  background: linear-gradient(90deg, #111827, #1f2937);
-  color: white;
+  padding: 1.6rem 2.4rem 1.8rem;
+  background: radial-gradient(circle at top left, #606c38 0, #283618 55%, #1d2018 100%);
+  color: #fdfbf6;
+  box-shadow: 0 14px 35px rgba(15, 23, 42, 0.45);
 }
 
 .app-header h1 {
-  margin: 0 0 0.5rem;
-  font-size: 1.6rem;
+  margin: 0 0 0.4rem;
+  font-size: 1.8rem;
+  letter-spacing: 0.04em;
 }
 
 .app-header .subtitle {
   margin: 0;
-  max-width: 60rem;
-  font-size: 0.95rem;
-  color: #e5e7eb;
+  max-width: 58rem;
+  font-size: 0.98rem;
+  color: #e9e5d8;
 }
+
+/* ---------- Main layout ---------- */
 
 .app-main {
   flex: 1;
   display: grid;
-  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1.8fr);
-  gap: 1.5rem;
-  padding: 1.5rem 2rem;
+  grid-template-columns: minmax(0, 1.25fr) minmax(0, 1.75fr);
+  gap: 1.8rem;
+  padding: 1.8rem 2.4rem 2rem;
+  max-width: 1400px;
+  width: 100%;
+  margin: 0 auto;
 }
+
+/* ---------- Triangle / left side ---------- */
 
 .triangle-section {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 1.1rem;
 }
 
 .triangle-wrapper {
-  background: white;
-  border-radius: 0.75rem;
-  padding: 1rem;
-  box-shadow: 0 10px 25px rgba(15, 23, 42, 0.05);
+  background: linear-gradient(135deg, #fdfbf7 0%, #f6efe2 100%);
+  border-radius: 1rem;
+  padding: 1.2rem 1.2rem 1rem;
+  box-shadow: 0 16px 45px rgba(15, 23, 42, 0.09);
+  border: 1px solid rgba(148, 119, 86, 0.18);
 }
 
 .triangle-svg {
   width: 100%;
   height: auto;
+  display: block;
 }
 
-.vertex-label {
-  font-size: 0.7rem;
-  fill: #111827;
-}
+/* triangle wedges */
 
 .triangle-wedge {
-  fill: #e5e7eb;
-  stroke: #9ca3af;
-  stroke-width: 0.5;
+  fill: #e8ded1; /* soft beige */
+  stroke: #c2b19a;
+  stroke-width: 0.6;
   cursor: pointer;
-  transition: fill 0.15s ease, stroke 0.15s ease;
+  transition: fill 0.18s ease, stroke 0.18s ease, transform 0.18s ease;
 }
 
 .triangle-wedge:hover {
-  fill: #d1d5db;
+  fill: #e1d2c0;
+}
+
+/* Pair-based default colors: FE, FL, EL */
+
+.triangle-wedge.triangle-pair-fe {
+  /* Fairness ↔ Explainability pair (Q1, Q2) – soft sage */
+  fill: #d7e2c7;
+}
+
+.triangle-wedge.triangle-pair-el {
+  /* Explainability ↔ LLMs pair (Q5, Q6) – peach */
+  fill: #f2d0b5;
+}
+
+.triangle-wedge.triangle-pair-fl {
+  /* Fairness ↔ LLMs pair (Q3, Q4) – warm sand */
+  fill: #f0e0b8;
+}
+
+/* Slightly darker on hover for each pair (only when NOT active) */
+
+.triangle-wedge.triangle-pair-fe:hover {
+  fill: #ccd8bb;
+}
+
+.triangle-wedge.triangle-pair-el:hover {
+  fill: #e8c6ab;
+}
+
+.triangle-wedge.triangle-pair-fl:hover {
+  fill: #e7d6ac;
+}
+
+/* Active state still uses the strong highlight color */
+.triangle-wedge-active {
+  fill: #f4a261; /* terracotta highlight */
+  stroke: #e76f51;
+  stroke-width: 1.2;
 }
 
 .triangle-wedge-active {
-  fill: #bfdbfe;
-  stroke: #1d4ed8;
-  stroke-width: 1;
+  fill: #f4a261; /* terracotta highlight */
+  stroke: #e76f51;
+  stroke-width: 1.2;
+}
+
+/* arrow */
+
+.triangle-arrow {
+  stroke: #b45326;
+  stroke-width: 2.2;
+  opacity: 0.98;
+  transition: opacity 0.2s ease;
+}
+
+/* small center point and outline */
+
+.vertex-label {
+  font-size: 0.72rem;
+  fill: #374151;
 }
 
 .triangle-hint {
-  margin-top: 0.75rem;
+  margin-top: 0.8rem;
   font-size: 0.8rem;
-  color: #4b5563;
+  color: #6b7280;
 }
 
+/* ---------- Legend card (Q1–Q6) ---------- */
+
 .legend-card {
-  background: white;
-  border-radius: 0.75rem;
-  padding: 1rem;
-  box-shadow: 0 10px 25px rgba(15, 23, 42, 0.05);
+  background: #fffbf5;
+  border-radius: 0.9rem;
+  padding: 1rem 1.1rem;
+  box-shadow: 0 14px 38px rgba(15, 23, 42, 0.08);
+  border: 1px solid rgba(148, 119, 86, 0.18);
 }
 
 .legend-card h2 {
-  margin: 0 0 0.75rem;
-  font-size: 1rem;
+  margin: 0 0 0.7rem;
+  font-size: 1.02rem;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: #374151;
 }
 
 .legend-card ul {
   list-style: none;
   padding: 0;
-  margin: 0 0 0.75rem;
+  margin: 0 0 0.9rem;
   display: flex;
   flex-direction: column;
-  gap: 0.4rem;
+  gap: 0.45rem;
 }
 
 .legend-item {
   display: flex;
-  gap: 0.5rem;
-  padding: 0.4rem 0.5rem;
-  border-radius: 0.5rem;
+  gap: 0.6rem;
+  padding: 0.45rem 0.55rem;
+  border-radius: 0.7rem;
   cursor: pointer;
   font-size: 0.85rem;
   align-items: flex-start;
-  transition: background-color 0.15s ease;
+  transition: background-color 0.18s ease, box-shadow 0.18s ease, transform 0.08s ease;
+  border: 1px solid transparent;
 }
 
 .legend-item:hover {
-  background-color: #f3f4f6;
+  background-color: #f4ede1;
+  box-shadow: 0 6px 18px rgba(148, 119, 86, 0.25);
+  transform: translateY(-1px);
 }
 
 .legend-item-active {
-  background-color: #dbeafe;
+  background-color: #f4a26120;
+  border-color: #f4a26180;
+  box-shadow: 0 7px 22px rgba(244, 162, 97, 0.35);
 }
 
 .legend-qid {
   font-weight: 600;
-  color: #1d4ed8;
-  min-width: 2.2rem;
+  color: #b45309;
+  min-width: 2.5rem;
 }
 
 .legend-text {
@@ -150,53 +229,73 @@ body {
 }
 
 .btn-reset {
-  margin-top: 0.5rem;
-  padding: 0.35rem 0.7rem;
+  margin-top: 0.4rem;
+  padding: 0.35rem 0.85rem;
   border-radius: 999px;
   border: none;
-  background-color: #1d4ed8;
-  color: white;
+  background-color: #283618;
+  color: #fdfbf6;
   font-size: 0.78rem;
   cursor: pointer;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
 }
 
 .btn-reset:hover {
-  background-color: #1e40af;
+  background-color: #1f2a16;
 }
 
+/* ---------- Right side: list & filters ---------- */
+
 .list-section {
-  background: white;
-  border-radius: 0.75rem;
-  padding: 1rem 1.25rem;
-  box-shadow: 0 10px 25px rgba(15, 23, 42, 0.05);
+  background: #fffbf5;
+  border-radius: 1rem;
+  padding: 1.1rem 1.3rem;
+  box-shadow: 0 16px 45px rgba(15, 23, 42, 0.09);
+  border: 1px solid rgba(148, 119, 86, 0.18);
   display: flex;
   flex-direction: column;
 }
 
 .list-header h2 {
-  margin: 0 0 0.25rem;
-  font-size: 1.1rem;
+  margin: 0 0 0.2rem;
+  font-size: 1.12rem;
 }
 
 .count-text {
-  margin: 0 0 0.5rem;
-  font-size: 0.85rem;
-  color: #4b5563;
+  margin: 0 0 0.7rem;
+  font-size: 0.84rem;
+  color: #6b7280;
 }
 
 .year-filter {
-  display: flex;
-  gap: 0.5rem;
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
   align-items: center;
   font-size: 0.82rem;
-  margin-bottom: 0.75rem;
+  margin-bottom: 0.8rem;
+  padding: 0.45rem 0.65rem;
+  border-radius: 999px;
+  background-color: #f3eee4;
+}
+
+.year-filter label {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
 }
 
 .year-filter input {
-  width: 4rem;
-  padding: 0.15rem 0.3rem;
+  width: 4.1rem;
+  padding: 0.2rem 0.45rem;
   font-size: 0.82rem;
+  border-radius: 999px;
+  border: 1px solid #d1c4b0;
+  background-color: #fefcf8;
 }
+
+/* ---------- Paper list ---------- */
 
 .paper-list {
   list-style: none;
@@ -206,8 +305,8 @@ body {
 }
 
 .paper-item {
-  border-bottom: 1px solid #e5e7eb;
-  padding: 0.6rem 0;
+  border-bottom: 1px solid #e3d8c8;
+  padding: 0.7rem 0;
 }
 
 .paper-item:last-child {
@@ -218,12 +317,12 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  gap: 0.5rem;
+  gap: 0.7rem;
 }
 
 .paper-title {
   margin: 0;
-  font-size: 0.95rem;
+  font-size: 0.97rem;
 }
 
 .paper-meta {
@@ -235,12 +334,13 @@ body {
 }
 
 .paper-meta span {
-  color: #6b7280;
+  color: #7c828b;
 }
 
 .paper-meta a {
-  color: #1d4ed8;
+  color: #b45309;
   text-decoration: none;
+  font-weight: 500;
 }
 
 .paper-meta a:hover {
@@ -248,56 +348,76 @@ body {
 }
 
 .paper-claim {
-  margin: 0.3rem 0;
-  font-size: 0.82rem;
+  margin: 0.32rem 0;
+  font-size: 0.83rem;
   color: #374151;
 }
 
 .paper-tags {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.3rem;
+  gap: 0.32rem;
   margin-top: 0.1rem;
 }
 
+/* tags */
+
 .tag {
   font-size: 0.7rem;
-  padding: 0.1rem 0.4rem;
+  padding: 0.12rem 0.55rem;
   border-radius: 999px;
   background-color: #e5e7eb;
   color: #374151;
 }
 
 .tag-fairness {
-  background-color: #fee2e2;
-  color: #b91c1c;
+  background-color: #f4a26133;
+  color: #7c2d12;
 }
 
 .tag-xai {
-  background-color: #ede9fe;
-  color: #4c1d95;
+  background-color: #a3b18a33;
+  color: #3f4e28;
 }
 
 .tag-llm {
-  background-color: #dbeafe;
-  color: #1d4ed8;
+  background-color: #81b29a33;
+  color: #234e42;
 }
 
 .tag-qid {
-  background-color: #f3f4f6;
+  background-color: #e0e1dd;
   color: #374151;
 }
 
+/* ---------- Footer ---------- */
+
 .app-footer {
-  padding: 0.75rem 2rem;
+  padding: 0.85rem 2.4rem;
   font-size: 0.78rem;
   color: #6b7280;
-  background-color: #f3f4f6;
+  background-color: #e9e2d5;
   text-align: right;
+  border-top: 1px solid rgba(148, 119, 86, 0.35);
 }
+
+/* ---------- Responsive ---------- */
 
 @media (max-width: 900px) {
   .app-main {
     grid-template-columns: 1fr;
+    padding: 1.4rem 1.2rem 1.8rem;
+  }
+
+  .app-header {
+    padding: 1.4rem 1.4rem 1.6rem;
+  }
+
+  .list-section {
+    order: 2;
+  }
+
+  .triangle-section {
+    order: 1;
   }
 }

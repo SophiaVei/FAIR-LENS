@@ -18,37 +18,49 @@ export interface Paper {
   mentions_llm: boolean;
 }
 
-const questionMeta: Record<QuestionId, { label: string; description: string }> = {
+const questionMeta: Record<
+  QuestionId,
+  { label: string; description: string }
+> = {
   Q1: {
     label: "Q1: Fairness → Explainability",
-    description: "Fairness/bias concerns motivate or shape explainability/XAI methods."
+    description:
+      "Fairness/bias concerns motivate or shape explainability/XAI methods.",
   },
   Q2: {
     label: "Q2: Explainability → Fairness",
-    description: "XAI methods are used to detect, measure, or mitigate bias/unfairness."
+    description:
+      "XAI methods are used to detect, measure, or mitigate bias/unfairness.",
   },
   Q3: {
     label: "Q3: Fairness → LLMs",
-    description: "Fairness/bias is defined or operationalized specifically for LLMs."
+    description:
+      "Fairness/bias is defined or operationalized specifically for LLMs.",
   },
   Q4: {
     label: "Q4: LLMs → Fairness",
-    description: "LLMs affect, amplify, or address fairness/discrimination."
+    description:
+      "LLMs affect, amplify, or address fairness/discrimination.",
   },
   Q5: {
     label: "Q5: Explainability → LLMs",
-    description: "XAI methods are applied to analyze or interpret LLM behaviour."
+    description: "XAI methods are applied to analyze or interpret LLM behaviour.",
   },
   Q6: {
     label: "Q6: LLMs → Explainability",
-    description: "LLMs advance or challenge explainability (e.g., self-explanations, CoT)."
+    description:
+      "LLMs advance or challenge explainability (e.g., self-explanations, CoT).",
   },
 };
 
 const App: React.FC = () => {
   const [papers, setPapers] = useState<Paper[]>([]);
-  const [activeQuestion, setActiveQuestion] = useState<QuestionId | null>(null);
-  const [yearFilter, setYearFilter] = useState<{ min: number | null; max: number | null }>({
+  // ⬇⬇⬇ MULTI-SELECTION STATE
+  const [activeQuestions, setActiveQuestions] = useState<QuestionId[]>([]);
+  const [yearFilter, setYearFilter] = useState<{
+    min: number | null;
+    max: number | null;
+  }>({
     min: null,
     max: null,
   });
@@ -73,18 +85,34 @@ const App: React.FC = () => {
 
   // Initialize year filter once we know ranges
   useEffect(() => {
-    if (years.min !== null && years.max !== null && yearFilter.min === null && yearFilter.max === null) {
+    if (
+      years.min !== null &&
+      years.max !== null &&
+      yearFilter.min === null &&
+      yearFilter.max === null
+    ) {
       setYearFilter({ min: years.min, max: years.max });
     }
   }, [years, yearFilter.min, yearFilter.max]);
 
+  // ⬇⬇⬇ helper to toggle one question on/off
+  const toggleQuestion = (qid: QuestionId) => {
+    setActiveQuestions((prev) =>
+      prev.includes(qid) ? prev.filter((q) => q !== qid) : [...prev, qid]
+    );
+  };
+
   const filteredPapers = useMemo(() => {
     let subset = papers;
 
-    if (activeQuestion) {
-      subset = subset.filter((p) => p.question_id === activeQuestion);
+    // filter by one or more selected questions
+    if (activeQuestions.length > 0) {
+      subset = subset.filter((p) =>
+        activeQuestions.includes(p.question_id as QuestionId)
+      );
     }
 
+    // filter by year range
     if (yearFilter.min !== null) {
       subset = subset.filter(
         (p) => p.year === null || p.year >= yearFilter.min!
@@ -100,19 +128,30 @@ const App: React.FC = () => {
     subset = [...subset].sort((a, b) => (b.year ?? 0) - (a.year ?? 0));
 
     return subset;
-  }, [papers, activeQuestion, yearFilter]);
+  }, [papers, activeQuestions, yearFilter]);
 
   const handleReset = () => {
-    setActiveQuestion(null);
+    setActiveQuestions([]);
     if (years.min !== null && years.max !== null) {
       setYearFilter({ min: years.min, max: years.max });
     }
   };
 
+  // Title depending on how many filters are active
+  let listTitle: string;
+  if (activeQuestions.length === 0) {
+    listTitle = "All directional papers";
+  } else if (activeQuestions.length === 1) {
+    listTitle = questionMeta[activeQuestions[0]].label;
+  } else {
+    const ids = activeQuestions.join(", ");
+    listTitle = `Selected questions: ${ids}`;
+  }
+
   return (
     <div className="app-root">
       <header className="app-header">
-        <h1>FAIR–LENS Triangle Visualizer</h1>
+        <h1>FAIR–LENS</h1>
         <p className="subtitle">
           Interactive view of how included papers connect{" "}
           <strong>Fairness/Bias</strong>, <strong>Explainability</strong>, and{" "}
@@ -123,8 +162,8 @@ const App: React.FC = () => {
       <main className="app-main">
         <section className="triangle-section">
           <Triangle
-            activeQuestion={activeQuestion}
-            onSelectQuestion={setActiveQuestion}
+            activeQuestions={activeQuestions}
+            onToggleQuestion={toggleQuestion}
           />
           <div className="legend-card">
             <h2>Directional questions (Q1–Q6)</h2>
@@ -134,11 +173,11 @@ const App: React.FC = () => {
                   key={qid}
                   className={
                     "legend-item" +
-                    (activeQuestion === qid ? " legend-item-active" : "")
+                    (activeQuestions.includes(qid)
+                      ? " legend-item-active"
+                      : "")
                   }
-                  onClick={() =>
-                    setActiveQuestion(activeQuestion === qid ? null : qid)
-                  }
+                  onClick={() => toggleQuestion(qid)}
                 >
                   <span className="legend-qid">{qid}</span>
                   <span className="legend-text">
@@ -159,14 +198,10 @@ const App: React.FC = () => {
 
         <section className="list-section">
           <div className="list-header">
-            <h2>
-              {activeQuestion
-                ? questionMeta[activeQuestion].label
-                : "All directional papers"}
-            </h2>
+            <h2>{listTitle}</h2>
             <p className="count-text">
-              Showing <strong>{filteredPapers.length}</strong> paper
-              {filteredPapers.length === 1 ? "" : "s"}
+              Showing <strong>{filteredPapers.length}</strong> papers. Duplicates
+              arise when a paper belongs to more than one directional question.
             </p>
 
             {years.min !== null && years.max !== null && (
@@ -218,11 +253,7 @@ const App: React.FC = () => {
                     {p.year && <span>{p.year}</span>}
                     {p.venue && <span>{p.venue}</span>}
                     {p.url && (
-                      <a
-                        href={p.url}
-                        target="_blank"
-                        rel="noreferrer"
-                      >
+                      <a href={p.url} target="_blank" rel="noreferrer">
                         Open
                       </a>
                     )}
