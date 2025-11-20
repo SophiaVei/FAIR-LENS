@@ -208,9 +208,6 @@ const Triangle: React.FC<TriangleProps> = ({
         {/* One arrow per active question */}
         {arrowLines}
 
-        {/* Center point */}
-        <circle cx="100" cy="120" r="2.3" fill="#4b5563" />
-
         {/* Vertex labels */}
         <text x="100" y="12" textAnchor="middle" className="vertex-label">
           Fairness / Bias
