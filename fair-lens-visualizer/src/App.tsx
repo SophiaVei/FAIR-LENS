@@ -234,8 +234,8 @@ const ExplorerView: React.FC<ExplorerProps> = ({
             <span className="stat-label">Visible rows</span>
             <strong className="stat-value">{filteredPapers.length}</strong>
             <span className="stat-meta">
-              {activeQuestions.length 
-                ? `${activeQuestions.length} focus areas` 
+              {activeQuestions.length
+                ? `${activeQuestions.length} focus areas`
                 : "All questions. Relevant papers to all Qs presenting the overlaps when no focus area is selected."}
             </span>
           </div>
@@ -463,10 +463,6 @@ const InsightsView: React.FC<InsightsProps> = ({ papers, questionMeta }) => {
     });
     const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]);
     const visible = sorted.slice(0, venueLimit);
-    const remainder = sorted.slice(venueLimit);
-    if (remainder.length) {
-      visible.push(["Others", remainder.reduce((acc, [, count]) => acc + count, 0)]);
-    }
     return visible.map(([name, value]) => ({ name, value }));
   }, [papers, venueLimit]);
 
@@ -642,7 +638,7 @@ const InsightsView: React.FC<InsightsProps> = ({ papers, questionMeta }) => {
             </ul>
           </article>
 
-          <article className="insight-card tall">
+          <article className="insight-card wide">
             <div className="panel-head">
               <div>
                 <p className="eyebrow">Venues</p>
@@ -662,7 +658,7 @@ const InsightsView: React.FC<InsightsProps> = ({ papers, questionMeta }) => {
               </div>
             </div>
             <div className="chart-shell">
-              <ResponsiveContainer width="100%" height={300}>
+              <ResponsiveContainer width="100%" height={venueLimit * 50 + 100}>
                 <ReBarChart data={venueSeries} layout="vertical" margin={{ left: 40 }}>
                   <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
                   <XAxis type="number" allowDecimals={false} stroke="rgba(255,255,255,0.5)" />
@@ -686,10 +682,17 @@ const InsightsView: React.FC<InsightsProps> = ({ papers, questionMeta }) => {
                 <RadialBarChart innerRadius="20%" outerRadius="90%" data={mentionSeries} startAngle={90} endAngle={-270}>
                   <RadialBar dataKey="value" />
                   <RechartsTooltip content={<ChartTooltip />} />
-                  <Legend />
                 </RadialBarChart>
               </ResponsiveContainer>
             </div>
+            <ul className="insight-list">
+              {mentionSeries.map((row) => (
+                <li key={row.name}>
+                  <span>{row.name}</span>
+                  <strong>{row.value}</strong>
+                </li>
+              ))}
+            </ul>
           </article>
 
           <article className="insight-card">
@@ -704,7 +707,6 @@ const InsightsView: React.FC<InsightsProps> = ({ papers, questionMeta }) => {
                 <RadialBarChart innerRadius="40%" outerRadius="100%" data={comboSeries} startAngle={90} endAngle={-270}>
                   <RadialBar dataKey="value" />
                   <RechartsTooltip content={<ChartTooltip />} />
-                  <Legend />
                 </RadialBarChart>
               </ResponsiveContainer>
             </div>
@@ -845,7 +847,7 @@ const App: React.FC = () => {
             normalizedPapers.push({ ...paper, question_id: normalizedQid });
           }
         }
-        
+
         // Deduplicate: keep only one entry per (title, question_id) combination
         // This prevents the same paper from appearing multiple times for the same question
         const seen = new Set<string>();
@@ -857,7 +859,7 @@ const App: React.FC = () => {
             deduplicated.push(paper);
           }
         }
-        
+
         setPapers(deduplicated);
       })
       .catch((err) => console.error("Error loading data:", err));
@@ -987,7 +989,7 @@ const App: React.FC = () => {
               filteredPapers={filteredPapers}
               questionMeta={questionMeta}
               questionOrder={questionOrder}
-            activeQuestions={activeQuestions}
+              activeQuestions={activeQuestions}
               toggleQuestion={toggleQuestion}
               clearQuestions={() => setActiveQuestions([])}
               showPaperDetails={(paper) => setDetailPaper(paper)}
