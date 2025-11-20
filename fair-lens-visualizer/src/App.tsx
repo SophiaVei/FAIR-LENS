@@ -755,12 +755,12 @@ const InsightsView: React.FC<InsightsProps> = ({ papers, questionMeta }) => {
                   <YAxis allowDecimals={false} stroke="rgba(255,255,255,0.5)" />
                   <RechartsTooltip content={<ChartTooltip />} />
                   <Legend />
-                  <Area type="monotone" dataKey="Q1" stackId="1" stroke="#f4a261" fill="url(#q1Gradient)" />
-                  <Area type="monotone" dataKey="Q2" stackId="1" stroke="#f9844a" fill="url(#q2Gradient)" />
-                  <Area type="monotone" dataKey="Q3" stackId="1" stroke="#f9c74f" fill="url(#q3Gradient)" />
-                  <Area type="monotone" dataKey="Q4" stackId="1" stroke="#90be6d" fill="url(#q4Gradient)" />
-                  <Area type="monotone" dataKey="Q5" stackId="1" stroke="#43aa8b" fill="url(#q5Gradient)" />
-                  <Area type="monotone" dataKey="Q6" stackId="1" stroke="#577590" fill="url(#q6Gradient)" />
+                  <Area type="monotone" dataKey="Q1" stroke="#f4a261" fill="url(#q1Gradient)" />
+                  <Area type="monotone" dataKey="Q2" stroke="#f9844a" fill="url(#q2Gradient)" />
+                  <Area type="monotone" dataKey="Q3" stroke="#f9c74f" fill="url(#q3Gradient)" />
+                  <Area type="monotone" dataKey="Q4" stroke="#90be6d" fill="url(#q4Gradient)" />
+                  <Area type="monotone" dataKey="Q5" stroke="#43aa8b" fill="url(#q5Gradient)" />
+                  <Area type="monotone" dataKey="Q6" stroke="#577590" fill="url(#q6Gradient)" />
                 </AreaChart>
               </ResponsiveContainer>
             </div>
