@@ -521,6 +521,42 @@ const InsightsView: React.FC<InsightsProps> = ({ papers, questionMeta }) => {
     }));
   }, [papers]);
 
+  // Word frequency from titles (stop words filtered)
+  const wordFrequency = useMemo(() => {
+    const stopWords = new Set([
+      'the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for',
+      'of', 'with', 'by', 'from', 'as', 'is', 'was', 'are', 'were', 'been',
+      'be', 'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would', 'could',
+      'should', 'may', 'might', 'must', 'can', 'this', 'that', 'these', 'those',
+      'i', 'you', 'he', 'she', 'it', 'we', 'they', 'what', 'which', 'who',
+      'when', 'where', 'why', 'how', 'all', 'each', 'every', 'both', 'few',
+      'more', 'most', 'other', 'some', 'such', 'no', 'nor', 'not', 'only',
+      'own', 'same', 'so', 'than', 'too', 'very', 'via', 'using', 'based'
+    ]);
+
+    const wordCounts: Record<string, number> = {};
+
+    papers.forEach((paper) => {
+      const title = paper.title?.toLowerCase() || '';
+      // Split by non-word characters and filter
+      const words = title.split(/\W+/).filter(word =>
+        word.length > 3 && !stopWords.has(word) && !/^\d+$/.test(word)
+      );
+
+      words.forEach(word => {
+        wordCounts[word] = (wordCounts[word] || 0) + 1;
+      });
+    });
+
+    return Object.entries(wordCounts)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 20)
+      .map(([word, count]) => ({
+        name: word.charAt(0).toUpperCase() + word.slice(1),
+        value: count
+      }));
+  }, [papers]);
+
   const totalPapers = papers.length;
   const activeYears = yearSeries.length ? `${yearSeries[0].year}–${yearSeries[yearSeries.length - 1].year}` : "—";
   const avgPerYear = yearSeries.length ? Math.round((totalPapers / yearSeries.length) * 10) / 10 : 0;
@@ -804,6 +840,62 @@ const InsightsView: React.FC<InsightsProps> = ({ papers, questionMeta }) => {
                 </li>
               ))}
             </ul>
+          </article>
+
+          <article className="insight-card wide">
+            <div className="panel-head">
+              <div>
+                <p className="eyebrow">Keywords</p>
+                <h2>Most frequent terms</h2>
+                <p style={{ margin: "0.5rem 0 0", fontSize: "0.9rem", color: "var(--text-muted)" }}>Common meaningful words appearing in paper titles</p>
+              </div>
+            </div>
+            <div className="chart-shell" style={{ padding: "2rem 1rem", minHeight: "300px" }}>
+              <div style={{
+                display: "flex",
+                flexWrap: "wrap",
+                gap: "1rem",
+                alignItems: "center",
+                justifyContent: "center",
+                textAlign: "center"
+              }}>
+                {wordFrequency.map((word, index) => {
+                  const maxValue = wordFrequency[0].value;
+                  const minValue = wordFrequency[wordFrequency.length - 1].value;
+                  const range = maxValue - minValue;
+                  const scale = range > 0 ? (word.value - minValue) / range : 0.5;
+                  const fontSize = 0.9 + scale * 2.5; // 0.9rem to 3.4rem
+                  const colors = ["#f4a261", "#f9844a", "#f9c74f", "#90be6d", "#43aa8b", "#577590", "#8ecae6"];
+                  const color = colors[index % colors.length];
+
+                  return (
+                    <span
+                      key={word.name}
+                      style={{
+                        fontSize: `${fontSize}rem`,
+                        fontWeight: 600,
+                        color: color,
+                        opacity: 0.7 + scale * 0.3,
+                        cursor: "default",
+                        lineHeight: 1.2,
+                        transition: "all 0.2s ease",
+                      }}
+                      title={`${word.name}: ${word.value} occurrences`}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.opacity = "1";
+                        e.currentTarget.style.transform = "scale(1.1)";
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.opacity = String(0.7 + scale * 0.3);
+                        e.currentTarget.style.transform = "scale(1)";
+                      }}
+                    >
+                      {word.name}
+                    </span>
+                  );
+                })}
+              </div>
+            </div>
           </article>
         </section>
       </main>
