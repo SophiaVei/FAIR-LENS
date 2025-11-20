@@ -99,7 +99,6 @@ type ExplorerProps = {
   uniqueFilteredPapers: number;
   handleReset: () => void;
   handleSelectAllQuestions: () => void;
-  highlightedPaper?: Paper;
   filtersActive: boolean;
   listTitle: string;
   coverageText: string;
@@ -197,7 +196,6 @@ const ExplorerView: React.FC<ExplorerProps> = ({
   uniqueFilteredPapers,
   handleReset,
   handleSelectAllQuestions,
-  highlightedPaper,
   filtersActive,
   listTitle,
   coverageText,
@@ -250,16 +248,6 @@ const ExplorerView: React.FC<ExplorerProps> = ({
             <span className="stat-meta">Conferences & journals</span>
           </div>
         </div>
-
-        {highlightedPaper && (
-          <div className="quote-card">
-            <Sparkles size={18} />
-            <div>
-              <p>{highlightedPaper.directional_claim}</p>
-              <span>{highlightedPaper.title}</span>
-            </div>
-          </div>
-        )}
       </header>
 
       <main className="content-grid">
@@ -945,11 +933,6 @@ const App: React.FC = () => {
     }
   };
 
-  const highlightedPaper = useMemo(
-    () => filteredPapers.find((paper) => Boolean(paper.directional_claim)),
-    [filteredPapers]
-  );
-
   const coverageText = years.min !== null && years.max !== null ? `${years.min}–${years.max}` : "—";
   const isYearDefault =
     years.min !== null && years.max !== null && yearFilter.min === years.min && yearFilter.max === years.max;
@@ -1009,7 +992,6 @@ const App: React.FC = () => {
               uniqueFilteredPapers={uniqueFilteredPapers}
               handleReset={handleReset}
               handleSelectAllQuestions={() => setActiveQuestions(questionOrder)}
-              highlightedPaper={highlightedPaper}
               filtersActive={filtersActive}
               listTitle={listTitle}
               coverageText={coverageText}
