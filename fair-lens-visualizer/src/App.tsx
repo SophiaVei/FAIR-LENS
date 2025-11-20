@@ -588,6 +588,7 @@ const InsightsView: React.FC<InsightsProps> = ({ papers, questionMeta }) => {
               <div>
                 <p className="eyebrow">Cadence</p>
                 <h2>Publication tempo</h2>
+                <p style={{ margin: "0.5rem 0 0", fontSize: "0.9rem", color: "var(--text-muted)" }}>Number of papers published each year</p>
               </div>
             </div>
             <div className="chart-shell">
@@ -614,6 +615,7 @@ const InsightsView: React.FC<InsightsProps> = ({ papers, questionMeta }) => {
               <div>
                 <p className="eyebrow">Questions</p>
                 <h3>Directional balance</h3>
+                <p style={{ margin: "0.5rem 0 0", fontSize: "0.9rem", color: "var(--text-muted)" }}>Distribution of papers across the six research questions</p>
               </div>
             </div>
             <div className="chart-shell">
@@ -643,6 +645,7 @@ const InsightsView: React.FC<InsightsProps> = ({ papers, questionMeta }) => {
               <div>
                 <p className="eyebrow">Venues</p>
                 <h3>Where conversations cluster</h3>
+                <p style={{ margin: "0.5rem 0 0", fontSize: "0.9rem", color: "var(--text-muted)" }}>Most frequent conferences and journals publishing this research</p>
               </div>
               <div className="venue-control">
                 <label>
@@ -675,6 +678,7 @@ const InsightsView: React.FC<InsightsProps> = ({ papers, questionMeta }) => {
               <div>
                 <p className="eyebrow">Mentions</p>
                 <h3>Topical coverage</h3>
+                <p style={{ margin: "0.5rem 0 0", fontSize: "0.9rem", color: "var(--text-muted)" }}>How many papers mention each of the three topics</p>
               </div>
             </div>
             <div className="chart-shell">
@@ -700,6 +704,7 @@ const InsightsView: React.FC<InsightsProps> = ({ papers, questionMeta }) => {
               <div>
                 <p className="eyebrow">Intersections</p>
                 <h3>Co-mention intensity</h3>
+                <p style={{ margin: "0.5rem 0 0", fontSize: "0.9rem", color: "var(--text-muted)" }}>Papers that combine two or more topics together</p>
               </div>
             </div>
             <div className="chart-shell">
@@ -725,6 +730,7 @@ const InsightsView: React.FC<InsightsProps> = ({ papers, questionMeta }) => {
               <div>
                 <p className="eyebrow">Evolution</p>
                 <h2>Question trends over time</h2>
+                <p style={{ margin: "0.5rem 0 0", fontSize: "0.9rem", color: "var(--text-muted)" }}>How focus on each research question has changed year by year</p>
               </div>
             </div>
             <div className="chart-shell">
@@ -777,6 +783,7 @@ const InsightsView: React.FC<InsightsProps> = ({ papers, questionMeta }) => {
               <div>
                 <p className="eyebrow">Clusters</p>
                 <h3>Research clusters</h3>
+                <p style={{ margin: "0.5rem 0 0", fontSize: "0.9rem", color: "var(--text-muted)" }}>Major research themes combining multiple topics</p>
               </div>
             </div>
             <div className="chart-shell">
