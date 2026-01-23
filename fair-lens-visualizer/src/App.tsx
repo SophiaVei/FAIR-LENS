@@ -567,10 +567,10 @@ const InsightsView: React.FC<InsightsProps> = ({ papers, questionMeta }) => {
       <div className="aurora" aria-hidden="true" />
       <header className="insights-hero">
         <div>
-          <p className="eyebrow">Insight studio</p>
+          <p className="eyebrow">Category Insights</p>
           <h1>FAIR–LENS Observatory</h1>
           <p className="subtitle">
-            High-level telemetry for the review: yearly cadence, venue concentration, and how fairness, explainability, and LLMs co-occur.
+            High-level insights for the review: yearly cadence, venue concentration, and how fairness, explainability, and LLMs co-occur.
           </p>
         </div>
         <div className="insight-stats-row">
