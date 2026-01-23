@@ -205,7 +205,7 @@ const ExplorerView: React.FC<ExplorerProps> = ({
       <div className="aurora" aria-hidden="true" />
       <header className="hero">
         <div className="hero-copy">
-          <p className="eyebrow">Systematic review companion</p>
+          <p className="eyebrow">Systematic review categorization</p>
           <h1>FAIR–LENS</h1>
           <p className="subtitle">
             Interactive view of how included papers connect <strong>Fairness/Bias</strong>, <strong>Explainability</strong>, and{" "}
@@ -410,7 +410,7 @@ const ExplorerView: React.FC<ExplorerProps> = ({
       </main>
 
       <footer className="app-footer">
-        FAIR–LENS visualization prototype · Powered by lens.py, exclude_final.py, and questions.py
+        FAIR–LENS visualization prototype · Result of PRISMA, taking an extra step.
       </footer>
     </div>
   );
@@ -900,7 +900,7 @@ const InsightsView: React.FC<InsightsProps> = ({ papers, questionMeta }) => {
         </section>
       </main>
 
-      <footer className="app-footer">Insights auto-refresh as soon as new outputs from lens.py feed the visualizer.</footer>
+      <footer className="app-footer">Insights will auto-refresh as soon as new outputs feed the visualizer.</footer>
     </div>
   );
 };
