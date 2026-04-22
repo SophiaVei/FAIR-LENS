@@ -15,6 +15,7 @@ Outputs (default: outputs/):
 
 import argparse
 import json
+import os
 import re
 import sys
 from pathlib import Path
@@ -71,14 +72,40 @@ Abstract: {abstract}
 Respond with the STRICT JSON schema specified by the system message.
 """
 
-def call_ollama(prompt: str, model: str = "mistral",
-                url: str = "http://localhost:11434/api/generate", timeout: int = 120) -> str:
-    payload = {"model": model, "prompt": prompt, "stream": False}
+# ---- LLM backend configuration ----
+# Set your API key:  $env:OPENWEBUI_API_KEY = "sk-..."
+# Generate one at: https://filos.csd.auth.gr/ → Settings → Account → API Keys
+OPENWEBUI_API_KEY = os.getenv("OPENWEBUI_API_KEY", "").strip()
+OPENWEBUI_BASE_URL = os.getenv("OPENWEBUI_BASE_URL", "https://filos.csd.auth.gr")
+
+def call_llm(system_prompt: str, user_prompt: str,
+             model: str = "llama4:16x17b",
+             url: str = None, timeout: int = 300) -> str:
+    """
+    Call the Open WebUI server at filos.csd.auth.gr using its
+    OpenAI-compatible /api/chat/completions endpoint.
+    """
+    if url is None:
+        url = f"{OPENWEBUI_BASE_URL}/api/chat/completions"
+
+    headers = {
+        "Authorization": f"Bearer {OPENWEBUI_API_KEY}",
+        "Content-Type": "application/json",
+    }
+    payload = {
+        "model": model,
+        "messages": [
+            {"role": "system", "content": system_prompt},
+            {"role": "user",   "content": user_prompt},
+        ],
+        "stream": False,
+    }
     try:
-        r = requests.post(url, json=payload, timeout=timeout)
+        r = requests.post(url, headers=headers, json=payload, timeout=timeout)
         r.raise_for_status()
         js = r.json()
-        return js.get("response", "").strip()
+        # OpenAI-compatible response format
+        return js["choices"][0]["message"]["content"].strip()
     except Exception as e:
         return f"__ERROR__: {e}"
 
@@ -120,8 +147,7 @@ def ask_all_questions(row: pd.Series, model: str) -> List[Dict[str, Any]]:
             qid=q["id"], cluster=q["cluster"], subc=q["subcluster"], qtext=q["query"],
             title=title, abstract=abstract
         )
-        full_prompt = f"<<SYS>>\n{SYSTEM_PROMPT}\n<</SYS>>\n\n{user_prompt}"
-        r = call_ollama(full_prompt, model=model)
+        r = call_llm(SYSTEM_PROMPT, user_prompt, model=model)
         parsed = parse_json(r, {
             "question_id": q["id"], "relevant": False, "reason": "LLM error",
             "mentions_fairness": False, "mentions_xai": False, "mentions_llm": False,
@@ -214,8 +240,8 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--input", type=str, default="outputs/prefilter_kept.csv",
                     help="Path to prefiltered CSV (from tri_prefilter_E0E2.py).")
-    ap.add_argument("--model", type=str, default="mistral",
-                    help="Ollama model name (e.g., mistral, llama3.2, qwen2.5:7b).")
+    ap.add_argument("--model", type=str, default="llama4:16x17b",
+                    help="Model name on Open WebUI (e.g., llama4:16x17b, qwen3.5:122b).")
     ap.add_argument("--outdir", type=str, default="outputs", help="Output directory.")
     args = ap.parse_args()
 

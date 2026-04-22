@@ -1045,7 +1045,6 @@ const App: React.FC = () => {
       <nav className="primary-nav">
         <div className="brand">
           <span>FAIR–LENS</span>
-          <span className="brand-tag">beta</span>
         </div>
         <div className="nav-links">
           <NavLink to="/" end className={({ isActive }) => `nav-link${isActive ? " is-active" : ""}`}>

@@ -21,6 +21,7 @@ Outputs (default: outputs/):
 
 import argparse
 import json
+import os
 import re
 import sys
 from pathlib import Path
@@ -64,14 +65,39 @@ Title: {title}
 Abstract: {abstract}
 Apply the exclusion rules and respond with the STRICT JSON schema."""
 
-def call_ollama(prompt: str, model: str = "mistral",
-                url: str = "http://localhost:11434/api/generate", timeout: int = 120) -> str:
-    payload = {"model": model, "prompt": prompt, "stream": False}
+# ---- LLM backend configuration ----
+# Set your API key:  $env:OPENWEBUI_API_KEY = "sk-..."
+# Generate one at: https://filos.csd.auth.gr/ → Settings → Account → API Keys
+OPENWEBUI_API_KEY = os.getenv("OPENWEBUI_API_KEY", "").strip()
+OPENWEBUI_BASE_URL = os.getenv("OPENWEBUI_BASE_URL", "https://filos.csd.auth.gr")
+
+def call_llm(system_prompt: str, user_prompt: str,
+             model: str = "llama4:16x17b",
+             url: str = None, timeout: int = 300) -> str:
+    """
+    Call the Open WebUI server at filos.csd.auth.gr using its
+    OpenAI-compatible /api/chat/completions endpoint.
+    """
+    if url is None:
+        url = f"{OPENWEBUI_BASE_URL}/api/chat/completions"
+
+    headers = {
+        "Authorization": f"Bearer {OPENWEBUI_API_KEY}",
+        "Content-Type": "application/json",
+    }
+    payload = {
+        "model": model,
+        "messages": [
+            {"role": "system", "content": system_prompt},
+            {"role": "user",   "content": user_prompt},
+        ],
+        "stream": False,
+    }
     try:
-        r = requests.post(url, json=payload, timeout=timeout)
+        r = requests.post(url, headers=headers, json=payload, timeout=timeout)
         r.raise_for_status()
         js = r.json()
-        return js.get("response", "").strip()
+        return js["choices"][0]["message"]["content"].strip()
     except Exception as e:
         return f"__ERROR__: {e}"
 
@@ -108,8 +134,8 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--input", type=str, default="data/lens/stages/S4_tagged.csv",
                     help="Path to curated CSV (S4_tagged.csv or data/raw/lens.csv).")
-    ap.add_argument("--model", type=str, default="mistral",
-                    help="Ollama model name (e.g., mistral, llama3.2, qwen2.5:7b).")
+    ap.add_argument("--model", type=str, default="llama4:16x17b",
+                    help="Model name on Open WebUI (e.g., llama4:16x17b, qwen3.5:122b).")
     ap.add_argument("--outdir", type=str, default="outputs",
                     help="Output directory for prefilter results.")
     args = ap.parse_args()
@@ -129,8 +155,7 @@ def main():
         title = str(row.get("title", ""))[:8000]
         abstract = str(row.get("abstract", ""))[:12000]
         user_prompt = PREFILTER_USER_TEMPLATE.format(title=title, abstract=abstract)
-        full_prompt = f"<<SYS>>\n{PREFILTER_SYSTEM_PROMPT}\n<</SYS>>\n\n{user_prompt}"
-        resp = call_ollama(full_prompt, model=args.model)
+        resp = call_llm(PREFILTER_SYSTEM_PROMPT, user_prompt, model=args.model)
         parsed = parse_json(resp, {"exclude": False, "reasons": [], "note": "LLM error/uncertain; kept"})
         exclude = bool(parsed.get("exclude", False))
         codes = ",".join(parsed.get("reasons", []))
