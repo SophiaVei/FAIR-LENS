@@ -82,7 +82,6 @@ type YearFilter = {
 };
 
 type ExplorerProps = {
-  papers: Paper[];
   filteredPapers: Paper[];
   questionMeta: typeof questionMeta;
   questionOrder: QuestionId[];
@@ -101,7 +100,6 @@ type ExplorerProps = {
   handleSelectAllQuestions: () => void;
   filtersActive: boolean;
   listTitle: string;
-  coverageText: string;
 };
 
 type InsightsProps = {
@@ -179,7 +177,6 @@ const PaperDetailModal: React.FC<{ paper: Paper; onClose: () => void }> = ({ pap
 };
 
 const ExplorerView: React.FC<ExplorerProps> = ({
-  papers,
   filteredPapers,
   questionMeta,
   questionOrder,
@@ -198,7 +195,6 @@ const ExplorerView: React.FC<ExplorerProps> = ({
   handleSelectAllQuestions,
   filtersActive,
   listTitle,
-  coverageText,
 }) => {
   return (
     <div className="app-root">
@@ -822,7 +818,7 @@ const InsightsView: React.FC<InsightsProps> = ({ papers, questionMeta }) => {
                     outerRadius={90}
                     paddingAngle={2}
                   >
-                    {clusterSeries.map((entry, index) => (
+                    {clusterSeries.map((_, index) => (
                       <Cell
                         key={`cluster-${index}`}
                         fill={["#f4a261", "#90be6d", "#43aa8b"][index % 3]}
@@ -898,10 +894,414 @@ const InsightsView: React.FC<InsightsProps> = ({ papers, questionMeta }) => {
             </div>
           </article>
         </section>
+
       </main>
 
       <footer className="app-footer">Insights will auto-refresh as soon as new outputs feed the visualizer.</footer>
     </div>
+  );
+};
+
+const FrameworkView: React.FC = () => {
+  return (
+    <div className="app-root insights-root">
+      <div className="aurora" aria-hidden="true" />
+      <header className="insights-hero" style={{ paddingBottom: "2rem" }}>
+        <div>
+          <p className="eyebrow" style={{ color: "var(--xai-color)" }}>Conceptual Framework</p>
+          <h1>The FAIR–LENS Triad</h1>
+          <p className="subtitle">
+            Beyond isolated findings, this interactive model structures the results visually onto the core triangle of the review. The tensions, relationships, and volumes form the ultimate conclusion structure for the research.
+          </p>
+        </div>
+      </header>
+
+      <main className="insights-content" style={{ marginTop: 0 }}>
+
+        {/* The Geometric Triangle Visual Header */}
+        <section style={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          marginBottom: "3rem",
+          background: "rgba(255, 255, 255, 0.02)",
+          borderRadius: "24px",
+          border: "1px solid rgba(255, 255, 255, 0.05)",
+          padding: "4rem 1rem 2rem",
+          position: "relative",
+          overflow: "hidden",
+          width: "100%"
+        }}>
+
+          <style>{`
+            .void-container {
+              cursor: help;
+              transition: all 0.3s ease;
+            }
+            .void-container:hover .void-circle {
+              fill: rgba(255, 100, 100, 0.15) !important;
+              stroke: rgba(255, 100, 100, 0.6) !important;
+            }
+            .void-container:hover .void-text {
+              fill: rgba(255, 255, 255, 1) !important;
+              font-weight: bold;
+            }
+            .void-tooltip {
+              opacity: 0;
+              transition: opacity 0.3s ease;
+              pointer-events: none;
+            }
+            .void-container:hover .void-tooltip {
+              opacity: 1;
+            }
+            .flow-container {
+              display: flex;
+              flex-direction: row;
+              align-items: center;
+              justify-content: center;
+              gap: 2rem;
+              width: 100%;
+              margin-top: 1rem;
+            }
+            @media (max-width: 900px) {
+              .flow-container {
+                flex-direction: column;
+                gap: 2rem;
+              }
+            }
+          `}</style>
+
+          <div style={{ textAlign: "center", marginBottom: "2rem", zIndex: 2 }}>
+            <h2 style={{ fontSize: "2.5rem", letterSpacing: "-0.02em", color: "white", marginBottom: "0.5rem" }}>Synthesis Trajectory</h2>
+            <p style={{ color: "var(--text-muted)", maxWidth: "800px", margin: "0 auto", lineHeight: 1.6 }}>
+              The unweighted conceptual model serves merely as a theoretical starting point. By comprehensively mapping all 111 studies to the framework, the actual empirical imbalance defining current research priorities natively illuminates.
+            </p>
+          </div>
+
+          <div className="flow-container" style={{ display: "grid", gridTemplateColumns: "1fr auto 550px", gap: "2rem", alignItems: "center", width: "100%", maxWidth: "1100px", margin: "2rem auto 0 auto" }}>
+            {/* Step 1: The Theoretical Model */}
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", opacity: 0.9, background: "rgba(0,0,0,0.3)", padding: "2rem", borderRadius: "16px", border: "1px dashed rgba(255,255,255,0.1)" }}>
+              <h3 style={{ color: "white", fontSize: "1.2rem", marginBottom: "1rem", letterSpacing: "1px", textTransform: "uppercase" }}>Conceptual Hypothesis</h3>
+              <svg viewBox="0 0 200 200" style={{ width: "180px", height: "180px", overflow: "visible" }}>
+                <defs>
+                  <marker id="arrow-fair" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="4" markerHeight="4" orient="auto-start-reverse">
+                    <path d="M 0 0 L 10 5 L 0 10 z" fill="#f4a261" />
+                  </marker>
+                  <marker id="arrow-xai" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="4" markerHeight="4" orient="auto-start-reverse">
+                    <path d="M 0 0 L 10 5 L 0 10 z" fill="#a3b18a" />
+                  </marker>
+                  <marker id="arrow-llm" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="4" markerHeight="4" orient="auto-start-reverse">
+                    <path d="M 0 0 L 10 5 L 0 10 z" fill="#8ecae6" />
+                  </marker>
+                </defs>
+                <polygon points="100,20 20,180 180,180" fill="none" stroke="#4b5563" strokeWidth="2" strokeDasharray="4 4" />
+                <circle cx="100" cy="20" r="4" fill="#6b7280" />
+                <circle cx="20" cy="180" r="4" fill="#6b7280" />
+                <circle cx="180" cy="180" r="4" fill="#6b7280" />
+
+                <text x="100" y="10" fill="#9ca3af" textAnchor="middle" fontSize="10">Fairness/Bias</text>
+                <text x="0" y="195" fill="#9ca3af" textAnchor="middle" fontSize="10">Explainability</text>
+                <text x="195" y="195" fill="#9ca3af" textAnchor="middle" fontSize="10" fontWeight="bold">LLMs</text>
+
+                {/* Conceptual Flow Indicators */}
+                <path d="M 90,40 L 40,150" stroke="#4b5563" strokeWidth="1" strokeDasharray="2 2" marker-end="url(#arrow-xai)" opacity="0.4" />
+                <path d="M 110,40 L 160,150" stroke="#4b5563" strokeWidth="1" strokeDasharray="2 2" marker-end="url(#arrow-llm)" opacity="0.4" />
+                <path d="M 40,185 L 160,185" stroke="#4b5563" strokeWidth="1" strokeDasharray="2 2" marker-end="url(#arrow-llm)" opacity="0.4" />
+              </svg>
+              <div style={{ marginTop: "1rem", color: "#9ca3af", fontSize: "0.9rem", textAlign: "center", lineHeight: 1.5 }}>
+                <strong style={{ color: "white" }}>Expected Balance:</strong>
+                <p style={{ marginTop: "0.5rem" }}>Prior to the review, theoretical frameworks implied holistic, roughly equal research addressing all three nodes simultaneously to build trustworthy generative AI.</p>
+              </div>
+            </div>
+
+            {/* Transition Arrow */}
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", color: "#8ecae6", opacity: 0.8, padding: "0 1rem" }}>
+              <Sparkles size={24} style={{ marginBottom: "0.5rem" }} />
+              <div style={{ height: "2px", width: "80px", background: "linear-gradient(90deg, transparent, #8ecae6, transparent)", marginBottom: "0.5rem" }} />
+              <span style={{ fontSize: "0.8rem", fontWeight: "bold", letterSpacing: "1px", textTransform: "uppercase" }}>Mapping</span>
+              <span style={{ fontSize: "0.8rem", color: "white" }}>111 Final Papers</span>
+              <div style={{ height: "2px", width: "80px", background: "linear-gradient(90deg, transparent, #8ecae6, transparent)", marginTop: "0.5rem" }} />
+            </div>
+
+            {/* Custom Visualization (The Empirical Triad) */}
+            <div style={{ width: "100%", margin: "0 auto", position: "relative" }}>
+              <svg viewBox="0 0 500 400" style={{ width: "100%", height: "auto", overflow: "visible" }}>
+                <defs>
+                  <filter id="glow" filterUnits="userSpaceOnUse" x="-100" y="-100" width="700" height="600">
+                    <feGaussianBlur stdDeviation="3" result="coloredBlur" />
+                    <feMerge>
+                      <feMergeNode in="coloredBlur" />
+                      <feMergeNode in="SourceGraphic" />
+                    </feMerge>
+                  </filter>
+                  <linearGradient id="edgeBaseGrad" gradientUnits="userSpaceOnUse" x1="100" y1="300" x2="400" y2="300">
+                    <stop offset="0%" stopColor="#a3b18a" />
+                    <stop offset="100%" stopColor="#8ecae6" />
+                  </linearGradient>
+                  <linearGradient id="edgeLeftGrad" gradientUnits="userSpaceOnUse" x1="250" y1="40" x2="100" y2="300">
+                    <stop offset="0%" stopColor="#f4a261" />
+                    <stop offset="100%" stopColor="#a3b18a" />
+                  </linearGradient>
+                  <linearGradient id="edgeRightGrad" gradientUnits="userSpaceOnUse" x1="250" y1="40" x2="400" y2="300">
+                    <stop offset="0%" stopColor="#f4a261" />
+                    <stop offset="100%" stopColor="#8ecae6" />
+                  </linearGradient>
+                </defs>
+
+                {/* Edges (Volumes determine thickness) */}
+
+                {/* E <-> LLMs (n=136 - Thickest - Base) */}
+                <line x1="100" y1="300" x2="400" y2="300" stroke="url(#edgeBaseGrad)" strokeWidth="24" strokeLinecap="round" filter="url(#glow)" opacity="1" />
+
+                {/* F <-> E (n=69 - Medium - Left Edge) */}
+                <line x1="250" y1="40" x2="100" y2="300" stroke="url(#edgeLeftGrad)" strokeWidth="12" strokeLinecap="round" filter="url(#glow)" opacity="0.9" />
+
+                {/* F <-> LLMs (n=65 - Thinnest - Right Edge) */}
+                <line x1="250" y1="40" x2="400" y2="300" stroke="url(#edgeRightGrad)" strokeWidth="10" strokeLinecap="round" filter="url(#glow)" opacity="0.8" />
+
+                {/* Directional Indicators (Q1-Q6) */}
+                {/* Q1: F -> E */}
+                <path d="M 210,105 L 165,190" stroke="#f4a261" strokeWidth="2" marker-end="url(#arrow-xai)" opacity="0.8" />
+                <text x="175" y="135" fill="#f4a261" fontSize="10" fontWeight="bold">Q1</text>
+
+                {/* Q2: E -> F */}
+                <path d="M 145,215 L 195,130" stroke="#a3b18a" strokeWidth="2" marker-end="url(#arrow-fair)" opacity="0.8" />
+                <text x="185" y="195" fill="#a3b18a" fontSize="10" fontWeight="bold">Q2</text>
+
+                {/* Q3: F -> L */}
+                <path d="M 290,105 L 335,190" stroke="#f4a261" strokeWidth="2" marker-end="url(#arrow-llm)" opacity="0.8" />
+                <text x="325" y="135" fill="#f4a261" fontSize="10" fontWeight="bold">Q3</text>
+
+                {/* Q4: L -> F */}
+                <path d="M 355,215 L 305,130" stroke="#8ecae6" strokeWidth="2" marker-end="url(#arrow-fair)" opacity="0.8" />
+                <text x="315" y="195" fill="#8ecae6" fontSize="10" fontWeight="bold">Q4</text>
+
+                {/* Q5: E -> L */}
+                <path d="M 180,285 L 320,285" stroke="#a3b18a" strokeWidth="2" marker-end="url(#arrow-llm)" opacity="0.8" />
+                <text x="250" y="278" fill="#a3b18a" fontSize="10" fontWeight="bold">Q5</text>
+
+                {/* Q6: L -> E */}
+                <path d="M 320,315 L 180,315" stroke="#8ecae6" strokeWidth="2" marker-end="url(#arrow-xai)" opacity="0.8" />
+                <text x="250" y="328" fill="#8ecae6" fontSize="10" fontWeight="bold">Q6</text>
+
+                {/* Central Void (Interactive) */}
+                <g className="void-container">
+                  <circle cx="250" cy="200" r="40" className="void-circle" fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.1)" strokeWidth="1" strokeDasharray="4 4" />
+                  <text x="250" y="205" className="void-text" fill="rgba(255, 255, 255, 0.5)" textAnchor="middle" fontSize="12" letterSpacing="1px">THE VOID</text>
+
+                  {/* Tooltip Content */}
+                  <g className="void-tooltip" transform="translate(250, 140)">
+                    <rect x="-110" y="-40" width="220" height="65" rx="6" fill="rgba(0,0,0,0.9)" stroke="#f4a261" strokeWidth="1" />
+                    <text x="0" y="-22" fill="#f4a261" textAnchor="middle" fontSize="10" fontWeight="bold">The Alignment Deficit</text>
+                    <text x="0" y="-8" fill="white" textAnchor="middle" fontSize="9">Missing holistic research simultaneously</text>
+                    <text x="0" y="3" fill="white" textAnchor="middle" fontSize="9">bridging Fairness, Explainability & LLMs.</text>
+                    <text x="0" y="14" fill="rgba(255,255,255,0.6)" textAnchor="middle" fontSize="8" fontStyle="italic">Zero papers represent perfectly overlapping focus.</text>
+                  </g>
+                </g>
+
+                {/* Edge Annotations */}
+                <g transform="translate(250, 335)">
+                  <rect x="-60" y="-15" width="160" height="30" rx="15" fill="rgba(163, 177, 138, 0.15)" stroke="var(--xai-color)" strokeWidth="1" />
+                  <text x="20" y="4" fill="white" textAnchor="middle" fontSize="12" fontWeight="bold">Visibility (n=136)</text>
+                </g>
+
+                <g transform="translate(100, 160)">
+                  <rect x="-80" y="-15" width="160" height="30" rx="15" fill="rgba(244, 162, 97, 0.15)" stroke="var(--fairness-color)" strokeWidth="1" />
+                  <text x="0" y="4" fill="white" textAnchor="middle" fontSize="12" fontWeight="bold">Accountability (n=69)</text>
+                </g>
+
+                <g transform="translate(400, 160)">
+                  <rect x="-80" y="-15" width="140" height="30" rx="15" fill="rgba(142, 202, 230, 0.15)" stroke="var(--llm-color)" strokeWidth="1" />
+                  <text x="-10" y="4" fill="white" textAnchor="middle" fontSize="12" fontWeight="bold">Alignment (n=65)</text>
+                </g>
+
+                {/* Nodes */}
+                {/* Top - Fairness */}
+                <circle cx="250" cy="40" r="8" fill="#f4a261" filter="url(#glow)" />
+                <text x="250" y="20" fill="white" textAnchor="middle" fontSize="16" fontWeight="bold" letterSpacing="1px">Fairness / Bias</text>
+
+                {/* Bottom Left - Explainability */}
+                <circle cx="100" cy="300" r="8" fill="#a3b18a" filter="url(#glow)" />
+                <text x="50" y="325" fill="white" textAnchor="middle" fontSize="16" fontWeight="bold" letterSpacing="1px">Explainability</text>
+
+                {/* Bottom Right - LLMs */}
+                <circle cx="400" cy="300" r="8" fill="#8ecae6" filter="url(#glow)" />
+                <text x="450" y="325" fill="white" textAnchor="middle" fontSize="16" fontWeight="bold" letterSpacing="1px">Large Language Models</text>
+              </svg>
+              <div style={{ textAlign: "center", marginTop: "1rem" }}>
+                <span style={{ color: "white", fontStyle: "italic", fontSize: "0.9rem" }}>Empirical Tensions Driven by Volume</span>
+              </div>
+            </div>
+          </div>
+
+        </section>
+
+        <section className="insight-grid" style={{ gridTemplateColumns: "1fr" }}>
+
+          <article className="insight-card wide" style={{ borderLeft: "8px solid #a3b18a", padding: "2rem" }}>
+            <div className="panel-head" style={{ paddingBottom: "1.5rem", borderBottom: "1px solid rgba(255,255,255,0.1)" }}>
+              <div>
+                <p className="eyebrow" style={{ color: "#a3b18a", fontSize: "1rem" }}>EDGE 1 • EXPLAINABILITY ↔ LLMS (N=136)</p>
+                <h2 style={{ fontSize: "2.2rem", margin: "0.5rem 0" }}>The "Visibility" Axis</h2>
+                <p style={{ fontSize: "1.1rem", color: "var(--text-muted)", lineHeight: 1.6, maxWidth: "900px" }}>
+                  <strong>The thickest edge of the triangle.</strong> Current research is aggressively prioritizing structural transparency, splitting between using XAI to dissect the LLM computationally, and deploying LLMs as colloquial explanation agents.
+                </p>
+              </div>
+            </div>
+
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "2rem", marginTop: "2rem" }}>
+              <div style={{ background: "rgba(163, 177, 138, 0.08)", padding: "2rem", borderRadius: "16px", border: "1px solid rgba(163, 177, 138, 0.2)" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <h3 style={{ color: "white", fontSize: "1.4rem" }}>Q5: Explainability → LLMs</h3>
+                  <span style={{ background: "#a3b18a", color: "black", padding: "4px 12px", borderRadius: "100px", fontWeight: "bold" }}>84 papers</span>
+                </div>
+                <h4 style={{ color: "#a3b18a", marginTop: "1rem", marginBottom: "0.5rem", fontSize: "1.1rem" }}>Demystifying the Black Box</h4>
+                <p style={{ color: "var(--text-muted)", fontSize: "1rem", lineHeight: 1.6 }}>
+                  The most populated node in the review. Research concentrates heavily on post-hoc interpretation (mechanistic interpretability, attention map analysis) to uncover <em>how</em> foundational models generate specific outputs.
+                  <br /><br /><strong>Implication:</strong> The field is in an exploratory "diagnostic" phase, prioritizing the architectural understanding of LLMs over alignment.
+                </p>
+              </div>
+
+              <div style={{ background: "rgba(163, 177, 138, 0.08)", padding: "2rem", borderRadius: "16px", border: "1px solid rgba(163, 177, 138, 0.2)" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <h3 style={{ color: "white", fontSize: "1.4rem" }}>Q6: LLMs → Explainability</h3>
+                  <span style={{ background: "#a3b18a", color: "black", padding: "4px 12px", borderRadius: "100px", fontWeight: "bold" }}>52 papers</span>
+                </div>
+                <h4 style={{ color: "#a3b18a", marginTop: "1rem", marginBottom: "0.5rem", fontSize: "1.1rem" }}>The Explanatory Agent</h4>
+                <p style={{ color: "var(--text-muted)", fontSize: "1rem", lineHeight: 1.6 }}>
+                  LLMs are increasingly treated not as models to be explained, but as <em>agents</em> that generate human-readable explanations for other opaque AI models (e.g., healthcare diagnostics or financial scoring).
+                  <br /><br /><strong>Implication:</strong> While generative explanations are highly accessible, they risk "hallucinated interpretability" where the explanation does not accurately reflect the underlying logic.
+                </p>
+              </div>
+            </div>
+          </article>
+
+          <article className="insight-card wide" style={{ borderLeft: "8px solid #f4a261", padding: "2rem" }}>
+            <div className="panel-head" style={{ paddingBottom: "1.5rem", borderBottom: "1px solid rgba(255,255,255,0.1)" }}>
+              <div>
+                <p className="eyebrow" style={{ color: "#f4a261", fontSize: "1rem" }}>EDGE 2 • FAIRNESS ↔ EXPLAINABILITY (N=69)</p>
+                <h2 style={{ fontSize: "2.2rem", margin: "0.5rem 0" }}>The "Accountability" Axis</h2>
+                <p style={{ fontSize: "1.1rem", color: "var(--text-muted)", lineHeight: 1.6, maxWidth: "900px" }}>
+                  <strong>The balanced edge.</strong> This axis establishes that Fairness and Explainability are not parallel goals, but sequential ones. You cannot fix algorithmic bias until you can map it.
+                </p>
+              </div>
+            </div>
+
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "2rem", marginTop: "2rem" }}>
+              <div style={{ background: "rgba(244, 162, 97, 0.08)", padding: "2rem", borderRadius: "16px", border: "1px solid rgba(244, 162, 97, 0.2)" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <h3 style={{ color: "white", fontSize: "1.4rem" }}>Q2: Explainability → Fairness</h3>
+                  <span style={{ background: "#f4a261", color: "black", padding: "4px 12px", borderRadius: "100px", fontWeight: "bold" }}>39 papers</span>
+                </div>
+                <h4 style={{ color: "#f4a261", marginTop: "1rem", marginBottom: "0.5rem", fontSize: "1.1rem" }}>Transparency as a Prerequisite</h4>
+                <p style={{ color: "var(--text-muted)", fontSize: "1rem", lineHeight: 1.6 }}>
+                  A strongly established paradigm where XAI frameworks (like SHAP or LIME) are explicitly utilized to expose the root causes of biased predictions. "You cannot fix what you cannot explain."
+                  <br /><br /><strong>Implication:</strong> XAI tools are becoming mandatory compliance and auditing mechanisms for achieving measurable fairness.
+                </p>
+              </div>
+
+              <div style={{ background: "rgba(244, 162, 97, 0.08)", padding: "2rem", borderRadius: "16px", border: "1px solid rgba(244, 162, 97, 0.2)" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <h3 style={{ color: "white", fontSize: "1.4rem" }}>Q1: Fairness → Explainability</h3>
+                  <span style={{ background: "#f4a261", color: "black", padding: "4px 12px", borderRadius: "100px", fontWeight: "bold" }}>30 papers</span>
+                </div>
+                <h4 style={{ color: "#f4a261", marginTop: "1rem", marginBottom: "0.5rem", fontSize: "1.1rem" }}>The Bias of Explanations</h4>
+                <p style={{ color: "var(--text-muted)", fontSize: "1rem", lineHeight: 1.6 }}>
+                  A critical subfield actively investigating whether XAI methods are themselves equitable. Studies indicate that explanations may systematically fail or mislead minority demographic groups.
+                  <br /><br /><strong>Implication:</strong> Explanations are not inherently neutral. XAI systems must be audited for structural equity to ensure they serve all users optimally.
+                </p>
+              </div>
+            </div>
+          </article>
+
+          <article className="insight-card wide" style={{ borderLeft: "8px solid #8ecae6", padding: "2rem" }}>
+            <div className="panel-head" style={{ paddingBottom: "1.5rem", borderBottom: "1px solid rgba(255,255,255,0.1)" }}>
+              <div>
+                <p className="eyebrow" style={{ color: "#8ecae6", fontSize: "1rem" }}>EDGE 3 • FAIRNESS ↔ LLMS (N=65)</p>
+                <h2 style={{ fontSize: "2.2rem", margin: "0.5rem 0" }}>The "Alignment" Axis</h2>
+                <p style={{ fontSize: "1.1rem", color: "var(--text-muted)", lineHeight: 1.6, maxWidth: "900px" }}>
+                  <strong>The alignment deficit.</strong> The field is highly efficient at identifying LLM harms dynamically, but lacks maturity in enforcing proactive fairness constraints organically within model generation.
+                </p>
+              </div>
+            </div>
+
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "2rem", marginTop: "2rem" }}>
+              <div style={{ background: "rgba(142, 202, 230, 0.08)", padding: "2rem", borderRadius: "16px", border: "1px solid rgba(142, 202, 230, 0.2)" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <h3 style={{ color: "white", fontSize: "1.4rem" }}>Q4: LLMs → Fairness</h3>
+                  <span style={{ background: "#8ecae6", color: "black", padding: "4px 12px", borderRadius: "100px", fontWeight: "bold" }}>41 papers</span>
+                </div>
+                <h4 style={{ color: "#8ecae6", marginTop: "1rem", marginBottom: "0.5rem", fontSize: "1.1rem" }}>Diagnosing Amplified Harm</h4>
+                <p style={{ color: "var(--text-muted)", fontSize: "1rem", lineHeight: 1.6 }}>
+                  Research exposing how foundational models amplify structural biases, generating toxic or stereotyped content due to the unsupervised nature of massive web corpora.
+                  <br /><br /><strong>Implication:</strong> Rapid deployment of unaligned LLMs poses immediate risks to representational equity. Post-deployment auditing dominates this sector.
+                </p>
+              </div>
+
+              <div style={{ background: "rgba(142, 202, 230, 0.08)", padding: "2rem", borderRadius: "16px", border: "1px solid rgba(142, 202, 230, 0.2)" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <h3 style={{ color: "white", fontSize: "1.4rem" }}>Q3: Fairness → LLMs</h3>
+                  <span style={{ background: "#8ecae6", color: "black", padding: "4px 12px", borderRadius: "100px", fontWeight: "bold" }}>24 papers</span>
+                </div>
+                <h4 style={{ color: "#8ecae6", marginTop: "1rem", marginBottom: "0.5rem", fontSize: "1.1rem" }}>The Proactive Struggle</h4>
+                <p style={{ color: "var(--text-muted)", fontSize: "1rem", lineHeight: 1.6 }}>
+                  The least populated node. Methodologies attempting to strictly enforce demographic parity and mathematical fairness constraints within open-ended generative contexts.
+                  <br /><br /><strong>Implication:</strong> A critical gap remains regarding proactive debiasing. Enforcing constraints during generation is computationally intensive and mathematically complex.
+                </p>
+              </div>
+            </div>
+          </article>
+
+        </section>
+
+        {/* Final Executive Conclusion Block */}
+        <section style={{
+          marginTop: "4rem",
+          padding: "4rem",
+          background: "linear-gradient(135deg, rgba(244, 162, 97, 0.1) 0%, rgba(142, 202, 230, 0.1) 100%)",
+          borderRadius: "32px",
+          border: "1px solid rgba(255, 255, 255, 0.1)",
+          textAlign: "center",
+          position: "relative",
+          overflow: "hidden",
+          marginBottom: "4rem"
+        }}>
+          <div style={{ position: "relative", zIndex: 2 }}>
+            <h2 style={{ fontSize: "2.8rem", color: "white", marginBottom: "1.5rem", letterSpacing: "-0.03em" }}>Executive Synthesis</h2>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "2rem", textAlign: "left", marginTop: "3rem" }}>
+              <div>
+                <h3 style={{ color: "#f4a261", marginBottom: "1rem" }}>1. The Visibility Paradox</h3>
+                <p style={{ color: "var(--text-muted)", lineHeight: 1.6 }}>
+                  Research is heavily skewed towards <strong>Explainability ↔ LLMs</strong>. While we are mastering how to look "inside" the box, we are failing to ensure the box is built on a fair foundation. Transparency is being prioritized over equity.
+                </p>
+              </div>
+              <div>
+                <h3 style={{ color: "#a3b18a", marginBottom: "1rem" }}>2. Structural Decoupling</h3>
+                <p style={{ color: "var(--text-muted)", lineHeight: 1.6 }}>
+                  Fairness research remains largely isolated from the generative engine. Most studies treat bias as a post-hoc filtering problem rather than an architectural alignment challenge, creating a significant technical debt in AI safety.
+                </p>
+              </div>
+              <div>
+                <h3 style={{ color: "#8ecae6", marginBottom: "1rem" }}>3. The Final Verdict</h3>
+                <p style={{ color: "var(--text-muted)", lineHeight: 1.6 }}>
+                  The <strong>"Void"</strong> at the center of our triad is the blueprint for future work. A truly trustworthy LLM requires a <em>simultaneous</em> integration of ethical constraints (Fairness) and functional transparency (XAI).
+                </p>
+              </div>
+            </div>
+
+            <div style={{ marginTop: "4rem", padding: "2rem", background: "rgba(255,255,255,0.03)", borderRadius: "16px" }}>
+              <p style={{ fontSize: "1.2rem", color: "white", fontStyle: "italic", fontWeight: "300" }}>
+                "The current landscape reveals an AI that is becoming more visible to the human eye, but remains structurally unaligned with human representational fairness."
+              </p>
+              <div style={{ marginTop: "1rem", height: "1px", width: "100px", background: "#f4a261", margin: "0 auto" }} />
+              <p style={{ marginTop: "1rem", color: "#f4a261", fontWeight: "bold", textTransform: "uppercase", letterSpacing: "2px", fontSize: "0.9rem" }}>Conclusion of Systematic Review</p>
+            </div>
+          </div>
+        </section>
+      </main>
+      <footer className="app-footer">Designed for direct inclusion in systematic review conclusion and limitations.</footer>
+    </div >
   );
 };
 
@@ -1053,6 +1453,9 @@ const App: React.FC = () => {
           <NavLink to="/insights" className={({ isActive }) => `nav-link${isActive ? " is-active" : ""}`}>
             Insights
           </NavLink>
+          <NavLink to="/framework" className={({ isActive }) => `nav-link${isActive ? " is-active" : ""}`}>
+            Framework
+          </NavLink>
         </div>
         <div className="nav-meta">
           <span>{papers.length} rows</span>
@@ -1066,7 +1469,6 @@ const App: React.FC = () => {
           path="/"
           element={
             <ExplorerView
-              papers={papers}
               filteredPapers={filteredPapers}
               questionMeta={questionMeta}
               questionOrder={questionOrder}
@@ -1085,11 +1487,11 @@ const App: React.FC = () => {
               handleSelectAllQuestions={() => setActiveQuestions(questionOrder)}
               filtersActive={filtersActive}
               listTitle={listTitle}
-              coverageText={coverageText}
             />
           }
         />
         <Route path="/insights" element={<InsightsView papers={papers} questionMeta={questionMeta} />} />
+        <Route path="/framework" element={<FrameworkView />} />
       </Routes>
       {detailPaper && <PaperDetailModal paper={detailPaper} onClose={() => setDetailPaper(null)} />}
     </div>
