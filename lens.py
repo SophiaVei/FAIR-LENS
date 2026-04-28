@@ -46,7 +46,11 @@ QUERY_PLAIN = "(" + " OR ".join([
 ]) + ")"
 
 
-YEARS = (2016, 2025)  # inclusive
+# -------------------------
+# Date Range & API Settings
+# -------------------------
+YEARS = (2016, 2026)  # inclusive; updated to catch 2026 papers
+LENS_API_TOKEN = os.getenv("LENS_API_TOKEN", "")  # Or paste it here directly if not using env vars
 
 # -------------------------
 # Helpers
@@ -267,9 +271,9 @@ def tag_inclusions_exclusions(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 # -------------------------
-# Lens API fetch (uses token if present)
+# Lens API fetch logic
 # -------------------------
-LENS_API_TOKEN = os.getenv("LENS_API_TOKEN")  # set this if you want API mode
+# LENS_API_TOKEN is now handled in the settings block above.
 
 
 
@@ -485,7 +489,7 @@ def run_lens(y1: int = YEARS[0], y2: int = YEARS[1]) -> pd.DataFrame:
 
         df_for_screen = df_after_dedup[mask_en & mask_peer].copy()
 
-        print("[PRISMA] Total identified (2016–2025) =", total_identified)
+        print(f"[PRISMA] Total identified ({y1}–{y2}) =", total_identified)
         print("[PRISMA] Removed before screening:")
         print("         Duplicates =", n_duplicates)
         print("         Non-English =", n_non_english)
@@ -542,7 +546,7 @@ def run_lens(y1: int = YEARS[0], y2: int = YEARS[1]) -> pd.DataFrame:
 
         df_for_screen = df_after_dedup[mask_en & mask_peer].copy()
 
-        print("[PRISMA] Total identified (2016–2025) =", total_identified)
+        print(f"[PRISMA] Total identified ({y1}–{y2}) =", total_identified)
         print("[PRISMA] Removed before screening:")
         print("         Duplicates =", n_duplicates)
         print("         Non-English =", n_non_english)

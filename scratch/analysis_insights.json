@@ -1,0 +1,188 @@
+{
+  "Q1": {
+    "count": 85,
+    "top_keywords": [
+      [
+        "bias",
+        34
+      ],
+      [
+        "transparency",
+        8
+      ],
+      [
+        "trust",
+        7
+      ],
+      [
+        "healthcare",
+        5
+      ],
+      [
+        "accountability",
+        4
+      ]
+    ],
+    "recent_count": 72,
+    "sample_claims": [
+      "The paper suggests that fairness and bias concerns drive the need for XAI techniques.",
+      "The paper presents explainability methods (SHAP and LIME) for a federated learning framework, but does not explicitly link fairness/bias concerns to the development of these methods.",
+      "The paper suggests that fairness concerns drive the development of explainable AI (XAI) methods, as part of trustworthy AI systems."
+    ]
+  },
+  "Q2": {
+    "count": 120,
+    "top_keywords": [
+      [
+        "bias",
+        62
+      ],
+      [
+        "transparency",
+        26
+      ],
+      [
+        "trust",
+        12
+      ],
+      [
+        "healthcare",
+        4
+      ],
+      [
+        "accountability",
+        2
+      ]
+    ],
+    "recent_count": 101,
+    "sample_claims": [
+      "The paper applies explainability techniques to detect and mitigate bias in AML transaction monitoring.",
+      "The paper uses explainability techniques to support fairness and trust in clinical AI applications.",
+      "The paper suggests that explainability techniques are used to ensure fairness in the justice system by providing transparent and secure decision-making processes."
+    ]
+  },
+  "Q3": {
+    "count": 65,
+    "top_keywords": [
+      [
+        "bias",
+        36
+      ],
+      [
+        "safety",
+        5
+      ],
+      [
+        "mitigation",
+        5
+      ],
+      [
+        "trust",
+        4
+      ],
+      [
+        "healthcare",
+        4
+      ]
+    ],
+    "recent_count": 56,
+    "sample_claims": [
+      "The paper addresses fairness concerns in LLMs by introducing a framework for creating unbiased datasets.",
+      "The paper defines and operationalizes fairness concerns for LLMs by proposing a Hierarchical Causal Validation Framework that addresses bias mitigation and fairness in LLM-powered recommendation systems.",
+      "The paper operationalizes fairness/bias concerns for LLMs by analyzing model limitations and bias in sexism detection tasks."
+    ]
+  },
+  "Q4": {
+    "count": 111,
+    "top_keywords": [
+      [
+        "bias",
+        85
+      ],
+      [
+        "healthcare",
+        7
+      ],
+      [
+        "transparency",
+        6
+      ],
+      [
+        "trust",
+        4
+      ],
+      [
+        "education",
+        3
+      ]
+    ],
+    "recent_count": 91,
+    "sample_claims": [
+      "The paper suggests that LLMs can positively impact fairness in healthcare by providing tailored advice for disease prevention.",
+      "LLMs can amplify bias towards certain demographic groups, specifically older and white annotators.",
+      "The paper highlights the potential for LLMs to affect fairness in medical education, particularly in terms of algorithmic bias and the need for fairness assurance."
+    ]
+  },
+  "Q5": {
+    "count": 280,
+    "top_keywords": [
+      [
+        "transparency",
+        34
+      ],
+      [
+        "trust",
+        12
+      ],
+      [
+        "reasoning",
+        6
+      ],
+      [
+        "healthcare",
+        5
+      ],
+      [
+        "bias",
+        5
+      ]
+    ],
+    "recent_count": 237,
+    "sample_claims": [
+      "The paper applies explainability methods to LLMs, specifically introducing a framework for explainable generative AI to decode and visualize LLM reasoning.",
+      "The paper applies explainability methods to analyze LLM (or neural network) behavior.",
+      "The paper applies explainability methods (SHAP) to interpret the results of a deep learning model, which can be related to LLMs in the broader context of model interpretability."
+    ]
+  },
+  "Q6": {
+    "count": 186,
+    "top_keywords": [
+      [
+        "transparency",
+        21
+      ],
+      [
+        "trust",
+        19
+      ],
+      [
+        "reasoning",
+        8
+      ],
+      [
+        "safety",
+        4
+      ],
+      [
+        "healthcare",
+        4
+      ]
+    ],
+    "recent_count": 162,
+    "sample_claims": [
+      "The paper shows LLMs advancing explainability by generating explanations and improving transparency in AI-driven financial transactions.",
+      "The paper shows LLMs (Transformer models) advancing explainability through self-attention mechanisms and SHAP for transparent and physically consistent predictions.",
+      "The paper discusses how LLMs, specifically Grok, can be aligned with human values and exhibit creative, playful behavior through a protocol called the 'Happy Handshake', which enables a more affective and imaginative interaction."
+    ]
+  }
+}
