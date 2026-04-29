@@ -782,7 +782,6 @@ body {
 }
 
 .triangle-wedge-active {
-  fill: var(--brand-soft);
   stroke: var(--brand);
   stroke-width: 1.2;
 }

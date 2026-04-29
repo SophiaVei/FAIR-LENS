@@ -120,6 +120,17 @@ function shortenSegment(
     },
   };
 }
+// Color map for each pair group (matches the CSS values)
+const pairFillColors: Record<PairGroup, string> = {
+  FE: "rgba(157, 234, 201, 0.35)",
+  EL: "rgba(255, 212, 176, 0.35)",
+  FL: "rgba(255, 255, 185, 0.3)",
+};
+
+const ACTIVE_STROKE = "#f0ab3d";
+const WEDGE_STROKE = "rgba(255, 255, 255, 0.15)";
+const ARROW_STROKE = "#ffae42";
+const LABEL_FILL = "rgba(255, 255, 255, 0.7)";
 
 const Triangle: React.FC<TriangleProps> = ({
   activeQuestions,
@@ -140,6 +151,8 @@ const Triangle: React.FC<TriangleProps> = ({
         y1={from.y}
         x2={to.x}
         y2={to.y}
+        stroke={ARROW_STROKE}
+        strokeWidth={2.2}
         markerEnd="url(#triangleArrowhead)"
       />
     );
@@ -148,7 +161,7 @@ const Triangle: React.FC<TriangleProps> = ({
   return (
     <div className="triangle-wrapper">
       <svg
-        viewBox="0 0 200 200"
+        viewBox="-15 -2 230 215"
         className="triangle-svg"
         aria-labelledby="triangleTitle triangleDesc"
       >
@@ -186,7 +199,7 @@ const Triangle: React.FC<TriangleProps> = ({
         {/* Wedges */}
         {wedges.map((w) => {
           const isActive = activeQuestions.includes(w.id);
-          const pairClass = `triangle-pair-${w.pair.toLowerCase()}`; // FE/FL/EL → fe/fl/el
+          const pairClass = `triangle-pair-${w.pair.toLowerCase()}`;
           return (
             <polygon
               key={w.id}
@@ -196,6 +209,9 @@ const Triangle: React.FC<TriangleProps> = ({
                 pairClass +
                 (isActive ? " triangle-wedge-active" : "")
               }
+              style={{ fill: pairFillColors[w.pair] }}
+              stroke={isActive ? ACTIVE_STROKE : WEDGE_STROKE}
+              strokeWidth={isActive ? 1.2 : 0.6}
               onClick={() => onToggleQuestion(w.id)}
             >
               <title>
@@ -209,18 +225,18 @@ const Triangle: React.FC<TriangleProps> = ({
         {arrowLines}
 
         {/* Vertex labels */}
-        <text x="100" y="12" textAnchor="middle" className="vertex-label">
+        <text x="100" y="12" textAnchor="middle" className="vertex-label" fill={LABEL_FILL} style={{ fontSize: "0.72rem" }}>
           Fairness / Bias
         </text>
-        <text x="35" y="198" textAnchor="middle" className="vertex-label">
+        <text x="35" y="198" textAnchor="middle" className="vertex-label" fill={LABEL_FILL} style={{ fontSize: "0.72rem" }}>
           Explainability
         </text>
-        <text x="178" y="198" textAnchor="middle" className="vertex-label">
+        <text x="178" y="198" textAnchor="middle" className="vertex-label" fill={LABEL_FILL} style={{ fontSize: "0.72rem" }}>
           LLMs
         </text>
       </svg>
 
-      <p className="triangle-hint">
+      <p className="triangle-hint hide-on-export">
         Click one or more regions (Q1–Q6) or legend items to highlight those
         directions and filter the paper list. Click again to unselect.
       </p>

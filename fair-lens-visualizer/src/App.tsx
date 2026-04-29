@@ -5,6 +5,7 @@ import {
   Activity,
   BarChart3,
   CalendarRange,
+  Download,
   ExternalLink,
   Filter,
   LineChart,
@@ -12,6 +13,7 @@ import {
   RefreshCw,
   Sparkles,
 } from "lucide-react";
+import { toPng } from "html-to-image";
 import Triangle from "./components/Triangle";
 import {
   Area,
@@ -100,6 +102,82 @@ type ExplorerProps = {
   handleSelectAllQuestions: () => void;
   filtersActive: boolean;
   listTitle: string;
+};
+
+const downloadChart = (elementId: string, filename: string) => {
+  const el = document.getElementById(elementId);
+  if (!el) return;
+
+  // 1. Temporarily hide titles and hint text
+  const toHide = el.querySelectorAll(".panel-head, .triangle-hint");
+  const hiddenState: { node: HTMLElement; prev: string }[] = [];
+  toHide.forEach((node) => {
+    const htmlNode = node as HTMLElement;
+    hiddenState.push({ node: htmlNode, prev: htmlNode.style.display });
+    htmlNode.style.display = "none";
+  });
+
+  // 2. Strip visual chrome (bg, border, shadow) from card + key children
+  const bgTargets = [el, ...Array.from(el.querySelectorAll(".triangle-wrapper"))];
+  const savedBg: {
+    node: HTMLElement;
+    bg: string;
+    bgc: string;
+    border: string;
+    shadow: string;
+    bdFilter: string;
+  }[] = [];
+  bgTargets.forEach((node) => {
+    const htmlNode = node as HTMLElement;
+    savedBg.push({
+      node: htmlNode,
+      bg: htmlNode.style.background,
+      bgc: htmlNode.style.backgroundColor,
+      border: htmlNode.style.border,
+      shadow: htmlNode.style.boxShadow,
+      bdFilter: htmlNode.style.backdropFilter,
+    });
+    htmlNode.style.background = "transparent";
+    htmlNode.style.backgroundColor = "transparent";
+    htmlNode.style.border = "none";
+    htmlNode.style.boxShadow = "none";
+    htmlNode.style.backdropFilter = "none";
+  });
+
+  toPng(el, {
+    backgroundColor: "rgba(0,0,0,0)",
+    pixelRatio: 2,
+    filter: (node) => {
+      const htmlNode = node as HTMLElement;
+      if (htmlNode?.classList?.contains("hide-on-export")) {
+        return false;
+      }
+      return true;
+    },
+  })
+    .then((dataUrl) => {
+      const link = document.createElement("a");
+      link.download = filename;
+      link.href = dataUrl;
+      link.click();
+    })
+    .catch((err) => {
+      console.error("Oops, something went wrong!", err);
+    })
+    .finally(() => {
+      // Restore hidden elements
+      hiddenState.forEach(({ node, prev }) => {
+        node.style.display = prev;
+      });
+      // Restore backgrounds
+      savedBg.forEach(({ node, bg, bgc, border, shadow, bdFilter }) => {
+        node.style.background = bg;
+        node.style.backgroundColor = bgc;
+        node.style.border = border;
+        node.style.boxShadow = shadow;
+        node.style.backdropFilter = bdFilter;
+      });
+    });
 };
 
 type InsightsProps = {
@@ -248,13 +326,23 @@ const ExplorerView: React.FC<ExplorerProps> = ({
 
       <main className="content-grid">
         <section className="left-column">
-          <article className="panel triangle-panel">
+          <article className="panel triangle-panel" id="chart-triangle">
             <div className="panel-head">
               <div>
                 <p className="eyebrow">Relationship map</p>
                 <h2>Bias · Explainability · LLMs</h2>
               </div>
-              <Sparkles size={18} />
+              <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
+                <button
+                  className="ghost-button hide-on-export"
+                  onClick={() => downloadChart("chart-triangle", "relationship_map.png")}
+                  title="Download Plot"
+                  style={{ padding: "0.4rem", borderRadius: "50%" }}
+                >
+                  <Download size={18} />
+                </button>
+                <Sparkles size={18} />
+              </div>
             </div>
             <Triangle activeQuestions={activeQuestions} onToggleQuestion={toggleQuestion} />
           </article>
@@ -603,13 +691,21 @@ const InsightsView: React.FC<InsightsProps> = ({ papers, questionMeta }) => {
 
       <main className="insights-content">
         <section className="insight-grid">
-          <article className="insight-card wide">
+          <article className="insight-card wide" id="chart-cadence">
             <div className="panel-head">
               <div>
                 <p className="eyebrow">Cadence</p>
                 <h2>Publication tempo</h2>
                 <p style={{ margin: "0.5rem 0 0", fontSize: "0.9rem", color: "var(--text-muted)" }}>Number of papers published each year</p>
               </div>
+              <button
+                className="ghost-button hide-on-export"
+                onClick={() => downloadChart("chart-cadence", "publication_tempo.png")}
+                title="Download Plot"
+                style={{ padding: "0.4rem", borderRadius: "50%", alignSelf: "flex-start" }}
+              >
+                <Download size={18} />
+              </button>
             </div>
             <div className="chart-shell">
               <ResponsiveContainer width="100%" height={260}>
@@ -630,13 +726,21 @@ const InsightsView: React.FC<InsightsProps> = ({ papers, questionMeta }) => {
             </div>
           </article>
 
-          <article className="insight-card">
+          <article className="insight-card" id="chart-directional">
             <div className="panel-head">
               <div>
                 <p className="eyebrow">Questions</p>
                 <h3>Directional balance</h3>
                 <p style={{ margin: "0.5rem 0 0", fontSize: "0.9rem", color: "var(--text-muted)" }}>Distribution of papers across the six research questions</p>
               </div>
+              <button
+                className="ghost-button hide-on-export"
+                onClick={() => downloadChart("chart-directional", "directional_balance.png")}
+                title="Download Plot"
+                style={{ padding: "0.4rem", borderRadius: "50%", alignSelf: "flex-start" }}
+              >
+                <Download size={18} />
+              </button>
             </div>
             <div className="chart-shell">
               <ResponsiveContainer width="100%" height={260}>
@@ -650,25 +754,31 @@ const InsightsView: React.FC<InsightsProps> = ({ papers, questionMeta }) => {
                 </RePieChart>
               </ResponsiveContainer>
             </div>
-            <ul className="insight-list">
-              {questionSeries.map((row) => (
-                <li key={row.qid}>
-                  <span>{row.name}</span>
-                  <strong>{row.value}</strong>
-                </li>
-              ))}
+            <ul className="insight-list" style={{ marginTop: "-0.5rem" }}>
+              {questionSeries.map((row, index) => {
+                const colors = ["#f4a261", "#f9844a", "#f9c74f", "#90be6d", "#43aa8b", "#577590"];
+                return (
+                  <li key={row.qid}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                      <span style={{ width: "12px", height: "12px", backgroundColor: colors[index], borderRadius: "2px" }} />
+                      <span>{row.name}</span>
+                    </div>
+                    <strong>{row.value}</strong>
+                  </li>
+                );
+              })}
             </ul>
           </article>
 
-          <article className="insight-card wide">
+          <article className="insight-card wide" id="chart-venues">
             <div className="panel-head">
               <div>
                 <p className="eyebrow">Venues</p>
                 <h3>Where conversations cluster</h3>
                 <p style={{ margin: "0.5rem 0 0", fontSize: "0.9rem", color: "var(--text-muted)" }}>Most frequent conferences and journals publishing this research</p>
               </div>
-              <div className="venue-control">
-                <label>
+              <div className="venue-control" style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
+                <label className="hide-on-export">
                   Top venues ({venueLimit})
                   <input
                     type="range"
@@ -678,6 +788,14 @@ const InsightsView: React.FC<InsightsProps> = ({ papers, questionMeta }) => {
                     onChange={(e) => setVenueLimit(parseInt(e.target.value, 10))}
                   />
                 </label>
+                <button
+                  className="ghost-button hide-on-export"
+                  onClick={() => downloadChart("chart-venues", "venue_clusters.png")}
+                  title="Download Plot"
+                  style={{ padding: "0.4rem", borderRadius: "50%" }}
+                >
+                  <Download size={18} />
+                </button>
               </div>
             </div>
             <div className="chart-shell">
@@ -693,13 +811,21 @@ const InsightsView: React.FC<InsightsProps> = ({ papers, questionMeta }) => {
             </div>
           </article>
 
-          <article className="insight-card">
+          <article className="insight-card" id="chart-mentions">
             <div className="panel-head">
               <div>
                 <p className="eyebrow">Mentions</p>
                 <h3>Topical coverage</h3>
                 <p style={{ margin: "0.5rem 0 0", fontSize: "0.9rem", color: "var(--text-muted)" }}>How many papers mention each of the three topics</p>
               </div>
+              <button
+                className="ghost-button hide-on-export"
+                onClick={() => downloadChart("chart-mentions", "topical_coverage.png")}
+                title="Download Plot"
+                style={{ padding: "0.4rem", borderRadius: "50%", alignSelf: "flex-start" }}
+              >
+                <Download size={18} />
+              </button>
             </div>
             <div className="chart-shell">
               <ResponsiveContainer width="100%" height={260}>
@@ -709,23 +835,34 @@ const InsightsView: React.FC<InsightsProps> = ({ papers, questionMeta }) => {
                 </RadialBarChart>
               </ResponsiveContainer>
             </div>
-            <ul className="insight-list">
+            <ul className="insight-list" style={{ marginTop: "-0.5rem" }}>
               {mentionSeries.map((row) => (
                 <li key={row.name}>
-                  <span>{row.name}</span>
+                  <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                    <span style={{ width: "12px", height: "12px", backgroundColor: row.fill, borderRadius: "2px" }} />
+                    <span>{row.name}</span>
+                  </div>
                   <strong>{row.value}</strong>
                 </li>
               ))}
             </ul>
           </article>
 
-          <article className="insight-card">
+          <article className="insight-card" id="chart-intersections">
             <div className="panel-head">
               <div>
                 <p className="eyebrow">Intersections</p>
                 <h3>Co-mention intensity</h3>
                 <p style={{ margin: "0.5rem 0 0", fontSize: "0.9rem", color: "var(--text-muted)" }}>Papers that combine two or more topics together</p>
               </div>
+              <button
+                className="ghost-button hide-on-export"
+                onClick={() => downloadChart("chart-intersections", "comention_intensity.png")}
+                title="Download Plot"
+                style={{ padding: "0.4rem", borderRadius: "50%", alignSelf: "flex-start" }}
+              >
+                <Download size={18} />
+              </button>
             </div>
             <div className="chart-shell">
               <ResponsiveContainer width="100%" height={260}>
@@ -735,23 +872,34 @@ const InsightsView: React.FC<InsightsProps> = ({ papers, questionMeta }) => {
                 </RadialBarChart>
               </ResponsiveContainer>
             </div>
-            <ul className="insight-list">
+            <ul className="insight-list" style={{ marginTop: "-0.5rem" }}>
               {comboSeries.map((row) => (
                 <li key={row.name}>
-                  <span>{row.name}</span>
+                  <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                    <span style={{ width: "12px", height: "12px", backgroundColor: row.fill, borderRadius: "2px" }} />
+                    <span>{row.name}</span>
+                  </div>
                   <strong>{row.value}</strong>
                 </li>
               ))}
             </ul>
           </article>
 
-          <article className="insight-card wide">
+          <article className="insight-card wide" id="chart-trends">
             <div className="panel-head">
               <div>
                 <p className="eyebrow">Evolution</p>
                 <h2>Question trends over time</h2>
                 <p style={{ margin: "0.5rem 0 0", fontSize: "0.9rem", color: "var(--text-muted)" }}>How focus on each research question has changed year by year</p>
               </div>
+              <button
+                className="ghost-button hide-on-export"
+                onClick={() => downloadChart("chart-trends", "question_trends.png")}
+                title="Download Plot"
+                style={{ padding: "0.4rem", borderRadius: "50%", alignSelf: "flex-start" }}
+              >
+                <Download size={18} />
+              </button>
             </div>
             <div className="chart-shell">
               <ResponsiveContainer width="100%" height={260}>
@@ -798,13 +946,21 @@ const InsightsView: React.FC<InsightsProps> = ({ papers, questionMeta }) => {
             </div>
           </article>
 
-          <article className="insight-card">
+          <article className="insight-card" id="chart-clusters">
             <div className="panel-head">
               <div>
                 <p className="eyebrow">Clusters</p>
                 <h3>Research clusters</h3>
                 <p style={{ margin: "0.5rem 0 0", fontSize: "0.9rem", color: "var(--text-muted)" }}>Major research themes combining multiple topics</p>
               </div>
+              <button
+                className="ghost-button hide-on-export"
+                onClick={() => downloadChart("chart-clusters", "research_clusters.png")}
+                title="Download Plot"
+                style={{ padding: "0.4rem", borderRadius: "50%", alignSelf: "flex-start" }}
+              >
+                <Download size={18} />
+              </button>
             </div>
             <div className="chart-shell">
               <ResponsiveContainer width="100%" height={260}>
@@ -818,33 +974,50 @@ const InsightsView: React.FC<InsightsProps> = ({ papers, questionMeta }) => {
                     outerRadius={90}
                     paddingAngle={2}
                   >
-                    {clusterSeries.map((_, index) => (
-                      <Cell
-                        key={`cluster-${index}`}
-                        fill={["#f4a261", "#90be6d", "#43aa8b"][index % 3]}
-                      />
-                    ))}
+                    {clusterSeries.map((_, index) => {
+                      const colors = ["#8ecae6", "#219ebc", "#023047", "#ffb703", "#fb8500", "#90be6d", "#43aa8b"];
+                      return (
+                        <Cell
+                          key={`cluster-${index}`}
+                          fill={colors[index % colors.length]}
+                        />
+                      );
+                    })}
                   </Pie>
                 </RePieChart>
               </ResponsiveContainer>
             </div>
-            <ul className="insight-list">
-              {clusterSeries.map((row) => (
-                <li key={row.name}>
-                  <span>{row.name}</span>
-                  <strong>{row.value}</strong>
-                </li>
-              ))}
+            <ul className="insight-list" style={{ marginTop: "-0.5rem" }}>
+              {clusterSeries.map((row, index) => {
+                const colors = ["#8ecae6", "#219ebc", "#023047", "#ffb703", "#fb8500", "#90be6d", "#43aa8b"];
+                return (
+                  <li key={row.name}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                      <span style={{ width: "12px", height: "12px", backgroundColor: colors[index % 7], borderRadius: "2px", flexShrink: 0 }} />
+                      <span>{row.name}</span>
+                    </div>
+                    <strong>{row.value}</strong>
+                  </li>
+                );
+              })}
             </ul>
           </article>
 
-          <article className="insight-card wide">
+          <article className="insight-card wide" id="chart-keywords">
             <div className="panel-head">
               <div>
                 <p className="eyebrow">Keywords</p>
                 <h2>Most frequent terms</h2>
                 <p style={{ margin: "0.5rem 0 0", fontSize: "0.9rem", color: "var(--text-muted)" }}>Common meaningful words appearing in paper titles</p>
               </div>
+              <button
+                className="ghost-button hide-on-export"
+                onClick={() => downloadChart("chart-keywords", "frequent_terms.png")}
+                title="Download Plot"
+                style={{ padding: "0.4rem", borderRadius: "50%", alignSelf: "flex-start" }}
+              >
+                <Download size={18} />
+              </button>
             </div>
             <div className="chart-shell" style={{ padding: "2rem 1rem", minHeight: "300px" }}>
               <div style={{
@@ -1425,7 +1598,7 @@ const App: React.FC = () => {
     }
   };
 
-  const coverageText = years.min !== null && years.max !== null ? `${years.min}–${years.max}` : "—";
+  // coverageText removed (unused)
   const isYearDefault =
     years.min !== null && years.max !== null && yearFilter.min === years.min && yearFilter.max === years.max;
   const filtersActive = activeQuestions.length > 0 || !isYearDefault;
