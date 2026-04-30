@@ -50,7 +50,7 @@ QUERY_PLAIN = "(" + " OR ".join([
 # Date Range & API Settings
 # -------------------------
 YEARS = (2016, 2026)  # inclusive; updated to catch 2026 papers
-LENS_API_TOKEN = os.getenv("LENS_API_TOKEN", "")  # Or paste it here directly if not using env vars
+LENS_API_TOKEN = os.getenv("LENS_API_TOKEN", "").strip()
 
 # -------------------------
 # Helpers
@@ -124,10 +124,13 @@ def is_english_row(row) -> bool:
     return any(_s(p.strip()) == "en" for p in lang.split(","))
 
 def is_arxiv_like(row) -> bool:
-    v = _s(row.get("venue"))
-    d = _s(row.get("doi"))
-    u = _s(row.get("url"))
-    return ("arxiv" in v) or d.startswith("10.48550") or ("arxiv.org" in u)
+    v = _s(row.get("venue")).lower()
+    d = _s(row.get("doi")).lower()
+    u = _s(row.get("url")).lower()
+    # Check for arXiv (10.48550) and Zenodo (10.5281)
+    is_arxiv = ("arxiv" in v) or d.startswith("10.48550") or ("arxiv.org" in u)
+    is_zenodo = ("zenodo" in v) or d.startswith("10.5281") or ("zenodo.org" in u)
+    return is_arxiv or is_zenodo
 
 def is_non_peer_row(row) -> bool:
     # Your rule: non-peer if arXiv-like OR missing/empty venue
@@ -135,14 +138,19 @@ def is_non_peer_row(row) -> bool:
 
 def dedupe_df(df: pd.DataFrame) -> pd.DataFrame:
     df = df.copy()
+    # 1. Normalize DOI and Title
     df["doi_norm"]   = df["doi"].str.lower().str.strip()
-    df["title_norm"] = df["title"].str.lower().str.replace(r"\s+", " ", regex=True).str.strip()
-    df = (df.sort_values(["doi_norm","year"], na_position="last")
-            .drop_duplicates(subset=["doi_norm"], keep="first"))
-    no_doi  = df[df["doi_norm"].isna()].drop_duplicates(subset=["title_norm","year"], keep="first")
-    with_doi = df[~df["doi_norm"].isna()]
-    out = pd.concat([with_doi, no_doi], ignore_index=True).drop(columns=["doi_norm","title_norm"])
-    return out
+    df["title_norm"] = df["title"].str.lower().str.replace(r"[^a-z0-9]", "", regex=True).str.strip()
+    
+    # 2. Strict deduplication: 
+    # First, drop by DOI (if present)
+    df = df.sort_values("year", ascending=False) # Keep most recent record
+    df = df.drop_duplicates(subset=["doi_norm"], keep="first")
+    
+    # Second, drop by Title (this is the strict part you requested)
+    df = df.drop_duplicates(subset=["title_norm"], keep="first")
+    
+    return df.drop(columns=["doi_norm", "title_norm"])
 
 # A∧B∧C matches – title-only vs abstract-only
 def _any(rx_list, text):

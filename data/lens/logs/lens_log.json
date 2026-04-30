@@ -1,41 +1,41 @@
 {
   "source_mode": "api",
-  "S0_raw_api": 63495,
-  "S1_year": 63495,
-  "S2_blockfilter": 1201,
-  "S4_tagged_final": 1201,
+  "S0_raw_api": 63946,
+  "S1_year": 63946,
+  "S2_blockfilter": 960,
+  "S4_tagged_final": 960,
   "by_year": {
     "2016": 4,
     "2017": 6,
     "2018": 4,
-    "2019": 7,
+    "2019": 3,
     "2020": 6,
     "2021": 15,
     "2022": 37,
-    "2023": 92,
-    "2024": 145,
-    "2025": 552,
-    "2026": 333
+    "2023": 89,
+    "2024": 144,
+    "2025": 459,
+    "2026": 193
   },
-  "peer_reviewed_true": 1201,
-  "english_true": 1201,
+  "peer_reviewed_true": 960,
+  "english_true": 960,
   "arxiv_like_only": 0,
-  "I_all_true": 277,
-  "E_any_true": 570,
+  "I_all_true": 232,
+  "E_any_true": 450,
   "exclusions_breakdown": {
     "E1_non_archival_only": 0,
-    "E2_pure_safety": 11,
-    "E3_pure_interpret_only": 22,
-    "E4_non_llm_modality": 356,
-    "E5_no_eval": 290
+    "E2_pure_safety": 3,
+    "E3_pure_interpret_only": 6,
+    "E4_non_llm_modality": 303,
+    "E5_no_eval": 217
   },
   "prisma": {
-    "total_identified": 63495,
-    "removed_duplicates": 230,
-    "removed_non_english": 1350,
-    "removed_non_peer": 406,
-    "records_screened": 61510,
-    "screen_kept_union": 1201,
-    "screen_excluded": 60309
+    "total_identified": 63946,
+    "removed_duplicates": 968,
+    "removed_non_english": 1230,
+    "removed_non_peer": 712,
+    "records_screened": 61065,
+    "screen_kept_union": 960,
+    "screen_excluded": 60105
   }
 }
