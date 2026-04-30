@@ -144,6 +144,41 @@ const downloadChart = (elementId: string, filename: string) => {
     htmlNode.style.backdropFilter = "none";
   });
 
+  // 3. Force dark colors for text and axes by setting inline styles with !important
+  const darkColorTargets = el.querySelectorAll<HTMLElement | SVGElement>(
+    ".insight-list, .insight-list *, .recharts-legend-wrapper *, .recharts-default-legend *, " +
+    "text, tspan, .vertex-label, " +
+    ".recharts-cartesian-axis-line, .recharts-cartesian-axis-tick-line, " +
+    ".recharts-cartesian-grid line"
+  );
+  const savedColors: { node: HTMLElement | SVGElement; color: string; fill: string; stroke: string; opacity: string }[] = [];
+  
+  darkColorTargets.forEach((node) => {
+    savedColors.push({
+      node,
+      color: node.style.color,
+      fill: node.style.fill,
+      stroke: node.style.stroke,
+      opacity: node.style.opacity,
+    });
+    
+    const isLine = node.tagName.toLowerCase() === "line" || node.tagName.toLowerCase() === "path";
+    
+    if (isLine) {
+      node.style.setProperty("stroke", "#222222", "important");
+      if (node.closest('.recharts-cartesian-grid')) {
+        node.style.setProperty("opacity", "0.2", "important");
+      } else {
+        node.style.setProperty("opacity", "0.6", "important");
+      }
+    } else {
+      // Set both color (HTML) and fill (SVG) just to be completely safe
+      node.style.setProperty("color", "#222222", "important");
+      node.style.setProperty("fill", "#222222", "important");
+      node.style.setProperty("stroke", "none", "important");
+    }
+  });
+
   toPng(el, {
     backgroundColor: "rgba(0,0,0,0)",
     pixelRatio: 2,
@@ -168,6 +203,13 @@ const downloadChart = (elementId: string, filename: string) => {
       // Restore hidden elements
       hiddenState.forEach(({ node, prev }) => {
         node.style.display = prev;
+      });
+      // Restore text and axis colors
+      savedColors.forEach(({ node, color, fill, stroke, opacity }) => {
+        node.style.color = color;
+        node.style.fill = fill;
+        node.style.stroke = stroke;
+        node.style.opacity = opacity;
       });
       // Restore backgrounds
       savedBg.forEach(({ node, bg, bgc, border, shadow, bdFilter }) => {

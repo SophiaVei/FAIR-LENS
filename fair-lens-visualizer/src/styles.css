@@ -859,3 +859,29 @@ body {
     justify-content: space-between;
   }
 }
+
+/* Applied during image export via downloadChart to make text visible on white background */
+.export-mode .insight-list,
+.export-mode .insight-list span,
+.export-mode .insight-list strong,
+.export-mode .recharts-legend-item-text {
+  color: #222222 !important;
+}
+
+.export-mode .recharts-text,
+.export-mode .recharts-cartesian-axis-tick-value,
+.export-mode .vertex-label {
+  fill: #222222 !important;
+  stroke: none !important;
+}
+
+.export-mode .recharts-cartesian-axis-line,
+.export-mode .recharts-cartesian-axis-tick-line {
+  stroke: #222222 !important;
+  opacity: 0.6 !important;
+}
+
+.export-mode .recharts-cartesian-grid line {
+  stroke: #222222 !important;
+  opacity: 0.15 !important;
+}
