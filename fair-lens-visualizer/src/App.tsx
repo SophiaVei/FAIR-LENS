@@ -209,10 +209,21 @@ const downloadChart = (elementId: string, filename: string) => {
     });
 };
 
+interface InsightsData {
+  venue_distribution?: Array<{ name: string; value: number }>;
+  focus_evolution?: Array<any>;
+  research_clusters?: Array<any>;
+  intersection_dist?: Array<any>;
+  discipline_split?: Array<any>;
+  global_trends?: Record<string, any>;
+  question_topics?: Record<string, Record<string, Array<{ name: string; value: number }>>>;
+  model_evolution?: Array<any>;
+}
+
 type InsightsProps = {
   papers: Paper[];
   questionMeta: typeof questionMeta;
-  insights: any; // Dynamic insights data
+  insights: InsightsData | null;
 };
 
 const ChartTooltip: React.FC<{
@@ -1037,7 +1048,7 @@ const InsightsView: React.FC<InsightsProps> = ({ papers, questionMeta, insights 
                     onChange={(e) => setTaxonomyCategory(e.target.value)}
                     className="select-input"
                  >
-                    {Object.keys(insights.global_trends).map(cat => <option key={cat} value={cat}>{cat}</option>)}
+                    {Object.keys(insights?.global_trends || {}).map(cat => <option key={cat} value={cat}>{cat}</option>)}
                  </select>
                  <select 
                     value={activeTaxonomyQid} 
@@ -1060,7 +1071,7 @@ const InsightsView: React.FC<InsightsProps> = ({ papers, questionMeta, insights 
               <ResponsiveContainer width="100%" height={300}>
                 <ReBarChart
                   layout="vertical"
-                  data={insights.question_topics?.[activeTaxonomyQid]?.[taxonomyCategory] || []}
+                  data={insights?.question_topics?.[activeTaxonomyQid]?.[taxonomyCategory] || []}
                   margin={{ top: 10, right: 30, left: 40, bottom: 5 }}
                 >
                   <CartesianGrid strokeDasharray="3 3" opacity={0.1} horizontal={false} />
@@ -1068,7 +1079,7 @@ const InsightsView: React.FC<InsightsProps> = ({ papers, questionMeta, insights 
                   <YAxis dataKey="name" type="category" width={120} stroke="rgba(255,255,255,0.8)" fontSize={12} />
                   <RechartsTooltip content={<ChartTooltip />} />
                   <Bar dataKey="value" radius={[0, 4, 4, 0]}>
-                    {(insights.question_topics?.[activeTaxonomyQid]?.[taxonomyCategory] || []).map((_, index) => {
+                    {(insights?.question_topics?.[activeTaxonomyQid]?.[taxonomyCategory] || []).map((_, index) => {
                        const colors = ["#f4a261", "#f9844a", "#f9c74f", "#90be6d", "#43aa8b", "#577590", "#8ecae6"];
                        return <Cell key={`tax-${index}`} fill={colors[index % colors.length]} />;
                     })}
@@ -1208,7 +1219,7 @@ const InsightsView: React.FC<InsightsProps> = ({ papers, questionMeta, insights 
                 </ReBarChart>
               </ResponsiveContainer>
             </div>
-            <p style={{ fontSize: "0.85rem", color: "var(--text-muted)", marginTop: "1rem", textAlign: "center" }}>
+            <p className="hide-on-export" style={{ fontSize: "0.85rem", color: "var(--text-muted)", marginTop: "1rem", textAlign: "center" }}>
               <strong>Note:</strong> Proactive design (Q1, Q3) consistently lags behind diagnostic auditing across all years.
             </p>
           </article>
