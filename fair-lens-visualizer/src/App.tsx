@@ -13,7 +13,8 @@ import {
   RefreshCw,
   Sparkles,
 } from "lucide-react";
-import { toPng } from "html-to-image";
+import { toCanvas } from "html-to-image";
+import { jsPDF } from "jspdf";
 import Triangle from "./components/Triangle";
 import {
   Area,
@@ -179,46 +180,66 @@ const downloadChart = (elementId: string, filename: string) => {
     }
   });
 
-  toPng(el, {
-    backgroundColor: "rgba(0,0,0,0)",
-    pixelRatio: 2,
-    filter: (node) => {
-      const htmlNode = node as HTMLElement;
-      if (htmlNode?.classList?.contains("hide-on-export")) {
-        return false;
+  // 1. Create a hidden container for isolated capture
+  const container = document.createElement("div");
+  container.style.position = "absolute";
+  container.style.top = "-9999px";
+  container.style.left = "-9999px";
+  container.style.width = el.offsetWidth + "px";
+  document.body.appendChild(container);
+
+  // 2. Clone the element and clean it for export
+  const clone = el.cloneNode(true) as HTMLElement;
+  clone.style.height = "auto";
+  clone.style.minHeight = "0";
+  clone.style.display = "block";
+  clone.style.background = "#ffffff";
+  clone.style.color = "#000000";
+  clone.style.padding = "20px"; // Clean border for PDF
+  clone.style.borderRadius = "0";
+  clone.style.boxShadow = "none";
+  container.appendChild(clone);
+
+  // 3. Update colors in the clone for black-on-white PDF
+  const textElements = clone.querySelectorAll("*");
+  textElements.forEach((node) => {
+    const htmlNode = node as HTMLElement;
+    if (htmlNode.classList.contains("hide-on-export")) {
+      htmlNode.style.display = "none";
+    } else {
+      // Force legible colors ONLY for actual text elements, preserving SVG graphic colors
+      const tag = htmlNode.tagName.toLowerCase();
+      const isLegendItem = htmlNode.closest(".recharts-legend-item") || htmlNode.closest(".insight-list li div");
+      const isText = tag === "span" || tag === "p" || tag === "h2" || tag === "h3" || tag === "strong";
+      const isSvgText = tag === "text";
+      
+      if ((isText || isSvgText) && !isLegendItem) {
+        htmlNode.style.setProperty("color", "#111111", "important");
+        htmlNode.style.setProperty("fill", "#111111", "important");
       }
-      return true;
-    },
+    }
+  });
+
+  toCanvas(clone, {
+    backgroundColor: "#ffffff",
+    pixelRatio: 3,
   })
-    .then((dataUrl) => {
-      const link = document.createElement("a");
-      link.download = filename;
-      link.href = dataUrl;
-      link.click();
+    .then((canvas) => {
+      const imgData = canvas.toDataURL("image/png");
+      const pdf = new jsPDF({
+        orientation: canvas.width > canvas.height ? "landscape" : "portrait",
+        unit: "px",
+        format: [canvas.width, canvas.height]
+      });
+      
+      pdf.addImage(imgData, "PNG", 0, 0, canvas.width, canvas.height);
+      pdf.save(filename.replace(".png", ".pdf"));
     })
     .catch((err) => {
-      console.error("Oops, something went wrong!", err);
+      console.error("PDF Export Failed:", err);
     })
     .finally(() => {
-      // Restore hidden elements
-      hiddenState.forEach(({ node, prev }) => {
-        node.style.display = prev;
-      });
-      // Restore text and axis colors
-      savedColors.forEach(({ node, color, fill, stroke, opacity }) => {
-        node.style.color = color;
-        node.style.fill = fill;
-        node.style.stroke = stroke;
-        node.style.opacity = opacity;
-      });
-      // Restore backgrounds
-      savedBg.forEach(({ node, bg, bgc, border, shadow, bdFilter }) => {
-        node.style.background = bg;
-        node.style.backgroundColor = bgc;
-        node.style.border = border;
-        node.style.boxShadow = shadow;
-        node.style.backdropFilter = bdFilter;
-      });
+      document.body.removeChild(container);
     });
 };
 
@@ -750,8 +771,8 @@ const InsightsView: React.FC<InsightsProps> = ({ papers, questionMeta }) => {
               </button>
             </div>
             <div className="chart-shell">
-              <ResponsiveContainer width="100%" height={260}>
-                <AreaChart data={yearSeries}>
+              <ResponsiveContainer width="100%" height={300}>
+                <AreaChart data={yearSeries} margin={{ top: 10, right: 10, left: 50, bottom: 0 }}>
                   <defs>
                     <linearGradient id="yearGradient" x1="0" y1="0" x2="0" y2="1">
                       <stop offset="5%" stopColor="#8ecae6" stopOpacity={0.9} />
@@ -841,8 +862,12 @@ const InsightsView: React.FC<InsightsProps> = ({ papers, questionMeta }) => {
               </div>
             </div>
             <div className="chart-shell">
-              <ResponsiveContainer width="100%" height={venueLimit * 50 + 100}>
-                <ReBarChart data={venueSeries} layout="vertical" margin={{ left: 40 }}>
+              <ResponsiveContainer width="100%" height={venueLimit * 45 + 60}>
+                <ReBarChart
+                  layout="vertical"
+                  data={venueSeries}
+                  margin={{ top: 5, right: 30, left: 10, bottom: 5 }}
+                >
                   <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
                   <XAxis type="number" allowDecimals={false} stroke="rgba(255,255,255,0.5)" />
                   <YAxis dataKey="name" type="category" width={180} stroke="rgba(255,255,255,0.7)" />
@@ -870,8 +895,8 @@ const InsightsView: React.FC<InsightsProps> = ({ papers, questionMeta }) => {
               </button>
             </div>
             <div className="chart-shell">
-              <ResponsiveContainer width="100%" height={260}>
-                <RadialBarChart innerRadius="20%" outerRadius="90%" data={mentionSeries} startAngle={90} endAngle={-270}>
+              <ResponsiveContainer width="100%" height={240}>
+                <RadialBarChart innerRadius="30%" outerRadius="100%" data={mentionSeries} startAngle={90} endAngle={-270} margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
                   <RadialBar dataKey="value" />
                   <RechartsTooltip content={<ChartTooltip />} />
                 </RadialBarChart>
@@ -907,8 +932,8 @@ const InsightsView: React.FC<InsightsProps> = ({ papers, questionMeta }) => {
               </button>
             </div>
             <div className="chart-shell">
-              <ResponsiveContainer width="100%" height={260}>
-                <RadialBarChart innerRadius="40%" outerRadius="100%" data={comboSeries} startAngle={90} endAngle={-270}>
+              <ResponsiveContainer width="100%" height={240}>
+                <RadialBarChart innerRadius="30%" outerRadius="100%" data={comboSeries} startAngle={90} endAngle={-270} margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
                   <RadialBar dataKey="value" />
                   <RechartsTooltip content={<ChartTooltip />} />
                 </RadialBarChart>
@@ -944,8 +969,8 @@ const InsightsView: React.FC<InsightsProps> = ({ papers, questionMeta }) => {
               </button>
             </div>
             <div className="chart-shell">
-              <ResponsiveContainer width="100%" height={260}>
-                <AreaChart data={questionTrends}>
+              <ResponsiveContainer width="100%" height={320}>
+                <AreaChart data={questionTrends} margin={{ top: 10, right: 10, left: 50, bottom: 0 }}>
                   <defs>
                     <linearGradient id="q1Gradient" x1="0" y1="0" x2="0" y2="1">
                       <stop offset="5%" stopColor="#f4a261" stopOpacity={0.8} />
@@ -976,7 +1001,7 @@ const InsightsView: React.FC<InsightsProps> = ({ papers, questionMeta }) => {
                   <XAxis dataKey="year" stroke="rgba(255,255,255,0.5)" />
                   <YAxis allowDecimals={false} stroke="rgba(255,255,255,0.5)" />
                   <RechartsTooltip content={<ChartTooltip />} />
-                  <Legend />
+                  <Legend iconType="rect" iconSize={12} wrapperStyle={{ paddingTop: "10px" }} />
                   <Area type="monotone" dataKey="Q1" stroke="#f4a261" fill="url(#q1Gradient)" />
                   <Area type="monotone" dataKey="Q2" stroke="#f9844a" fill="url(#q2Gradient)" />
                   <Area type="monotone" dataKey="Q3" stroke="#f9c74f" fill="url(#q3Gradient)" />
