@@ -1,0 +1,1392 @@
+{
+  "intersection_dist": [
+    {
+      "count": "1",
+      "value": 107
+    },
+    {
+      "count": "2",
+      "value": 114
+    },
+    {
+      "count": "3",
+      "value": 49
+    },
+    {
+      "count": "4",
+      "value": 37
+    },
+    {
+      "count": "5",
+      "value": 13
+    },
+    {
+      "count": "6",
+      "value": 20
+    }
+  ],
+  "question_topics": {
+    "Q1": {
+      "Domains": [
+        {
+          "name": "clinical",
+          "value": 24
+        },
+        {
+          "name": "healthcare",
+          "value": 15
+        },
+        {
+          "name": "education",
+          "value": 9
+        },
+        {
+          "name": "medical",
+          "value": 8
+        },
+        {
+          "name": "security",
+          "value": 7
+        },
+        {
+          "name": "legal",
+          "value": 7
+        },
+        {
+          "name": "finance",
+          "value": 4
+        },
+        {
+          "name": "hiring",
+          "value": 2
+        }
+      ],
+      "XAI Methods": [
+        {
+          "name": "shap",
+          "value": 27
+        },
+        {
+          "name": "attribution",
+          "value": 23
+        },
+        {
+          "name": "attention",
+          "value": 14
+        },
+        {
+          "name": "lime",
+          "value": 9
+        },
+        {
+          "name": "feature attribution",
+          "value": 7
+        },
+        {
+          "name": "counterfactual",
+          "value": 7
+        },
+        {
+          "name": "rationale",
+          "value": 4
+        },
+        {
+          "name": "mechanistic",
+          "value": 3
+        }
+      ],
+      "Fairness Concepts": [
+        {
+          "name": "age",
+          "value": 63
+        },
+        {
+          "name": "language",
+          "value": 48
+        },
+        {
+          "name": "bias",
+          "value": 47
+        },
+        {
+          "name": "gender",
+          "value": 3
+        },
+        {
+          "name": "race",
+          "value": 3
+        },
+        {
+          "name": "parity",
+          "value": 2
+        },
+        {
+          "name": "multilingual",
+          "value": 2
+        },
+        {
+          "name": "geographic",
+          "value": 1
+        }
+      ],
+      "Models": [
+        {
+          "name": "transformer",
+          "value": 31
+        },
+        {
+          "name": "gpt",
+          "value": 17
+        },
+        {
+          "name": "bert",
+          "value": 9
+        },
+        {
+          "name": "gemini",
+          "value": 3
+        },
+        {
+          "name": "llama",
+          "value": 2
+        },
+        {
+          "name": "claude",
+          "value": 1
+        },
+        {
+          "name": "bloom",
+          "value": 1
+        },
+        {
+          "name": "roberta",
+          "value": 1
+        }
+      ],
+      "Paper Type": [
+        {
+          "name": "framework",
+          "value": 39
+        },
+        {
+          "name": "dataset",
+          "value": 23
+        },
+        {
+          "name": "experiment",
+          "value": 15
+        },
+        {
+          "name": "benchmark",
+          "value": 10
+        },
+        {
+          "name": "mitigation",
+          "value": 9
+        },
+        {
+          "name": "audit",
+          "value": 6
+        },
+        {
+          "name": "survey",
+          "value": 4
+        }
+      ]
+    },
+    "Q2": {
+      "Domains": [
+        {
+          "name": "clinical",
+          "value": 39
+        },
+        {
+          "name": "healthcare",
+          "value": 24
+        },
+        {
+          "name": "medical",
+          "value": 15
+        },
+        {
+          "name": "security",
+          "value": 14
+        },
+        {
+          "name": "education",
+          "value": 11
+        },
+        {
+          "name": "legal",
+          "value": 9
+        },
+        {
+          "name": "finance",
+          "value": 5
+        },
+        {
+          "name": "software",
+          "value": 3
+        }
+      ],
+      "XAI Methods": [
+        {
+          "name": "shap",
+          "value": 47
+        },
+        {
+          "name": "attribution",
+          "value": 35
+        },
+        {
+          "name": "attention",
+          "value": 23
+        },
+        {
+          "name": "lime",
+          "value": 21
+        },
+        {
+          "name": "feature attribution",
+          "value": 11
+        },
+        {
+          "name": "counterfactual",
+          "value": 10
+        },
+        {
+          "name": "rationale",
+          "value": 5
+        },
+        {
+          "name": "integrated gradients",
+          "value": 2
+        }
+      ],
+      "Fairness Concepts": [
+        {
+          "name": "age",
+          "value": 93
+        },
+        {
+          "name": "bias",
+          "value": 66
+        },
+        {
+          "name": "language",
+          "value": 62
+        },
+        {
+          "name": "race",
+          "value": 8
+        },
+        {
+          "name": "geographic",
+          "value": 3
+        },
+        {
+          "name": "multilingual",
+          "value": 3
+        },
+        {
+          "name": "gender",
+          "value": 3
+        },
+        {
+          "name": "parity",
+          "value": 2
+        }
+      ],
+      "Models": [
+        {
+          "name": "transformer",
+          "value": 51
+        },
+        {
+          "name": "gpt",
+          "value": 23
+        },
+        {
+          "name": "bert",
+          "value": 13
+        },
+        {
+          "name": "gemini",
+          "value": 5
+        },
+        {
+          "name": "llama",
+          "value": 3
+        },
+        {
+          "name": "roberta",
+          "value": 2
+        },
+        {
+          "name": "bloom",
+          "value": 1
+        }
+      ],
+      "Paper Type": [
+        {
+          "name": "framework",
+          "value": 69
+        },
+        {
+          "name": "dataset",
+          "value": 38
+        },
+        {
+          "name": "experiment",
+          "value": 25
+        },
+        {
+          "name": "mitigation",
+          "value": 12
+        },
+        {
+          "name": "benchmark",
+          "value": 11
+        },
+        {
+          "name": "audit",
+          "value": 8
+        },
+        {
+          "name": "survey",
+          "value": 5
+        }
+      ]
+    },
+    "Q3": {
+      "Domains": [
+        {
+          "name": "clinical",
+          "value": 12
+        },
+        {
+          "name": "healthcare",
+          "value": 10
+        },
+        {
+          "name": "education",
+          "value": 9
+        },
+        {
+          "name": "legal",
+          "value": 8
+        },
+        {
+          "name": "medical",
+          "value": 8
+        },
+        {
+          "name": "security",
+          "value": 6
+        },
+        {
+          "name": "finance",
+          "value": 3
+        },
+        {
+          "name": "scientific",
+          "value": 3
+        }
+      ],
+      "XAI Methods": [
+        {
+          "name": "attribution",
+          "value": 30
+        },
+        {
+          "name": "shap",
+          "value": 18
+        },
+        {
+          "name": "attention",
+          "value": 5
+        },
+        {
+          "name": "lime",
+          "value": 5
+        },
+        {
+          "name": "counterfactual",
+          "value": 3
+        },
+        {
+          "name": "mechanistic",
+          "value": 2
+        },
+        {
+          "name": "probing",
+          "value": 1
+        }
+      ],
+      "Fairness Concepts": [
+        {
+          "name": "age",
+          "value": 57
+        },
+        {
+          "name": "language",
+          "value": 52
+        },
+        {
+          "name": "bias",
+          "value": 44
+        },
+        {
+          "name": "gender",
+          "value": 6
+        },
+        {
+          "name": "race",
+          "value": 3
+        },
+        {
+          "name": "stereotyp",
+          "value": 3
+        },
+        {
+          "name": "multilingual",
+          "value": 3
+        },
+        {
+          "name": "toxicity",
+          "value": 1
+        }
+      ],
+      "Models": [
+        {
+          "name": "gpt",
+          "value": 16
+        },
+        {
+          "name": "transformer",
+          "value": 10
+        },
+        {
+          "name": "bert",
+          "value": 7
+        },
+        {
+          "name": "llama",
+          "value": 4
+        },
+        {
+          "name": "gemini",
+          "value": 3
+        },
+        {
+          "name": "mistral",
+          "value": 2
+        },
+        {
+          "name": "roberta",
+          "value": 1
+        }
+      ],
+      "Paper Type": [
+        {
+          "name": "framework",
+          "value": 30
+        },
+        {
+          "name": "dataset",
+          "value": 15
+        },
+        {
+          "name": "mitigation",
+          "value": 10
+        },
+        {
+          "name": "experiment",
+          "value": 10
+        },
+        {
+          "name": "benchmark",
+          "value": 4
+        },
+        {
+          "name": "audit",
+          "value": 4
+        },
+        {
+          "name": "survey",
+          "value": 3
+        }
+      ]
+    },
+    "Q4": {
+      "Domains": [
+        {
+          "name": "clinical",
+          "value": 24
+        },
+        {
+          "name": "healthcare",
+          "value": 17
+        },
+        {
+          "name": "education",
+          "value": 17
+        },
+        {
+          "name": "legal",
+          "value": 15
+        },
+        {
+          "name": "medical",
+          "value": 14
+        },
+        {
+          "name": "security",
+          "value": 12
+        },
+        {
+          "name": "scientific",
+          "value": 8
+        },
+        {
+          "name": "finance",
+          "value": 7
+        }
+      ],
+      "XAI Methods": [
+        {
+          "name": "attribution",
+          "value": 54
+        },
+        {
+          "name": "shap",
+          "value": 26
+        },
+        {
+          "name": "attention",
+          "value": 13
+        },
+        {
+          "name": "lime",
+          "value": 9
+        },
+        {
+          "name": "feature attribution",
+          "value": 4
+        },
+        {
+          "name": "counterfactual",
+          "value": 4
+        },
+        {
+          "name": "mechanistic",
+          "value": 3
+        },
+        {
+          "name": "rationale",
+          "value": 2
+        }
+      ],
+      "Fairness Concepts": [
+        {
+          "name": "age",
+          "value": 100
+        },
+        {
+          "name": "language",
+          "value": 87
+        },
+        {
+          "name": "bias",
+          "value": 86
+        },
+        {
+          "name": "race",
+          "value": 8
+        },
+        {
+          "name": "gender",
+          "value": 8
+        },
+        {
+          "name": "stereotyp",
+          "value": 3
+        },
+        {
+          "name": "multilingual",
+          "value": 3
+        },
+        {
+          "name": "parity",
+          "value": 2
+        }
+      ],
+      "Models": [
+        {
+          "name": "gpt",
+          "value": 33
+        },
+        {
+          "name": "transformer",
+          "value": 29
+        },
+        {
+          "name": "bert",
+          "value": 12
+        },
+        {
+          "name": "gemini",
+          "value": 9
+        },
+        {
+          "name": "llama",
+          "value": 9
+        },
+        {
+          "name": "mistral",
+          "value": 2
+        },
+        {
+          "name": "claude",
+          "value": 2
+        },
+        {
+          "name": "t5",
+          "value": 1
+        }
+      ],
+      "Paper Type": [
+        {
+          "name": "framework",
+          "value": 52
+        },
+        {
+          "name": "dataset",
+          "value": 29
+        },
+        {
+          "name": "experiment",
+          "value": 20
+        },
+        {
+          "name": "mitigation",
+          "value": 17
+        },
+        {
+          "name": "audit",
+          "value": 11
+        },
+        {
+          "name": "benchmark",
+          "value": 10
+        },
+        {
+          "name": "survey",
+          "value": 6
+        }
+      ]
+    },
+    "Q5": {
+      "Domains": [
+        {
+          "name": "clinical",
+          "value": 78
+        },
+        {
+          "name": "healthcare",
+          "value": 48
+        },
+        {
+          "name": "medical",
+          "value": 33
+        },
+        {
+          "name": "security",
+          "value": 27
+        },
+        {
+          "name": "legal",
+          "value": 13
+        },
+        {
+          "name": "finance",
+          "value": 12
+        },
+        {
+          "name": "education",
+          "value": 11
+        },
+        {
+          "name": "software",
+          "value": 6
+        }
+      ],
+      "XAI Methods": [
+        {
+          "name": "shap",
+          "value": 96
+        },
+        {
+          "name": "attribution",
+          "value": 77
+        },
+        {
+          "name": "attention",
+          "value": 69
+        },
+        {
+          "name": "lime",
+          "value": 42
+        },
+        {
+          "name": "feature attribution",
+          "value": 24
+        },
+        {
+          "name": "counterfactual",
+          "value": 15
+        },
+        {
+          "name": "saliency",
+          "value": 12
+        },
+        {
+          "name": "integrated gradients",
+          "value": 7
+        }
+      ],
+      "Fairness Concepts": [
+        {
+          "name": "age",
+          "value": 216
+        },
+        {
+          "name": "language",
+          "value": 116
+        },
+        {
+          "name": "bias",
+          "value": 62
+        },
+        {
+          "name": "race",
+          "value": 14
+        },
+        {
+          "name": "multilingual",
+          "value": 5
+        },
+        {
+          "name": "parity",
+          "value": 3
+        },
+        {
+          "name": "toxicity",
+          "value": 3
+        },
+        {
+          "name": "gender",
+          "value": 3
+        }
+      ],
+      "Models": [
+        {
+          "name": "transformer",
+          "value": 150
+        },
+        {
+          "name": "bert",
+          "value": 27
+        },
+        {
+          "name": "gpt",
+          "value": 26
+        },
+        {
+          "name": "roberta",
+          "value": 8
+        },
+        {
+          "name": "llama",
+          "value": 8
+        },
+        {
+          "name": "gemini",
+          "value": 6
+        },
+        {
+          "name": "bloom",
+          "value": 4
+        },
+        {
+          "name": "claude",
+          "value": 2
+        }
+      ],
+      "Paper Type": [
+        {
+          "name": "framework",
+          "value": 151
+        },
+        {
+          "name": "dataset",
+          "value": 114
+        },
+        {
+          "name": "experiment",
+          "value": 56
+        },
+        {
+          "name": "benchmark",
+          "value": 36
+        },
+        {
+          "name": "audit",
+          "value": 17
+        },
+        {
+          "name": "mitigation",
+          "value": 16
+        },
+        {
+          "name": "survey",
+          "value": 13
+        }
+      ]
+    },
+    "Q6": {
+      "Domains": [
+        {
+          "name": "clinical",
+          "value": 42
+        },
+        {
+          "name": "healthcare",
+          "value": 36
+        },
+        {
+          "name": "medical",
+          "value": 23
+        },
+        {
+          "name": "security",
+          "value": 19
+        },
+        {
+          "name": "finance",
+          "value": 12
+        },
+        {
+          "name": "education",
+          "value": 10
+        },
+        {
+          "name": "legal",
+          "value": 8
+        },
+        {
+          "name": "scientific",
+          "value": 6
+        }
+      ],
+      "XAI Methods": [
+        {
+          "name": "shap",
+          "value": 63
+        },
+        {
+          "name": "attribution",
+          "value": 50
+        },
+        {
+          "name": "attention",
+          "value": 44
+        },
+        {
+          "name": "lime",
+          "value": 30
+        },
+        {
+          "name": "feature attribution",
+          "value": 16
+        },
+        {
+          "name": "counterfactual",
+          "value": 8
+        },
+        {
+          "name": "rationale",
+          "value": 6
+        },
+        {
+          "name": "integrated gradients",
+          "value": 6
+        }
+      ],
+      "Fairness Concepts": [
+        {
+          "name": "age",
+          "value": 152
+        },
+        {
+          "name": "language",
+          "value": 105
+        },
+        {
+          "name": "bias",
+          "value": 45
+        },
+        {
+          "name": "race",
+          "value": 10
+        },
+        {
+          "name": "multilingual",
+          "value": 4
+        },
+        {
+          "name": "gender",
+          "value": 3
+        },
+        {
+          "name": "geographic",
+          "value": 2
+        },
+        {
+          "name": "toxicity",
+          "value": 2
+        }
+      ],
+      "Models": [
+        {
+          "name": "transformer",
+          "value": 72
+        },
+        {
+          "name": "gpt",
+          "value": 26
+        },
+        {
+          "name": "bert",
+          "value": 17
+        },
+        {
+          "name": "llama",
+          "value": 7
+        },
+        {
+          "name": "roberta",
+          "value": 5
+        },
+        {
+          "name": "gemini",
+          "value": 5
+        },
+        {
+          "name": "bloom",
+          "value": 3
+        },
+        {
+          "name": "mistral",
+          "value": 3
+        }
+      ],
+      "Paper Type": [
+        {
+          "name": "framework",
+          "value": 99
+        },
+        {
+          "name": "dataset",
+          "value": 65
+        },
+        {
+          "name": "experiment",
+          "value": 39
+        },
+        {
+          "name": "benchmark",
+          "value": 22
+        },
+        {
+          "name": "audit",
+          "value": 14
+        },
+        {
+          "name": "survey",
+          "value": 14
+        },
+        {
+          "name": "mitigation",
+          "value": 13
+        }
+      ]
+    }
+  },
+  "global_trends": {
+    "Domains": [
+      {
+        "name": "clinical",
+        "value": 97
+      },
+      {
+        "name": "healthcare",
+        "value": 62
+      },
+      {
+        "name": "medical",
+        "value": 46
+      },
+      {
+        "name": "security",
+        "value": 35
+      },
+      {
+        "name": "legal",
+        "value": 24
+      },
+      {
+        "name": "education",
+        "value": 24
+      },
+      {
+        "name": "finance",
+        "value": 15
+      },
+      {
+        "name": "software",
+        "value": 12
+      },
+      {
+        "name": "scientific",
+        "value": 10
+      },
+      {
+        "name": "hiring",
+        "value": 3
+      },
+      {
+        "name": "recruitment",
+        "value": 3
+      },
+      {
+        "name": "justice",
+        "value": 3
+      }
+    ],
+    "XAI Methods": [
+      {
+        "name": "shap",
+        "value": 113
+      },
+      {
+        "name": "attribution",
+        "value": 111
+      },
+      {
+        "name": "attention",
+        "value": 75
+      },
+      {
+        "name": "lime",
+        "value": 46
+      },
+      {
+        "name": "feature attribution",
+        "value": 24
+      },
+      {
+        "name": "counterfactual",
+        "value": 17
+      },
+      {
+        "name": "saliency",
+        "value": 12
+      },
+      {
+        "name": "rationale",
+        "value": 7
+      },
+      {
+        "name": "integrated gradients",
+        "value": 7
+      },
+      {
+        "name": "mechanistic",
+        "value": 4
+      },
+      {
+        "name": "probing",
+        "value": 1
+      }
+    ],
+    "Fairness Concepts": [
+      {
+        "name": "age",
+        "value": 276
+      },
+      {
+        "name": "language",
+        "value": 169
+      },
+      {
+        "name": "bias",
+        "value": 104
+      },
+      {
+        "name": "race",
+        "value": 20
+      },
+      {
+        "name": "gender",
+        "value": 9
+      },
+      {
+        "name": "multilingual",
+        "value": 6
+      },
+      {
+        "name": "toxicity",
+        "value": 4
+      },
+      {
+        "name": "geographic",
+        "value": 3
+      },
+      {
+        "name": "stereotyp",
+        "value": 3
+      },
+      {
+        "name": "parity",
+        "value": 3
+      },
+      {
+        "name": "equality",
+        "value": 2
+      },
+      {
+        "name": "ethnic",
+        "value": 1
+      }
+    ],
+    "Models": [
+      {
+        "name": "transformer",
+        "value": 164
+      },
+      {
+        "name": "gpt",
+        "value": 54
+      },
+      {
+        "name": "bert",
+        "value": 36
+      },
+      {
+        "name": "llama",
+        "value": 13
+      },
+      {
+        "name": "gemini",
+        "value": 12
+      },
+      {
+        "name": "roberta",
+        "value": 8
+      },
+      {
+        "name": "bloom",
+        "value": 4
+      },
+      {
+        "name": "mistral",
+        "value": 4
+      },
+      {
+        "name": "claude",
+        "value": 4
+      },
+      {
+        "name": "t5",
+        "value": 2
+      }
+    ],
+    "Paper Type": [
+      {
+        "name": "framework",
+        "value": 178
+      },
+      {
+        "name": "dataset",
+        "value": 130
+      },
+      {
+        "name": "experiment",
+        "value": 66
+      },
+      {
+        "name": "benchmark",
+        "value": 45
+      },
+      {
+        "name": "mitigation",
+        "value": 25
+      },
+      {
+        "name": "audit",
+        "value": 23
+      },
+      {
+        "name": "survey",
+        "value": 21
+      }
+    ]
+  },
+  "model_evolution": [
+    {
+      "year": 2021,
+      "gpt": 0,
+      "llama": 0,
+      "bert": 1,
+      "roberta": 0,
+      "mistral": 0,
+      "claude": 0,
+      "gemini": 0,
+      "t5": 0,
+      "palm": 0,
+      "transformer": 2,
+      "bloom": 0
+    },
+    {
+      "year": 2022,
+      "gpt": 1,
+      "llama": 0,
+      "bert": 2,
+      "roberta": 1,
+      "mistral": 0,
+      "claude": 0,
+      "gemini": 0,
+      "t5": 0,
+      "palm": 0,
+      "transformer": 2,
+      "bloom": 0
+    },
+    {
+      "year": 2023,
+      "gpt": 5,
+      "llama": 0,
+      "bert": 4,
+      "roberta": 0,
+      "mistral": 0,
+      "claude": 0,
+      "gemini": 0,
+      "t5": 0,
+      "palm": 0,
+      "transformer": 11,
+      "bloom": 0
+    },
+    {
+      "year": 2024,
+      "gpt": 7,
+      "llama": 2,
+      "bert": 1,
+      "roberta": 0,
+      "mistral": 2,
+      "claude": 0,
+      "gemini": 0,
+      "t5": 0,
+      "palm": 0,
+      "transformer": 10,
+      "bloom": 1
+    },
+    {
+      "year": 2025,
+      "gpt": 35,
+      "llama": 9,
+      "bert": 21,
+      "roberta": 3,
+      "mistral": 2,
+      "claude": 4,
+      "gemini": 7,
+      "t5": 2,
+      "palm": 0,
+      "transformer": 94,
+      "bloom": 1
+    },
+    {
+      "year": 2026,
+      "gpt": 6,
+      "llama": 2,
+      "bert": 7,
+      "roberta": 4,
+      "mistral": 0,
+      "claude": 0,
+      "gemini": 5,
+      "t5": 0,
+      "palm": 0,
+      "transformer": 45,
+      "bloom": 2
+    }
+  ],
+  "focus_evolution": [
+    {
+      "year": 2021,
+      "Diagnostic (Audit)": 6.0,
+      "Proactive (Design)": 0.0
+    },
+    {
+      "year": 2022,
+      "Diagnostic (Audit)": 9.0,
+      "Proactive (Design)": 3.0
+    },
+    {
+      "year": 2023,
+      "Diagnostic (Audit)": 30.0,
+      "Proactive (Design)": 8.0
+    },
+    {
+      "year": 2024,
+      "Diagnostic (Audit)": 66.0,
+      "Proactive (Design)": 12.0
+    },
+    {
+      "year": 2025,
+      "Diagnostic (Audit)": 406.0,
+      "Proactive (Design)": 98.0
+    },
+    {
+      "year": 2026,
+      "Diagnostic (Audit)": 158.0,
+      "Proactive (Design)": 19.0
+    }
+  ],
+  "venue_distribution": [
+    {
+      "name": "Other",
+      "value": 254
+    },
+    {
+      "name": "Application",
+      "value": 57
+    },
+    {
+      "name": "HCI/Social",
+      "value": 11
+    },
+    {
+      "name": "NLP",
+      "value": 11
+    },
+    {
+      "name": "General AI/ML",
+      "value": 6
+    },
+    {
+      "name": "Fairness/Ethics",
+      "value": 1
+    }
+  ],
+  "total_unique_papers": 340,
+  "total_assignments": 815
+}

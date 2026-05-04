@@ -109,77 +109,6 @@ const downloadChart = (elementId: string, filename: string) => {
   const el = document.getElementById(elementId);
   if (!el) return;
 
-  // 1. Temporarily hide titles and hint text
-  const toHide = el.querySelectorAll(".panel-head, .triangle-hint");
-  const hiddenState: { node: HTMLElement; prev: string }[] = [];
-  toHide.forEach((node) => {
-    const htmlNode = node as HTMLElement;
-    hiddenState.push({ node: htmlNode, prev: htmlNode.style.display });
-    htmlNode.style.display = "none";
-  });
-
-  // 2. Strip visual chrome (bg, border, shadow) from card + key children
-  const bgTargets = [el, ...Array.from(el.querySelectorAll(".triangle-wrapper"))];
-  const savedBg: {
-    node: HTMLElement;
-    bg: string;
-    bgc: string;
-    border: string;
-    shadow: string;
-    bdFilter: string;
-  }[] = [];
-  bgTargets.forEach((node) => {
-    const htmlNode = node as HTMLElement;
-    savedBg.push({
-      node: htmlNode,
-      bg: htmlNode.style.background,
-      bgc: htmlNode.style.backgroundColor,
-      border: htmlNode.style.border,
-      shadow: htmlNode.style.boxShadow,
-      bdFilter: htmlNode.style.backdropFilter,
-    });
-    htmlNode.style.background = "transparent";
-    htmlNode.style.backgroundColor = "transparent";
-    htmlNode.style.border = "none";
-    htmlNode.style.boxShadow = "none";
-    htmlNode.style.backdropFilter = "none";
-  });
-
-  // 3. Force dark colors for text and axes by setting inline styles with !important
-  const darkColorTargets = el.querySelectorAll<HTMLElement | SVGElement>(
-    ".insight-list, .insight-list *, .recharts-legend-wrapper *, .recharts-default-legend *, " +
-    "text, tspan, .vertex-label, " +
-    ".recharts-cartesian-axis-line, .recharts-cartesian-axis-tick-line, " +
-    ".recharts-cartesian-grid line"
-  );
-  const savedColors: { node: HTMLElement | SVGElement; color: string; fill: string; stroke: string; opacity: string }[] = [];
-  
-  darkColorTargets.forEach((node) => {
-    savedColors.push({
-      node,
-      color: node.style.color,
-      fill: node.style.fill,
-      stroke: node.style.stroke,
-      opacity: node.style.opacity,
-    });
-    
-    const isLine = node.tagName.toLowerCase() === "line" || node.tagName.toLowerCase() === "path";
-    
-    if (isLine) {
-      node.style.setProperty("stroke", "#222222", "important");
-      if (node.closest('.recharts-cartesian-grid')) {
-        node.style.setProperty("opacity", "0.2", "important");
-      } else {
-        node.style.setProperty("opacity", "0.6", "important");
-      }
-    } else {
-      // Set both color (HTML) and fill (SVG) just to be completely safe
-      node.style.setProperty("color", "#222222", "important");
-      node.style.setProperty("fill", "#222222", "important");
-      node.style.setProperty("stroke", "none", "important");
-    }
-  });
-
   // 1. Create a hidden container for isolated capture
   const container = document.createElement("div");
   container.style.position = "absolute";
@@ -195,28 +124,65 @@ const downloadChart = (elementId: string, filename: string) => {
   clone.style.display = "block";
   clone.style.background = "#ffffff";
   clone.style.color = "#000000";
-  clone.style.padding = "20px"; // Clean border for PDF
+  clone.style.padding = "20px";
   clone.style.borderRadius = "0";
   clone.style.boxShadow = "none";
   container.appendChild(clone);
 
-  // 3. Update colors in the clone for black-on-white PDF
-  const textElements = clone.querySelectorAll("*");
-  textElements.forEach((node) => {
+  // 3. Force clean styles in the clone for export
+  // Hide UI chrome
+  const toHide = clone.querySelectorAll(".panel-head, .triangle-hint, .hide-on-export, .taxonomy-controls, .venue-control");
+  toHide.forEach((node) => {
+    (node as HTMLElement).style.display = "none";
+  });
+
+  // Strip dark-mode backgrounds from inner wrappers
+  const bgTargets = clone.querySelectorAll(".triangle-wrapper, .chart-shell, .insight-card");
+  bgTargets.forEach((node) => {
     const htmlNode = node as HTMLElement;
-    if (htmlNode.classList.contains("hide-on-export")) {
-      htmlNode.style.display = "none";
-    } else {
-      // Force legible colors ONLY for actual text elements, preserving SVG graphic colors
-      const tag = htmlNode.tagName.toLowerCase();
-      const isLegendItem = htmlNode.closest(".recharts-legend-item") || htmlNode.closest(".insight-list li div");
-      const isText = tag === "span" || tag === "p" || tag === "h2" || tag === "h3" || tag === "strong";
-      const isSvgText = tag === "text";
-      
-      if ((isText || isSvgText) && !isLegendItem) {
-        htmlNode.style.setProperty("color", "#111111", "important");
-        htmlNode.style.setProperty("fill", "#111111", "important");
+    htmlNode.style.background = "transparent";
+    htmlNode.style.backgroundColor = "transparent";
+    htmlNode.style.border = "none";
+    htmlNode.style.boxShadow = "none";
+    htmlNode.style.backdropFilter = "none";
+  });
+
+  // Force dark colors for text and lines
+  const darkColorTargets = clone.querySelectorAll<HTMLElement | SVGElement>(
+    ".insight-list, .insight-list *, .recharts-legend-wrapper *, .recharts-default-legend *, " +
+    "text, tspan, .vertex-label, " +
+    ".recharts-cartesian-axis-line, .recharts-cartesian-axis-tick-line, " +
+    ".recharts-cartesian-grid line"
+  );
+  
+  darkColorTargets.forEach((node) => {
+    const isLine = node.tagName.toLowerCase() === "line" || node.tagName.toLowerCase() === "path";
+    if (isLine) {
+      node.style.setProperty("stroke", "#222222", "important");
+      if (node.closest('.recharts-cartesian-grid')) {
+        node.style.setProperty("opacity", "0.2", "important");
+      } else {
+        node.style.setProperty("opacity", "0.6", "important");
       }
+    } else {
+      node.style.setProperty("color", "#222222", "important");
+      node.style.setProperty("fill", "#222222", "important");
+      node.style.setProperty("stroke", "none", "important");
+    }
+  });
+
+  // Ensure text elements that are not part of legends are dark
+  const allElements = clone.querySelectorAll("*");
+  allElements.forEach((node) => {
+    const htmlNode = node as HTMLElement;
+    const tag = htmlNode.tagName.toLowerCase();
+    const isLegendItem = htmlNode.closest(".recharts-legend-item") || htmlNode.closest(".insight-list li div");
+    const isText = tag === "span" || tag === "p" || tag === "h2" || tag === "h3" || tag === "strong";
+    const isSvgText = tag === "text";
+    
+    if ((isText || isSvgText) && !isLegendItem) {
+      htmlNode.style.setProperty("color", "#111111", "important");
+      htmlNode.style.setProperty("fill", "#111111", "important");
     }
   });
 
@@ -246,6 +212,7 @@ const downloadChart = (elementId: string, filename: string) => {
 type InsightsProps = {
   papers: Paper[];
   questionMeta: typeof questionMeta;
+  insights: any; // Dynamic insights data
 };
 
 const ChartTooltip: React.FC<{
@@ -563,7 +530,7 @@ const ExplorerView: React.FC<ExplorerProps> = ({
   );
 };
 
-const InsightsView: React.FC<InsightsProps> = ({ papers, questionMeta }) => {
+const InsightsView: React.FC<InsightsProps> = ({ papers, questionMeta, insights }) => {
   const [venueLimit, setVenueLimit] = useState(6);
 
   const questionOrder = Object.keys(questionMeta) as QuestionId[];
@@ -704,10 +671,27 @@ const InsightsView: React.FC<InsightsProps> = ({ papers, questionMeta }) => {
       }));
   }, [papers]);
 
+  const [taxonomyCategory, setTaxonomyCategory] = useState<string>("Domains");
+  const [activeTaxonomyQid, setActiveTaxonomyQid] = useState<QuestionId>("Q5");
+
   const totalPapers = papers.length;
   const activeYears = yearSeries.length ? `${yearSeries[0].year}–${yearSeries[yearSeries.length - 1].year}` : "—";
   const avgPerYear = yearSeries.length ? Math.round((totalPapers / yearSeries.length) * 10) / 10 : 0;
   const withLinks = papers.filter((p) => p.url && p.url !== "nan").length;
+
+  // Safeguard: if insights data is not yet available, show a loader
+  if (!insights || !insights.intersection_dist) {
+    return (
+      <div className="app-root insights-root">
+        <div className="aurora" aria-hidden="true" />
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "60vh", flexDirection: "column", gap: "1rem" }}>
+          <RefreshCw className="spin" size={48} style={{ color: "var(--brand)" }} />
+          <p>Assembling systematic review insights...</p>
+          <p style={{ fontSize: "0.8rem", color: "var(--text-muted)" }}>Checking for finalized corpus analysis...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="app-root insights-root">
@@ -824,6 +808,58 @@ const InsightsView: React.FC<InsightsProps> = ({ papers, questionMeta }) => {
                   <li key={row.qid}>
                     <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
                       <span style={{ width: "12px", height: "12px", backgroundColor: colors[index], borderRadius: "2px" }} />
+                      <span>{row.name}</span>
+                    </div>
+                    <strong>{row.value}</strong>
+                  </li>
+                );
+              })}
+            </ul>
+          </article>
+
+          <article className="insight-card" id="chart-discipline">
+            <div className="panel-head">
+              <div>
+                <p className="eyebrow">Diversity</p>
+                <h3>Discipline distribution</h3>
+                <p style={{ margin: "0.5rem 0 0", fontSize: "0.9rem", color: "var(--text-muted)" }}>Research spread across different academic fields</p>
+              </div>
+              <button
+                className="ghost-button hide-on-export"
+                onClick={() => downloadChart("chart-discipline", "discipline_spread.png")}
+                title="Download Plot"
+                style={{ padding: "0.4rem", borderRadius: "50%", alignSelf: "flex-start" }}
+              >
+                <Download size={18} />
+              </button>
+            </div>
+            <div className="chart-shell">
+              <ResponsiveContainer width="100%" height={260}>
+                <RePieChart>
+                  <RechartsTooltip content={<ChartTooltip />} />
+                  <Pie
+                    data={insights?.venue_distribution || []}
+                    dataKey="value"
+                    nameKey="name"
+                    innerRadius={60}
+                    outerRadius={90}
+                    paddingAngle={4}
+                  >
+                    {(insights?.venue_distribution || []).map((_, index) => {
+                      const colors = ["#8ecae6", "#219ebc", "#023047", "#ffb703", "#fb8500", "#90be6d", "#43aa8b"];
+                      return <Cell key={`discipline-${index}`} fill={colors[index % colors.length]} />;
+                    })}
+                  </Pie>
+                </RePieChart>
+              </ResponsiveContainer>
+            </div>
+            <ul className="insight-list" style={{ marginTop: "-0.5rem" }}>
+              {(insights?.venue_distribution || []).map((row, index) => {
+                const colors = ["#8ecae6", "#219ebc", "#023047", "#ffb703", "#fb8500", "#90be6d", "#43aa8b"];
+                return (
+                  <li key={row.name}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                      <span style={{ width: "12px", height: "12px", backgroundColor: colors[index % 7], borderRadius: "2px" }} />
                       <span>{row.name}</span>
                     </div>
                     <strong>{row.value}</strong>
@@ -952,6 +988,99 @@ const InsightsView: React.FC<InsightsProps> = ({ papers, questionMeta }) => {
             </ul>
           </article>
 
+          <article className="insight-card wide" id="chart-intersectionality">
+            <div className="panel-head">
+              <div>
+                <p className="eyebrow">Integration</p>
+                <h3>Evidence intersectionality</h3>
+                <p style={{ margin: "0.5rem 0 0", fontSize: "0.9rem", color: "var(--text-muted)" }}>Number of papers covering multiple FAIR-LENS directions simultaneously</p>
+              </div>
+              <button
+                className="ghost-button hide-on-export"
+                onClick={() => downloadChart("chart-intersectionality", "intersectionality_depth.png")}
+                title="Download Plot"
+                style={{ padding: "0.4rem", borderRadius: "50%", alignSelf: "flex-start" }}
+              >
+                <Download size={18} />
+              </button>
+            </div>
+            <div className="chart-shell">
+              <ResponsiveContainer width="100%" height={260}>
+                <ReBarChart data={insights?.intersection_dist || []} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                  <CartesianGrid strokeDasharray="3 3" opacity={0.2} vertical={false} />
+                  <XAxis dataKey="count" label={{ value: 'Directions Covered', position: 'insideBottom', offset: -5 }} stroke="rgba(255,255,255,0.5)" />
+                  <YAxis stroke="rgba(255,255,255,0.5)" />
+                  <RechartsTooltip content={<ChartTooltip />} />
+                  <Bar dataKey="value" fill="#8ecae6" radius={[4, 4, 0, 0]}>
+                    {(insights?.intersection_dist || []).map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={parseInt(entry.count) > 3 ? "#f4a261" : "#8ecae6"} />
+                    ))}
+                  </Bar>
+                </ReBarChart>
+              </ResponsiveContainer>
+            </div>
+            <p style={{ fontSize: "0.85rem", color: "var(--text-muted)", marginTop: "1rem", textAlign: "center" }}>
+              Papers covering <strong>4+ directions</strong> (shown in orange) represent the most integrated research in the corpus.
+            </p>
+          </article>
+
+          <article className="insight-card wide" id="chart-taxonomy">
+            <div className="panel-head">
+              <div>
+                <p className="eyebrow">Taxonomy Explorer</p>
+                <h3>Thematic focus by direction</h3>
+                <p style={{ margin: "0.5rem 0 0", fontSize: "0.9rem", color: "var(--text-muted)" }}>Top terms extracted from paper abstracts for each direction</p>
+              </div>
+              <div className="taxonomy-controls hide-on-export" style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
+                 <select 
+                    value={taxonomyCategory} 
+                    onChange={(e) => setTaxonomyCategory(e.target.value)}
+                    className="select-input"
+                 >
+                    {Object.keys(insights.global_trends).map(cat => <option key={cat} value={cat}>{cat}</option>)}
+                 </select>
+                 <select 
+                    value={activeTaxonomyQid} 
+                    onChange={(e) => setActiveTaxonomyQid(e.target.value as QuestionId)}
+                    className="select-input"
+                 >
+                    {Object.keys(questionMeta).map(qid => <option key={qid} value={qid}>{qid}</option>)}
+                 </select>
+                 <button
+                  className="ghost-button"
+                  onClick={() => downloadChart("chart-taxonomy", "taxonomy_explorer.png")}
+                  title="Download Plot"
+                  style={{ padding: "0.4rem", borderRadius: "50%" }}
+                >
+                  <Download size={18} />
+                </button>
+              </div>
+            </div>
+            <div className="chart-shell">
+              <ResponsiveContainer width="100%" height={300}>
+                <ReBarChart
+                  layout="vertical"
+                  data={insights.question_topics?.[activeTaxonomyQid]?.[taxonomyCategory] || []}
+                  margin={{ top: 10, right: 30, left: 40, bottom: 5 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" opacity={0.1} horizontal={false} />
+                  <XAxis type="number" hide />
+                  <YAxis dataKey="name" type="category" width={120} stroke="rgba(255,255,255,0.8)" fontSize={12} />
+                  <RechartsTooltip content={<ChartTooltip />} />
+                  <Bar dataKey="value" radius={[0, 4, 4, 0]}>
+                    {(insights.question_topics?.[activeTaxonomyQid]?.[taxonomyCategory] || []).map((_, index) => {
+                       const colors = ["#f4a261", "#f9844a", "#f9c74f", "#90be6d", "#43aa8b", "#577590", "#8ecae6"];
+                       return <Cell key={`tax-${index}`} fill={colors[index % colors.length]} />;
+                    })}
+                  </Bar>
+                </ReBarChart>
+              </ResponsiveContainer>
+            </div>
+            <p style={{ fontSize: "0.85rem", color: "var(--text-muted)", marginTop: "0.5rem", textAlign: "right", fontStyle: "italic" }}>
+              Currently showing <strong>{taxonomyCategory}</strong> for <strong>{activeTaxonomyQid}</strong>
+            </p>
+          </article>
+
           <article className="insight-card wide" id="chart-trends">
             <div className="panel-head">
               <div>
@@ -1001,16 +1130,87 @@ const InsightsView: React.FC<InsightsProps> = ({ papers, questionMeta }) => {
                   <XAxis dataKey="year" stroke="rgba(255,255,255,0.5)" />
                   <YAxis allowDecimals={false} stroke="rgba(255,255,255,0.5)" />
                   <RechartsTooltip content={<ChartTooltip />} />
-                  <Legend iconType="rect" iconSize={12} wrapperStyle={{ paddingTop: "10px" }} />
-                  <Area type="monotone" dataKey="Q1" stroke="#f4a261" fill="url(#q1Gradient)" />
-                  <Area type="monotone" dataKey="Q2" stroke="#f9844a" fill="url(#q2Gradient)" />
-                  <Area type="monotone" dataKey="Q3" stroke="#f9c74f" fill="url(#q3Gradient)" />
-                  <Area type="monotone" dataKey="Q4" stroke="#90be6d" fill="url(#q4Gradient)" />
-                  <Area type="monotone" dataKey="Q5" stroke="#43aa8b" fill="url(#q5Gradient)" />
-                  <Area type="monotone" dataKey="Q6" stroke="#577590" fill="url(#q6Gradient)" />
+                  <Legend iconType="circle" />
+                  <Area type="monotone" dataKey="Q1" stroke="#f4a261" strokeWidth={3} fill="url(#q1Gradient)" />
+                  <Area type="monotone" dataKey="Q2" stroke="#f9844a" strokeWidth={3} fill="url(#q2Gradient)" />
+                  <Area type="monotone" dataKey="Q3" stroke="#f9c74f" strokeWidth={3} fill="url(#q3Gradient)" />
+                  <Area type="monotone" dataKey="Q4" stroke="#90be6d" strokeWidth={3} fill="url(#q4Gradient)" />
+                  <Area type="monotone" dataKey="Q5" stroke="#43aa8b" strokeWidth={3} fill="url(#q5Gradient)" />
+                  <Area type="monotone" dataKey="Q6" stroke="#577590" strokeWidth={3} fill="url(#q6Gradient)" />
                 </AreaChart>
               </ResponsiveContainer>
             </div>
+          </article>
+
+          <article className="insight-card wide" id="chart-lineage">
+            <div className="panel-head">
+              <div>
+                <p className="eyebrow">Lineage</p>
+                <h2>Model family evolution</h2>
+                <p style={{ margin: "0.5rem 0 0", fontSize: "0.9rem", color: "var(--text-muted)" }}>Frequency of model family mentions in titles and abstracts over time</p>
+              </div>
+              <button
+                className="ghost-button hide-on-export"
+                onClick={() => downloadChart("chart-lineage", "model_lineage.png")}
+                title="Download Plot"
+                style={{ padding: "0.4rem", borderRadius: "50%", alignSelf: "flex-start" }}
+              >
+                <Download size={18} />
+              </button>
+            </div>
+            <div className="chart-shell">
+              <ResponsiveContainer width="100%" height={320}>
+                <AreaChart data={insights?.model_evolution || []} margin={{ top: 10, right: 30, left: 20, bottom: 0 }}>
+                  <defs>
+                    <linearGradient id="colorGpt" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#8ecae6" stopOpacity={0.8}/><stop offset="95%" stopColor="#8ecae6" stopOpacity={0}/></linearGradient>
+                    <linearGradient id="colorLlama" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#ffb703" stopOpacity={0.8}/><stop offset="95%" stopColor="#ffb703" stopOpacity={0}/></linearGradient>
+                    <linearGradient id="colorBert" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#fb8500" stopOpacity={0.8}/><stop offset="95%" stopColor="#fb8500" stopOpacity={0}/></linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" opacity={0.1} />
+                  <XAxis dataKey="year" stroke="rgba(255,255,255,0.5)" />
+                  <YAxis stroke="rgba(255,255,255,0.5)" />
+                  <RechartsTooltip content={<ChartTooltip />} />
+                  <Legend iconType="circle" />
+                  <Area type="monotone" dataKey="gpt" name="GPT Family" stroke="#8ecae6" strokeWidth={3} fillOpacity={1} fill="url(#colorGpt)" />
+                  <Area type="monotone" dataKey="llama" name="LLaMA Family" stroke="#ffb703" strokeWidth={3} fillOpacity={1} fill="url(#colorLlama)" />
+                  <Area type="monotone" dataKey="bert" name="BERT Family" stroke="#fb8500" strokeWidth={3} fillOpacity={1} fill="url(#colorBert)" />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          </article>
+
+          <article className="insight-card wide" id="chart-focus">
+            <div className="panel-head">
+              <div>
+                <p className="eyebrow">Intent</p>
+                <h2>Diagnostic vs Proactive split</h2>
+                <p style={{ margin: "0.5rem 0 0", fontSize: "0.9rem", color: "var(--text-muted)" }}>Comparing papers that audit/diagnose harms vs those that propose design requirements</p>
+              </div>
+              <button
+                className="ghost-button hide-on-export"
+                onClick={() => downloadChart("chart-focus", "intent_evolution.png")}
+                title="Download Plot"
+                style={{ padding: "0.4rem", borderRadius: "50%", alignSelf: "flex-start" }}
+              >
+                <Download size={18} />
+              </button>
+            </div>
+            <div className="chart-shell">
+              <ResponsiveContainer width="100%" height={320}>
+                <ReBarChart data={insights?.focus_evolution || []} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                  <CartesianGrid strokeDasharray="3 3" opacity={0.1} vertical={false} />
+                  <XAxis dataKey="year" stroke="rgba(255,255,255,0.5)" />
+                  <YAxis stroke="rgba(255,255,255,0.5)" />
+                  <RechartsTooltip content={<ChartTooltip />} />
+                  <Legend />
+                  <Bar dataKey="Diagnostic (Audit)" fill="#577590" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="Proactive (Design)" fill="#f4a261" radius={[4, 4, 0, 0]} />
+                </ReBarChart>
+              </ResponsiveContainer>
+            </div>
+            <p style={{ fontSize: "0.85rem", color: "var(--text-muted)", marginTop: "1rem", textAlign: "center" }}>
+              <strong>Note:</strong> Proactive design (Q1, Q3) consistently lags behind diagnostic auditing across all years.
+            </p>
           </article>
 
           <article className="insight-card" id="chart-clusters">
@@ -1557,16 +1757,18 @@ const normalizeQuestionId = (questionId: string): QuestionId | null => {
 
 const App: React.FC = () => {
   const [papers, setPapers] = useState<Paper[]>([]);
+  const [insights, setInsights] = useState<any>(null);
   const [activeQuestions, setActiveQuestions] = useState<QuestionId[]>([]);
   const [yearFilter, setYearFilter] = useState<YearFilter>({ min: null, max: null });
   const [detailPaper, setDetailPaper] = useState<Paper | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Fetch papers
     fetch("/fairlens_papers.json")
       .then((r) => r.json())
       .then((data: Paper[]) => {
-        // Normalize question_id values (extract Q1-Q6 from malformed IDs like "Q4|Fairness↔LLMs")
-        // Keep ALL papers that have a valid Q1-Q6 question_id (even if malformed)
+        // Normalize question_id values
         const normalizedPapers: Paper[] = [];
         for (const paper of data) {
           const normalizedQid = normalizeQuestionId(paper.question_id);
@@ -1575,8 +1777,7 @@ const App: React.FC = () => {
           }
         }
 
-        // Deduplicate: keep only one entry per (title, question_id) combination
-        // This prevents the same paper from appearing multiple times for the same question
+        // Deduplicate
         const seen = new Set<string>();
         const deduplicated: Paper[] = [];
         for (const paper of normalizedPapers) {
@@ -1588,8 +1789,18 @@ const App: React.FC = () => {
         }
 
         setPapers(deduplicated);
+        setLoading(false);
       })
-      .catch((err) => console.error("Error loading data:", err));
+      .catch((err) => {
+        console.error("Error loading papers:", err);
+        setLoading(false);
+      });
+
+    // Fetch dashboard insights
+    fetch("/dashboard_insights.json")
+      .then((r) => r.json())
+      .then((data) => setInsights(data))
+      .catch((err) => console.error("Error loading insights:", err));
   }, []);
 
   const years = useMemo(() => {
@@ -1730,7 +1941,7 @@ const App: React.FC = () => {
             />
           }
         />
-        <Route path="/insights" element={<InsightsView papers={papers} questionMeta={questionMeta} />} />
+        <Route path="/insights" element={<InsightsView papers={papers} questionMeta={questionMeta} insights={insights} />} />
         <Route path="/framework" element={<FrameworkView />} />
       </Routes>
       {detailPaper && <PaperDetailModal paper={detailPaper} onClose={() => setDetailPaper(null)} />}
