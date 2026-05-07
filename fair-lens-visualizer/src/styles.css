@@ -915,3 +915,220 @@ body {
   stroke: #222222 !important;
   opacity: 0.15 !important;
 }
+
+/* ═══════════════════════════════════════════
+   Synthesis View
+   ═══════════════════════════════════════════ */
+
+.synth-pipeline {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 3rem;
+  padding: 1.5rem;
+  background: rgba(255,255,255,0.03);
+  border-radius: 16px;
+  border: 1px solid rgba(255,255,255,0.06);
+}
+
+.synth-step {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px;
+  padding: 0.75rem 1.1rem;
+  transition: border-color 0.2s;
+}
+.synth-step:hover {
+  border-color: rgba(244,162,97,0.4);
+}
+.synth-step-num {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  background: rgba(244,162,97,0.15);
+  color: #f4a261;
+  font-weight: 700;
+  font-size: 0.85rem;
+  flex-shrink: 0;
+}
+.synth-step strong {
+  display: block;
+  color: white;
+  font-size: 0.9rem;
+}
+.synth-step-desc {
+  display: block;
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  line-height: 1.3;
+}
+.synth-arrow {
+  color: rgba(255,255,255,0.25);
+  font-size: 1.4rem;
+  flex-shrink: 0;
+}
+
+/* ── Body (3 columns) ── */
+.synth-body {
+  display: grid;
+  grid-template-columns: 260px 1fr 300px;
+  gap: 2rem;
+  align-items: start;
+  margin-bottom: 3rem;
+}
+@media (max-width: 960px) {
+  .synth-body {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* corpus card */
+.synth-corpus, .synth-axes {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 16px;
+  padding: 1.5rem;
+}
+.synth-heading {
+  color: white;
+  font-size: 1.15rem;
+  margin: 0 0 0.25rem;
+}
+.synth-sub {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  margin: 0 0 1.25rem;
+}
+.synth-big-nums {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+.synth-big-num {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+  background: rgba(255,255,255,0.04);
+  border-radius: 12px;
+  padding: 1rem 0.5rem;
+}
+.synth-big-num strong {
+  font-size: 2.2rem;
+  color: white;
+  line-height: 1;
+}
+.synth-big-num span {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  margin-top: 0.25rem;
+}
+.synth-badge {
+  display: inline-block;
+  background: rgba(244,162,97,0.15);
+  color: #f4a261;
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 4px 12px;
+  border-radius: 100px;
+  margin-bottom: 0.5rem;
+}
+.synth-fine {
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* triangle */
+.synth-triangle-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.synth-triangle-svg {
+  width: 100%;
+  max-width: 380px;
+  height: auto;
+}
+
+/* evidence axes */
+.synth-axis-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+.synth-axis-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+.synth-axis-count {
+  width: 48px; height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+.synth-axis-detail {
+  display: flex;
+  flex-direction: column;
+}
+.synth-axis-detail strong {
+  font-size: 0.9rem;
+}
+.synth-axis-detail span {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+/* proportional bars */
+.synth-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.synth-bar {
+  height: 8px;
+  border-radius: 4px;
+  transition: width 0.6s ease;
+}
+
+/* ── Callout ── */
+.synth-callout {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 2rem 2.5rem;
+  background: linear-gradient(135deg, rgba(29,78,137,0.15) 0%, rgba(244,162,97,0.12) 100%);
+  border-radius: 20px;
+  border: 1px solid rgba(255,255,255,0.08);
+  margin-bottom: 3rem;
+}
+.synth-callout-icon {
+  font-size: 2.5rem;
+  flex-shrink: 0;
+}
+.synth-callout-main {
+  color: white;
+  font-size: 1.15rem;
+  font-weight: 700;
+  margin: 0 0 0.25rem;
+  line-height: 1.5;
+}
+.synth-callout-sub {
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  margin: 0;
+}

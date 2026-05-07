@@ -1,0 +1,245 @@
+from pathlib import Path
+
+html = r"""
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FAIR-LENS Concluding Synthesis Figure</title>
+  <style>
+    :root {
+      --bg: #fbfaf7;
+      --ink: #111827;
+      --muted: #5f6673;
+      --fair: #f4a261;
+      --xai: #43aa8b;
+      --llm: #577590;
+      --line: #d7d2c7;
+      --panel: #ffffff;
+    }
+
+    html,
+    body {
+      margin: 0;
+      min-height: 100%;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    .page {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 42px 34px 54px;
+    }
+
+    h1 {
+      font-size: 30px;
+      line-height: 1.1;
+      margin: 0 0 8px;
+      letter-spacing: -0.03em;
+    }
+
+    .subtitle {
+      margin: 0 0 24px;
+      color: var(--muted);
+      font-size: 15px;
+      max-width: 940px;
+    }
+
+    .figure-card {
+      background: var(--panel);
+      border: 1px solid #e5e0d7;
+      border-radius: 24px;
+      box-shadow: 0 18px 60px rgba(17, 24, 39, 0.08);
+      padding: 18px;
+    }
+
+    svg {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    .label {
+      font-weight: 750;
+      fill: #111827;
+    }
+
+    .small {
+      font-size: 13px;
+      fill: #5f6673;
+    }
+
+    .tiny {
+      font-size: 11px;
+      fill: #5f6673;
+    }
+
+    .number {
+      font-weight: 800;
+      fill: #111827;
+    }
+
+    .axis-title {
+      font-size: 16px;
+      font-weight: 800;
+    }
+
+    .axis-note {
+      font-size: 12px;
+      fill: #5f6673;
+    }
+
+    .chip-text {
+      font-size: 12px;
+      font-weight: 700;
+      fill: #fff;
+    }
+
+    .caption {
+      margin: 18px 6px 0;
+      font-size: 14px;
+      line-height: 1.55;
+      color: #374151;
+    }
+
+    .caption strong {
+      color: #111827;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="page">
+    <h1>FAIR-LENS concluding synthesis figure</h1>
+    <p class="subtitle">A lens metaphor for the whole paper: the systematic-review corpus enters from the left, the
+      FAIR-LENS directional framework refracts it into three evidence axes, and the right side shows the field-level
+      conclusion and research agenda.</p>
+
+    <div class="figure-card">
+      <svg viewBox="0 0 1120 640" role="img"
+        aria-label="FAIR-LENS synthesis figure showing corpus, directional framework, imbalance, and research agenda">
+        <defs>
+          <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6"
+            orient="auto-start-reverse">
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="#9ca3af" />
+          </marker>
+          <linearGradient id="beam1" x1="0" x2="1">
+            <stop offset="0%" stop-color="#f4a261" stop-opacity="0.14" />
+            <stop offset="100%" stop-color="#f4a261" stop-opacity="0.55" />
+          </linearGradient>
+          <linearGradient id="beam2" x1="0" x2="1">
+            <stop offset="0%" stop-color="#577590" stop-opacity="0.14" />
+            <stop offset="100%" stop-color="#577590" stop-opacity="0.55" />
+          </linearGradient>
+          <linearGradient id="beam3" x1="0" x2="1">
+            <stop offset="0%" stop-color="#43aa8b" stop-opacity="0.14" />
+            <stop offset="100%" stop-color="#43aa8b" stop-opacity="0.62" />
+          </linearGradient>
+          <filter id="softShadow" x="-20%" y="-20%" width="140%" height="140%">
+            <feDropShadow dx="0" dy="10" stdDeviation="12" flood-color="#111827" flood-opacity="0.12" />
+          </filter>
+        </defs>
+
+        <text x="36" y="42" class="label" font-size="24">From visibility-rich evidence to accountable LLM
+          alignment</text>
+        <text x="36" y="68" class="small">A concluding map of the FAIR-LENS review: what the corpus shows, what it
+          underdevelops, and where future work should move.</text>
+
+        <rect x="34" y="116" width="210" height="350" rx="22" fill="#f8fafc" stroke="#d7dce4" />
+        <text x="58" y="154" class="label" font-size="17">Systematic-review corpus</text>
+        <text x="58" y="180" class="small">PRISMA-selected and</text>
+        <text x="58" y="199" class="small">directionally coded evidence</text>
+
+        <circle cx="92" cy="258" r="44" fill="#fff" stroke="#d7dce4" filter="url(#softShadow)" />
+        <text x="92" y="253" text-anchor="middle" class="number" font-size="24">340</text>
+        <text x="92" y="275" text-anchor="middle" class="tiny">unique papers</text>
+
+        <circle cx="184" cy="258" r="44" fill="#fff" stroke="#d7dce4" filter="url(#softShadow)" />
+        <text x="184" y="253" text-anchor="middle" class="number" font-size="24">815</text>
+        <text x="184" y="275" text-anchor="middle" class="tiny">assignments</text>
+
+        <rect x="60" y="336" width="156" height="42" rx="21" fill="#111827" />
+        <text x="138" y="362" text-anchor="middle" class="chip-text">multi-label evidence</text>
+        <text x="58" y="414" class="tiny">Each paper may contribute to more</text>
+        <text x="58" y="431" class="tiny">than one FAIR-LENS direction.</text>
+
+        <path d="M 244 214 C 300 214, 304 245, 360 245" stroke="url(#beam1)" stroke-width="30" fill="none"
+          stroke-linecap="round" />
+        <path d="M 244 291 C 302 291, 305 300, 360 300" stroke="url(#beam2)" stroke-width="30" fill="none"
+          stroke-linecap="round" />
+        <path d="M 244 368 C 300 368, 304 355, 360 355" stroke="url(#beam3)" stroke-width="30" fill="none"
+          stroke-linecap="round" />
+
+        <ellipse cx="438" cy="300" rx="74" ry="210" fill="#ffffff" stroke="#aab2bd" stroke-width="2.5"
+          filter="url(#softShadow)" />
+        <ellipse cx="438" cy="300" rx="52" ry="178" fill="#eef7f6" stroke="#d3ece8" />
+        <text x="438" y="286" text-anchor="middle" class="label" font-size="19">FAIR-LENS</text>
+        <text x="438" y="310" text-anchor="middle" class="small">directional</text>
+        <text x="438" y="329" text-anchor="middle" class="small">framework</text>
+
+        <polygon points="438,163 383,386 493,386" fill="none" stroke="#6b7280" stroke-width="1.5"
+          stroke-dasharray="5 5" />
+        <circle cx="438" cy="163" r="5" fill="#f4a261" />
+        <circle cx="383" cy="386" r="5" fill="#43aa8b" />
+        <circle cx="493" cy="386" r="5" fill="#577590" />
+
+        <path d="M 512 245 C 584 210, 621 175, 692 162" stroke="#f4a261" stroke-width="13" fill="none"
+          stroke-linecap="round" opacity="0.78" />
+        <path d="M 512 300 C 584 300, 621 300, 692 300" stroke="#577590" stroke-width="11" fill="none"
+          stroke-linecap="round" opacity="0.78" />
+        <path d="M 512 355 C 584 390, 621 433, 692 454" stroke="#43aa8b" stroke-width="29" fill="none"
+          stroke-linecap="round" opacity="0.82" />
+
+        <rect x="690" y="110" width="390" height="398" rx="24" fill="#ffffff" stroke="#e5e0d7"
+          filter="url(#softShadow)" />
+        <text x="718" y="148" class="label" font-size="18">Three refracted evidence axes</text>
+        <text x="718" y="173" class="small">The corpus is not evenly distributed around the triangle.</text>
+
+        <rect x="718" y="202" width="334" height="72" rx="14" fill="#fff7ed" stroke="#fed7aa" />
+        <circle cx="752" cy="238" r="18" fill="#f4a261" />
+        <text x="752" y="243" text-anchor="middle" fill="#fff" font-weight="800" font-size="14">199</text>
+        <text x="784" y="229" class="axis-title" fill="#9a4d12">Fairness ↔ Explainability</text>
+        <text x="784" y="250" class="axis-note">accountability through explanation, but uneven validation</text>
+
+        <rect x="718" y="293" width="334" height="72" rx="14" fill="#eff6ff" stroke="#bfdbfe" />
+        <circle cx="752" cy="329" r="18" fill="#577590" />
+        <text x="752" y="334" text-anchor="middle" fill="#fff" font-weight="800" font-size="14">169</text>
+        <text x="784" y="320" class="axis-title" fill="#24405b">Fairness ↔ LLMs</text>
+        <text x="784" y="341" class="axis-note">audit-heavy; proactive fairness design remains thin</text>
+
+        <rect x="718" y="384" width="334" height="82" rx="14" fill="#ecfdf5" stroke="#a7f3d0" />
+        <circle cx="752" cy="425" r="22" fill="#43aa8b" />
+        <text x="752" y="431" text-anchor="middle" fill="#fff" font-weight="800" font-size="15">447</text>
+        <text x="784" y="415" class="axis-title" fill="#12604a">Explainability ↔ LLMs</text>
+        <text x="784" y="436" class="axis-note">dominant visibility axis: inspection, probing, rationales</text>
+
+        <rect x="56" y="535" width="1010" height="74" rx="22" fill="#111827" />
+        <text x="88" y="568" fill="#ffffff" font-weight="850" font-size="20">Field-level conclusion:</text>
+        <text x="302" y="568" fill="#ffffff" font-size="20">visibility-rich but alignment-incomplete</text>
+        <text x="88" y="593" fill="#cbd5e1" font-size="13">Next step: connect fairness-by-design, faithful explanation,
+          human-centered validation, and deployment governance across the LLM lifecycle.</text>
+
+        <line x1="850" y1="508" x2="850" y2="532" stroke="#9ca3af" stroke-width="2" marker-end="url(#arrow)" />
+      </svg>
+
+      <p class="caption"><strong>Suggested caption.</strong> Concluding synthesis of the FAIR-LENS review. The
+        peer-reviewed corpus is treated as multi-label evidence: 340 unique papers produce 815 directional assignments
+        across the six FAIR-LENS relations. When refracted through the framework, the evidence base concentrates most
+        strongly on Explainability↔LLMs (447 assignments), while Fairness↔LLMs remains the smallest axis (169
+        assignments). The figure summarizes the paper’s main interpretation: current work is visibility-rich but
+        alignment-incomplete, requiring future research to connect fairness-by-design, explanation validity,
+        human-centered evaluation, and deployment governance.</p>
+    </div>
+  </div>
+</body>
+
+</html>
+"""
+
+path = Path("/mnt/data/fairlens_concluding_synthesis.html")
+path.write_text(html, encoding="utf-8")
+print(f"Created: {path}")
