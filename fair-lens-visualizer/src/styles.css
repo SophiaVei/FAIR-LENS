@@ -658,7 +658,19 @@ body {
   align-items: center;
 }
 
-.insights-root .hero {
+.insights-tab-view,
+.synthesis-tab-view {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 2rem;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.insights-tab-view .hero,
+.synthesis-tab-view .hero {
   display: none;
 }
 

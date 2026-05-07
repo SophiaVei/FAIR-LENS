@@ -24,14 +24,24 @@ import {
   Cell,
   CartesianGrid,
   Legend,
+  Line,
+  LineChart as ReLineChart,
   Pie,
   PieChart as RePieChart,
+  Radar,
+  RadarChart,
+  PolarGrid,
+  PolarAngleAxis,
+  PolarRadiusAxis,
   RadialBar,
   RadialBarChart,
   ResponsiveContainer,
+  Scatter,
+  ScatterChart,
   Tooltip as RechartsTooltip,
   XAxis,
   YAxis,
+  ZAxis,
 } from "recharts";
 
 export type QuestionId = "Q1" | "Q2" | "Q3" | "Q4" | "Q5" | "Q6";
@@ -646,6 +656,65 @@ const InsightsView: React.FC<InsightsProps> = ({ papers, questionMeta, insights 
     }));
   }, [papers]);
 
+  const synergyRadarData = useMemo(() => {
+    return questionOrder.map((qid) => {
+      const count = papers.filter((p) => (p.question_id as QuestionId) === qid).length;
+      return {
+        subject: qid,
+        fullName: questionMeta[qid].label.split(":")[1].trim(),
+        value: count,
+      };
+    });
+  }, [papers, questionMeta, questionOrder]);
+
+  const thematicRadarData = useMemo(() => {
+    return questionOrder.map((qid) => {
+      const qPapers = papers.filter((p) => p.question_id === qid);
+      const total = qPapers.length || 1;
+      return {
+        subject: qid,
+        Fairness: (qPapers.filter(p => p.mentions_fairness).length / total) * 100,
+        XAI: (qPapers.filter(p => p.mentions_xai).length / total) * 100,
+        LLMs: (qPapers.filter(p => p.mentions_llm).length / total) * 100,
+      };
+    });
+  }, [papers, questionOrder]);
+
+  const maturityData = useMemo(() => {
+    return questionOrder.map((qid) => {
+      const qPapers = papers.filter((p) => p.question_id === qid);
+      const total = qPapers.length || 1;
+      const withUrl = qPapers.filter(p => p.url && p.url !== "nan").length;
+      const multiTheme = qPapers.filter(p => 
+        (p.mentions_fairness?1:0) + (p.mentions_xai?1:0) + (p.mentions_llm?1:0) >= 2
+      ).length;
+      
+      return {
+        name: qid,
+        fullName: questionMeta[qid].label.split(":")[1].trim(),
+        accessibility: (withUrl / total) * 100,
+        depth: (multiTheme / total) * 100,
+        count: total,
+      };
+    });
+  }, [papers, questionMeta, questionOrder]);
+
+  const methodologyData = useMemo(() => {
+    if (!insights?.question_topics) return [];
+    
+    const categories = ["framework", "dataset", "experiment", "mitigation", "audit", "benchmark", "survey"];
+    
+    return questionOrder.map((qid) => {
+      const topics = insights.question_topics[qid]?.["Paper Type"] || [];
+      const row: any = { name: qid };
+      categories.forEach(cat => {
+        const found = topics.find((t: any) => t.name === cat);
+        row[cat] = found ? found.value : 0;
+      });
+      return row;
+    });
+  }, [insights, questionOrder]);
+
   // Word frequency from titles (stop words filtered)
   const wordFrequency = useMemo(() => {
     const stopWords = new Set([
@@ -682,6 +751,29 @@ const InsightsView: React.FC<InsightsProps> = ({ papers, questionMeta, insights 
       }));
   }, [papers]);
 
+  const maturityTrends = useMemo(() => {
+    const trends: Record<number, { total: number; acc: number; depth: number }> = {};
+    
+    papers.forEach((p) => {
+      if (!p.year) return;
+      if (!trends[p.year]) trends[p.year] = { total: 0, acc: 0, depth: 0 };
+      
+      trends[p.year].total += 1;
+      if (p.url && p.url !== "nan") trends[p.year].acc += 1;
+      if ((p.mentions_fairness?1:0) + (p.mentions_xai?1:0) + (p.mentions_llm?1:0) >= 2) {
+        trends[p.year].depth += 1;
+      }
+    });
+
+    return Object.entries(trends)
+      .map(([year, stats]) => ({
+        year: Number(year),
+        accessibility: (stats.acc / stats.total) * 100,
+        depth: (stats.depth / stats.total) * 100,
+      }))
+      .sort((a, b) => a.year - b.year);
+  }, [papers]);
+
   const [taxonomyCategory, setTaxonomyCategory] = useState<string>("Domains");
   const [activeTaxonomyQid, setActiveTaxonomyQid] = useState<QuestionId>("Q5");
 
@@ -705,7 +797,7 @@ const InsightsView: React.FC<InsightsProps> = ({ papers, questionMeta, insights 
   }
 
   return (
-    <div className="app-root insights-root">
+    <div className="insights-tab-view">
       <div className="aurora" aria-hidden="true" />
       <header className="insights-hero">
         <div>
@@ -828,6 +920,167 @@ const InsightsView: React.FC<InsightsProps> = ({ papers, questionMeta, insights 
             </ul>
           </article>
 
+          <article className="insight-card" id="chart-synergy-radar">
+            <div className="panel-head">
+              <div>
+                <p className="eyebrow">Structural Analysis</p>
+                <h3>Research Synergy Profile</h3>
+                <p style={{ margin: "0.5rem 0 0", fontSize: "0.9rem", color: "var(--text-muted)" }}>Spatial distribution of papers across the 6-question framework</p>
+              </div>
+              <button
+                className="ghost-button hide-on-export"
+                onClick={() => downloadChart("chart-synergy-radar", "synergy_profile.png")}
+                title="Download Plot"
+                style={{ padding: "0.4rem", borderRadius: "50%", alignSelf: "flex-start" }}
+              >
+                <Download size={18} />
+              </button>
+            </div>
+            <div className="chart-shell" style={{ height: "300px" }}>
+              <ResponsiveContainer width="100%" height="100%">
+                <RadarChart cx="50%" cy="50%" outerRadius="80%" data={synergyRadarData}>
+                  <PolarGrid stroke="#334155" />
+                  <PolarAngleAxis dataKey="subject" tick={{ fill: "#94a3b8", fontSize: 12, fontWeight: 600 }} />
+                  <PolarRadiusAxis angle={30} domain={[0, 'auto']} tick={{ fill: "#64748b", fontSize: 10 }} axisLine={false} />
+                  <Radar name="Count" dataKey="value" stroke="#6366f1" fill="#6366f1" fillOpacity={0.5} />
+                  <RechartsTooltip 
+                    content={({ active, payload }) => {
+                      if (active && payload && payload.length) {
+                        const data = payload[0].payload;
+                        return (
+                          <div className="chart-tooltip">
+                            <p className="chart-tooltip-label">{data.subject}</p>
+                            <span>{data.fullName}</span>
+                            <br />
+                            <span>Count: <strong>{data.value}</strong></span>
+                          </div>
+                        );
+                      }
+                      return null;
+                    }}
+                  />
+                </RadarChart>
+              </ResponsiveContainer>
+            </div>
+            <p className="insight-text" style={{ fontSize: "0.85rem", fontStyle: "italic" }}>
+              Visualizes the field's gravitational pull—showing a strong structural skew toward <strong>Visibility</strong> (Q5/Q6) over <strong>Alignment</strong> (Q3/Q4).
+            </p>
+          </article>
+
+          <article className="insight-card" id="chart-thematic-radar">
+            <div className="panel-head">
+              <div>
+                <p className="eyebrow">Thematic Purity</p>
+                <h3>Thematic Distribution</h3>
+                <p style={{ margin: "0.5rem 0 0", fontSize: "0.9rem", color: "var(--text-muted)" }}>Percentage of papers mentioning each core theme by question</p>
+              </div>
+              <button
+                className="ghost-button hide-on-export"
+                onClick={() => downloadChart("chart-thematic-radar", "thematic_profile.png")}
+                title="Download Plot"
+                style={{ padding: "0.4rem", borderRadius: "50%", alignSelf: "flex-start" }}
+              >
+                <Download size={18} />
+              </button>
+            </div>
+            <div className="chart-shell" style={{ height: "300px" }}>
+              <ResponsiveContainer width="100%" height="100%">
+                <RadarChart cx="50%" cy="50%" outerRadius="80%" data={thematicRadarData}>
+                  <PolarGrid stroke="#334155" />
+                  <PolarAngleAxis dataKey="subject" tick={{ fill: "#94a3b8", fontSize: 12, fontWeight: 600 }} />
+                  <PolarRadiusAxis angle={30} domain={[0, 100]} tick={{ fill: "#64748b", fontSize: 10 }} axisLine={false} />
+                  <Radar name="Fairness" dataKey="Fairness" stroke="#f4a261" fill="#f4a261" fillOpacity={0.3} />
+                  <Radar name="XAI" dataKey="XAI" stroke="#a3b18a" fill="#a3b18a" fillOpacity={0.3} />
+                  <Radar name="LLMs" dataKey="LLMs" stroke="#8ecae6" fill="#8ecae6" fillOpacity={0.3} />
+                  <Legend iconType="circle" wrapperStyle={{ paddingTop: "10px" }} />
+                  <RechartsTooltip 
+                    formatter={(value: number) => [`${value.toFixed(1)}%`]}
+                    contentStyle={{ backgroundColor: "#0f172a", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "8px" }}
+                  />
+                </RadarChart>
+              </ResponsiveContainer>
+            </div>
+            <p className="insight-text" style={{ fontSize: "0.85rem", fontStyle: "italic" }}>
+              High-fidelity mapping: Q3/Q4 are <strong>Fairness-pure</strong>, while Q5/Q6 are <strong>XAI-dominated</strong> with minimal fairness intersection.
+            </p>
+          </article>
+
+          <article className="insight-card wide" id="chart-maturity">
+            <div className="panel-head">
+              <div>
+                <p className="eyebrow">Meta-Analysis</p>
+                <h3>Research Maturity Matrix</h3>
+                <p style={{ margin: "0.5rem 0 0", fontSize: "0.9rem", color: "var(--text-muted)" }}>Accessibility (Links) vs. Interdisciplinary Depth (Multi-theme mentions)</p>
+              </div>
+              <button
+                className="ghost-button hide-on-export"
+                onClick={() => downloadChart("chart-maturity", "maturity_matrix.png")}
+                title="Download Plot"
+                style={{ padding: "0.4rem", borderRadius: "50%", alignSelf: "flex-start" }}
+              >
+                <Download size={18} />
+              </button>
+            </div>
+            <div className="chart-shell" style={{ height: "400px" }}>
+              <ResponsiveContainer width="100%" height="100%">
+                <ScatterChart margin={{ top: 20, right: 30, bottom: 40, left: 20 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#334155" opacity={0.3} />
+                  <XAxis 
+                    type="number" 
+                    dataKey="accessibility" 
+                    name="Accessibility" 
+                    unit="%" 
+                    label={{ value: 'Accessibility (% with links)', position: 'insideBottom', offset: -25, fill: '#94a3b8', fontSize: 12 }}
+                    stroke="#64748b"
+                    domain={[0, 100]}
+                  />
+                  <YAxis 
+                    type="number" 
+                    dataKey="depth" 
+                    name="Depth" 
+                    unit="%" 
+                    label={{ value: 'Thematic Depth (% Multi-theme)', angle: -90, position: 'insideLeft', fill: '#94a3b8', fontSize: 12 }}
+                    stroke="#64748b"
+                    domain={[0, 100]}
+                  />
+                  <ZAxis type="number" dataKey="count" range={[100, 1000]} name="Volume" />
+                  <RechartsTooltip 
+                    cursor={{ strokeDasharray: '3 3' }}
+                    content={({ active, payload }) => {
+                      if (active && payload && payload.length) {
+                        const data = payload[0].payload;
+                        return (
+                          <div className="chart-tooltip" style={{ backgroundColor: "#0f172a", padding: "1rem", borderRadius: "8px", border: "1px solid rgba(255,255,255,0.1)" }}>
+                            <p style={{ margin: "0 0 0.5rem", fontWeight: "bold", color: "var(--brand)" }}>{data.name}: {data.fullName}</p>
+                            <div style={{ fontSize: "0.85rem", display: "flex", flexDirection: "column", gap: "0.25rem" }}>
+                              <p>Papers: <strong>{data.count}</strong></p>
+                              <p>Accessibility: <strong>{data.accessibility.toFixed(1)}%</strong></p>
+                              <p>Thematic Depth: <strong>{data.depth.toFixed(1)}%</strong></p>
+                            </div>
+                          </div>
+                        );
+                      }
+                      return null;
+                    }}
+                  />
+                  <Scatter name="Questions" data={maturityData} fill="#6366f1">
+                    {maturityData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={["#f4a261", "#f9844a", "#f9c74f", "#90be6d", "#43aa8b", "#577590"][index % 6]} />
+                    ))}
+                  </Scatter>
+                </ScatterChart>
+              </ResponsiveContainer>
+            </div>
+            <div style={{ display: "flex", gap: "1rem", justifyContent: "center", marginTop: "1rem" }}>
+               {questionOrder.map((qid, idx) => (
+                 <div key={qid} style={{ display: "flex", alignItems: "center", gap: "0.4rem", fontSize: "0.75rem", color: "var(--text-muted)" }}>
+                   <div style={{ width: "8px", height: "8px", borderRadius: "50%", backgroundColor: ["#f4a261", "#f9844a", "#f9c74f", "#90be6d", "#43aa8b", "#577590"][idx] }} />
+                   <span>{qid}</span>
+                 </div>
+               ))}
+            </div>
+          </article>
+
           <article className="insight-card" id="chart-discipline">
             <div className="panel-head">
               <div>
@@ -878,6 +1131,48 @@ const InsightsView: React.FC<InsightsProps> = ({ papers, questionMeta, insights 
                 );
               })}
             </ul>
+          </article>
+
+          <article className="insight-card wide" id="chart-methodology">
+            <div className="panel-head">
+              <div>
+                <p className="eyebrow">Methodology</p>
+                <h3>Research Approach Distribution</h3>
+                <p style={{ margin: "0.5rem 0 0", fontSize: "0.9rem", color: "var(--text-muted)" }}>Comparing the nature of contributions (Frameworks, Experiments, Audits, etc.) across questions</p>
+              </div>
+              <button
+                className="ghost-button hide-on-export"
+                onClick={() => downloadChart("chart-methodology", "methodology_distribution.png")}
+                title="Download Plot"
+                style={{ padding: "0.4rem", borderRadius: "50%", alignSelf: "flex-start" }}
+              >
+                <Download size={18} />
+              </button>
+            </div>
+            <div className="chart-shell" style={{ height: "350px" }}>
+              <ResponsiveContainer width="100%" height="100%">
+                <ReBarChart data={methodologyData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                  <CartesianGrid strokeDasharray="3 3" opacity={0.1} vertical={false} />
+                  <XAxis dataKey="name" stroke="#64748b" />
+                  <YAxis stroke="#64748b" />
+                  <RechartsTooltip 
+                    contentStyle={{ backgroundColor: "#0f172a", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "8px" }}
+                    itemStyle={{ fontSize: "0.8rem", textTransform: "capitalize" }}
+                  />
+                  <Legend iconType="circle" wrapperStyle={{ paddingTop: "10px", fontSize: "0.8rem", textTransform: "capitalize" }} />
+                  <Bar dataKey="framework" name="Framework" stackId="a" fill="#f4a261" />
+                  <Bar dataKey="dataset" name="Dataset" stackId="a" fill="#219ebc" />
+                  <Bar dataKey="experiment" name="Experiment" stackId="a" fill="#8ecae6" />
+                  <Bar dataKey="mitigation" name="Mitigation" stackId="a" fill="#ffb703" />
+                  <Bar dataKey="audit" name="Audit" stackId="a" fill="#577590" />
+                  <Bar dataKey="benchmark" name="Benchmark" stackId="a" fill="#43aa8b" />
+                  <Bar dataKey="survey" name="Survey" stackId="a" fill="#90be6d" />
+                </ReBarChart>
+              </ResponsiveContainer>
+            </div>
+            <p className="insight-text" style={{ fontSize: "0.85rem", fontStyle: "italic", marginTop: "1rem" }}>
+              Reveals that <strong>Visibility</strong> (Q5/Q6) is dominated by experiments and audits, while <strong>Accountability</strong> (Q1) sees a higher proportion of new frameworks and datasets.
+            </p>
           </article>
 
           <article className="insight-card wide" id="chart-venues">
@@ -1153,6 +1448,40 @@ const InsightsView: React.FC<InsightsProps> = ({ papers, questionMeta, insights 
             </div>
           </article>
 
+          <article className="insight-card wide" id="chart-maturity-trends">
+            <div className="panel-head">
+              <div>
+                <p className="eyebrow">Temporal Meta-Analysis</p>
+                <h3>Field Maturity Trends</h3>
+                <p style={{ margin: "0.5rem 0 0", fontSize: "0.9rem", color: "var(--text-muted)" }}>Evolution of Accessibility and Interdisciplinary Depth over time</p>
+              </div>
+              <button
+                className="ghost-button hide-on-export"
+                onClick={() => downloadChart("chart-maturity-trends", "maturity_trends.png")}
+                title="Download Plot"
+                style={{ padding: "0.4rem", borderRadius: "50%", alignSelf: "flex-start" }}
+              >
+                <Download size={18} />
+              </button>
+            </div>
+            <div className="chart-shell" style={{ height: "320px" }}>
+              <ResponsiveContainer width="100%" height="100%">
+                <ReLineChart data={maturityTrends} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                  <CartesianGrid strokeDasharray="3 3" opacity={0.1} />
+                  <XAxis dataKey="year" stroke="#64748b" />
+                  <YAxis stroke="#64748b" unit="%" domain={[0, 100]} />
+                  <RechartsTooltip contentStyle={{ backgroundColor: "#0f172a", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "8px" }} />
+                  <Legend iconType="circle" />
+                  <Line type="monotone" dataKey="accessibility" name="Accessibility (% URLs)" stroke="#8ecae6" strokeWidth={3} dot={{ r: 6, fill: "#8ecae6" }} />
+                  <Line type="monotone" dataKey="depth" name="Thematic Depth (% Multi-theme)" stroke="#f4a261" strokeWidth={3} dot={{ r: 6, fill: "#f4a261" }} />
+                </ReLineChart>
+              </ResponsiveContainer>
+            </div>
+            <p className="insight-text" style={{ fontSize: "0.85rem", fontStyle: "italic", marginTop: "1rem" }}>
+              While <strong>Thematic Depth</strong> remains high, <strong>Accessibility</strong> shows a concerning decline in very recent publications, highlighting a potential "transparency lag" in the rapid LLM expansion.
+            </p>
+          </article>
+
           <article className="insight-card wide" id="chart-lineage">
             <div className="panel-head">
               <div>
@@ -1306,41 +1635,45 @@ const InsightsView: React.FC<InsightsProps> = ({ papers, questionMeta, insights 
                 justifyContent: "center",
                 textAlign: "center"
               }}>
-                {wordFrequency.map((word, index) => {
-                  const maxValue = wordFrequency[0].value;
-                  const minValue = wordFrequency[wordFrequency.length - 1].value;
-                  const range = maxValue - minValue;
-                  const scale = range > 0 ? (word.value - minValue) / range : 0.5;
-                  const fontSize = 0.9 + scale * 2.5; // 0.9rem to 3.4rem
-                  const colors = ["#f4a261", "#f9844a", "#f9c74f", "#90be6d", "#43aa8b", "#577590", "#8ecae6"];
-                  const color = colors[index % colors.length];
+                {wordFrequency.length > 0 ? (
+                  wordFrequency.map((word, index) => {
+                    const maxValue = wordFrequency[0].value;
+                    const minValue = wordFrequency[wordFrequency.length - 1].value;
+                    const range = maxValue - minValue;
+                    const scale = range > 0 ? (word.value - minValue) / range : 0.5;
+                    const fontSize = 0.9 + scale * 2.5; // 0.9rem to 3.4rem
+                    const colors = ["#f4a261", "#f9844a", "#f9c74f", "#90be6d", "#43aa8b", "#577590", "#8ecae6"];
+                    const color = colors[index % colors.length];
 
-                  return (
-                    <span
-                      key={word.name}
-                      style={{
-                        fontSize: `${fontSize}rem`,
-                        fontWeight: 600,
-                        color: color,
-                        opacity: 0.7 + scale * 0.3,
-                        cursor: "default",
-                        lineHeight: 1.2,
-                        transition: "all 0.2s ease",
-                      }}
-                      title={`${word.name}: ${word.value} occurrences`}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.opacity = "1";
-                        e.currentTarget.style.transform = "scale(1.1)";
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.opacity = String(0.7 + scale * 0.3);
-                        e.currentTarget.style.transform = "scale(1)";
-                      }}
-                    >
-                      {word.name}
-                    </span>
-                  );
-                })}
+                    return (
+                      <span
+                        key={word.name}
+                        style={{
+                          fontSize: `${fontSize}rem`,
+                          fontWeight: 600,
+                          color: color,
+                          opacity: 0.7 + scale * 0.3,
+                          cursor: "default",
+                          lineHeight: 1.2,
+                          transition: "all 0.2s ease",
+                        }}
+                        title={`${word.name}: ${word.value} occurrences`}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.opacity = "1";
+                          e.currentTarget.style.transform = "scale(1.1)";
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.opacity = String(0.7 + scale * 0.3);
+                          e.currentTarget.style.transform = "scale(1)";
+                        }}
+                      >
+                        {word.name}
+                      </span>
+                    );
+                  })
+                ) : (
+                  <p style={{ color: "var(--text-muted)" }}>Analyzing vocabulary...</p>
+                )}
               </div>
             </div>
           </article>
@@ -1368,7 +1701,7 @@ const SynthesisView: React.FC<SynthesisProps> = ({ papers, totalsByQuestion, uni
 
 
   return (
-    <div className="app-root insights-root">
+    <div className="synthesis-tab-view">
       <div className="aurora" aria-hidden="true" />
       <header className="insights-hero" style={{ paddingBottom: "1.5rem" }}>
         <div>
@@ -1675,6 +2008,14 @@ const App: React.FC = () => {
   } else {
     const ids = activeQuestions.join(", ");
     listTitle = `Selected questions: ${ids}`;
+  }
+
+  if (loading) {
+    return (
+      <div className="app-shell" style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100vh", background: "var(--bg-base)" }}>
+        <RefreshCw className="spin" size={48} style={{ color: "var(--brand)" }} />
+      </div>
+    );
   }
 
   return (
