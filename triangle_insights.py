@@ -229,24 +229,25 @@ def print_pipeline_counts(
 # PLOT HELPERS
 # -----------------------
 
-def style_plotly(fig, title, xlab, ylab):
+def style_plotly(fig, xlab, ylab):
     fig.update_layout(
-        title=dict(text=title, x=0.5, y=0.95),
-        plot_bgcolor=PLOT_BG,
-        paper_bgcolor=PAPER_BG,
+        title=None,
+        plot_bgcolor="rgba(0,0,0,0)",
+        paper_bgcolor="rgba(0,0,0,0)",
         font=dict(family="DejaVu Sans", size=16, color=TEXT_COLOR),
         xaxis=dict(title=xlab, showgrid=True, gridcolor=GRID_COLOR),
         yaxis=dict(title=ylab, showgrid=True, gridcolor=GRID_COLOR),
-        margin=dict(l=80, r=40, t=100, b=100),
+        margin=dict(l=80, r=40, t=60, b=100),
         legend=dict(
             orientation="h",
             yanchor="top",
             y=-0.20,
             x=0.5,
             xanchor="center",
-            bgcolor="rgba(255,255,255,0.9)",
+            bgcolor="rgba(0,0,0,0)",
             bordercolor=GRID_COLOR,
             borderwidth=1,
+            font=dict(color=TEXT_COLOR),
         ),
     )
     return fig
@@ -292,12 +293,7 @@ def plot_yearly_trends(df: pd.DataFrame, outdir: Path):
         marker=dict(size=9, line=dict(width=1.2, color="white")),
     )
 
-    fig = style_plotly(
-        fig,
-        "Yearly Publication Trends per Question",
-        "Publication Year",
-        "Number of Papers",
-    )
+    fig = style_plotly(fig, "Publication Year", "Number of Papers")
 
     fig.write_html(outdir / "triangle_trends.html")
     fig.write_image(outdir / "triangle_trends.png", scale=2)
@@ -318,12 +314,7 @@ def plot_cluster_distribution(df: pd.DataFrame, outdir: Path):
 
     fig.update_traces(textposition="outside")
 
-    fig = style_plotly(
-        fig,
-        "Relevant Papers per Cluster",
-        "Cluster",
-        "Number of Papers",
-    )
+    fig = style_plotly(fig, "Cluster", "Number of Papers")
 
     fig.write_html(outdir / "cluster_distribution.html")
     fig.write_image(outdir / "cluster_distribution.png", scale=2)
@@ -344,8 +335,10 @@ def plot_subcluster_heatmap(df: pd.DataFrame, outdir: Path):
         ["#FFFFFF", "#EDDCC2", "#C8C4A0", "#8FB996", "#386641"],
     )
 
-    plt.figure(figsize=(12, 6), facecolor="white")
-    ax = sns.heatmap(
+    fig, ax = plt.subplots(figsize=(12, 6), facecolor="none")
+    fig.patch.set_alpha(0)
+    ax.set_facecolor("none")
+    sns.heatmap(
         pivot,
         cmap=cmap,
         annot=True,
@@ -353,15 +346,23 @@ def plot_subcluster_heatmap(df: pd.DataFrame, outdir: Path):
         linewidths=0.5,
         linecolor=GRID_COLOR,
         cbar=False,
-        annot_kws={"color": TEXT_COLOR},
+        annot_kws={"color": TEXT_COLOR, "fontsize": 11, "fontweight": "bold"},
+        ax=ax,
     )
 
-    ax.set_title("Subcluster Density Heatmap", fontsize=18, pad=16)
-    ax.set_xlabel("Subcluster")
-    ax.set_ylabel("Cluster")
+    ax.set_xlabel("Subcluster", color=TEXT_COLOR)
+    ax.set_ylabel("Cluster", color=TEXT_COLOR)
+    ax.tick_params(colors=TEXT_COLOR)
 
     plt.tight_layout()
-    plt.savefig(outdir / "subcluster_heatmap.png", dpi=220, facecolor="white")
+    plt.savefig(
+        outdir / "subcluster_heatmap.png",
+        dpi=300,
+        transparent=True,
+        facecolor="none",
+        edgecolor="none",
+        bbox_inches="tight",
+    )
     plt.close()
 
     print("[PLOT] Saved subcluster heatmap")
@@ -390,12 +391,7 @@ def plot_venue_cloud(df: pd.DataFrame, outdir: Path):
     fig.update_layout(coloraxis_showscale=False)
 
     # Apply your base styling
-    fig = style_plotly(
-        fig,
-        "Top 15 Venues for Relevant Papers",
-        "Number of Papers",
-        "Venue",
-    )
+    fig = style_plotly(fig, "Number of Papers", "Venue")
 
     # 🔥 KEY CHANGES → Make plot wider & give labels room
     fig.update_layout(
@@ -440,12 +436,7 @@ def plot_interrelation_chord(df: pd.DataFrame, outdir: Path):
 
     fig.update_traces(insidetextorientation="radial")
 
-    fig = style_plotly(
-        fig,
-        "Hierarchical Relationships Between Clusters and Directions",
-        "",
-        "",
-    )
+    fig = style_plotly(fig, "", "")
 
     fig.update_layout(
         xaxis=dict(visible=False),

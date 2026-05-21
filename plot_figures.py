@@ -59,12 +59,15 @@ EDGE_COLORS = {
     "E\u2194L": "#2a7f3f",   # forest green
 }
 
-# Background for transparent-themed figures (optimized for white paper publication)
-BG_DARK   = "none"
-BG_PANEL  = "none"
-TEXT_MAIN  = "#111827"  # Deep charcoal/black for white-paper publication compatibility
-TEXT_MUTED = "#4b5563"  # Medium charcoal for ticks/secondary text
-GRID_COLOR = "#e5e7eb"  # Very light gray for light background compatibility
+# Publication: transparent canvas, dark ink readable on white paper
+BG_TRANSPARENT = "none"
+TEXT_MAIN  = "#111827"
+TEXT_MUTED = "#4b5563"
+GRID_COLOR = "#d1d5db"
+POLAR_GRID_COLOR = "#374151"
+POLAR_SPINE_COLOR = "#111827"
+POLAR_GRID_LW = 1.25
+POLAR_SPINE_LW = 2.0
 
 
 # ═══════════════════════════════════════════════════════════════════════
@@ -83,7 +86,7 @@ def setup_style():
         "savefig.facecolor":   "none",
         # Axes
         "axes.facecolor":      "none",
-        "axes.edgecolor":      "#4b5563",  # Visible border for transparent theme
+        "axes.edgecolor":      TEXT_MAIN,
         "axes.labelcolor":     TEXT_MAIN,
         "axes.titlesize":      12,
         "axes.labelsize":      11,
@@ -92,8 +95,8 @@ def setup_style():
         "axes.spines.right":   False,
         # Grid
         "grid.color":          GRID_COLOR,
-        "grid.linewidth":      0.5,
-        "grid.alpha":          0.8,
+        "grid.linewidth":      0.6,
+        "grid.alpha":          0.9,
         # Ticks
         "xtick.color":         TEXT_MAIN,
         "ytick.color":         TEXT_MAIN,
@@ -112,11 +115,51 @@ def setup_style():
     })
 
 
+def _transparent_figure(fig):
+    """Ensure figure and axes backgrounds stay transparent for export."""
+    fig.patch.set_facecolor(BG_TRANSPARENT)
+    fig.patch.set_alpha(0)
+    for ax in fig.axes:
+        ax.set_facecolor(BG_TRANSPARENT)
+        if hasattr(ax, "patch"):
+            ax.patch.set_alpha(0)
+
+
+def _style_legend(leg):
+    """Legends readable on transparent export."""
+    if leg is None:
+        return
+    frame = leg.get_frame()
+    frame.set_facecolor(BG_TRANSPARENT)
+    frame.set_edgecolor(TEXT_MUTED)
+    frame.set_alpha(0.0)
+    for text in leg.get_texts():
+        text.set_color(TEXT_MAIN)
+
+
+def _style_polar_axes(ax):
+    """Stronger polar grid and spokes for publication on transparent background."""
+    ax.set_facecolor(BG_TRANSPARENT)
+    ax.grid(
+        True,
+        color=POLAR_GRID_COLOR,
+        linestyle="-",
+        linewidth=POLAR_GRID_LW,
+        alpha=1.0,
+    )
+    ax.spines["polar"].set_visible(True)
+    ax.spines["polar"].set_color(POLAR_SPINE_COLOR)
+    ax.spines["polar"].set_linewidth(POLAR_SPINE_LW)
+    ax.tick_params(axis="both", colors=TEXT_MAIN, grid_color=POLAR_GRID_COLOR)
+
+
 def save(fig, name: str):
     """Save figure as both PNG and PDF with transparency."""
+    _transparent_figure(fig)
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-    fig.savefig(OUTPUT_DIR / f"{name}.png", transparent=True)
-    fig.savefig(OUTPUT_DIR / f"{name}.pdf", transparent=True)
+    kwargs = dict(transparent=True, facecolor="none", edgecolor="none")
+    fig.savefig(OUTPUT_DIR / f"{name}.png", **kwargs)
+    fig.savefig(OUTPUT_DIR / f"{name}.pdf", **kwargs)
     print(f"  [OK] {name}.png / .pdf")
     plt.close(fig)
 
@@ -138,7 +181,7 @@ def load_data():
 def fig1_papers_per_question(rel: pd.DataFrame):
     counts = rel.groupby("question_id").size().reindex(Q_ORDER).fillna(0).astype(int)
 
-    fig, ax = plt.subplots(figsize=(8, 4.5))
+    fig, ax = plt.subplots(figsize=(8, 4.5), facecolor=BG_TRANSPARENT)
     bars = ax.barh(
         [Q_META[q]["short"] for q in Q_ORDER],
         [counts[q] for q in Q_ORDER],
@@ -175,7 +218,7 @@ def fig2_yearly_trend(rel: pd.DataFrame):
               .reindex(columns=Q_ORDER, fill_value=0)
               .sort_index())
 
-    fig, ax = plt.subplots(figsize=(9, 5))
+    fig, ax = plt.subplots(figsize=(9, 5), facecolor=BG_TRANSPARENT)
     years = yearly.index.values
     bottom = np.zeros(len(years))
 
@@ -190,7 +233,7 @@ def fig2_yearly_trend(rel: pd.DataFrame):
 
     ax.set_xlabel("Year")
     ax.set_ylabel("Paper assignments")
-    ax.legend(loc="upper left", ncol=3, frameon=True)
+    _style_legend(ax.legend(loc="upper left", ncol=3, frameon=True))
     ax.xaxis.set_major_locator(mticker.MaxNLocator(integer=True))
     ax.set_xlim(years.min(), years.max())
     ax.set_ylim(0)
@@ -214,7 +257,9 @@ def fig3_edge_distribution(rel: pd.DataFrame):
     edge_totals = [sum(counts.get(q, 0) for q in e["qs"]) for e in edges.values()]
     edge_colors = [e["color"] for e in edges.values()]
 
-    fig, axes = plt.subplots(1, 2, figsize=(12, 5), gridspec_kw={"width_ratios": [1.5, 1]})
+    fig, axes = plt.subplots(
+        1, 2, figsize=(12, 5), gridspec_kw={"width_ratios": [1.5, 1]}, facecolor=BG_TRANSPARENT
+    )
 
     # Left: horizontal grouped bar (each edge split into its 2 Qs)
     ax = axes[0]
@@ -249,12 +294,12 @@ def fig3_edge_distribution(rel: pd.DataFrame):
         edge_totals, labels=None,
         colors=edge_colors, autopct="%1.0f%%",
         startangle=90, pctdistance=0.78,
-        wedgeprops=dict(width=0.45, edgecolor="#ffffff", linewidth=2),
+        wedgeprops=dict(width=0.45, edgecolor=TEXT_MAIN, linewidth=1),
     )
     for t in autotexts:
         t.set_fontsize(11)
         t.set_fontweight("bold")
-        t.set_color("#ffffff")
+        t.set_color(TEXT_MAIN)
 
     # Center text
     ax2.text(0, 0, f"{sum(edge_totals)}\nassignments",
@@ -286,7 +331,7 @@ def fig4_diagnostic_vs_proactive(rel: pd.DataFrame):
     yearly["Diagnostic (Audit)"]  = yearly[diag_qs].sum(axis=1)
     yearly["Proactive (Design)"]  = yearly[proac_qs].sum(axis=1)
 
-    fig, ax = plt.subplots(figsize=(8, 5))
+    fig, ax = plt.subplots(figsize=(8, 5), facecolor=BG_TRANSPARENT)
     width = 0.35
     years = yearly.index.values
     x = np.arange(len(years))
@@ -311,7 +356,7 @@ def fig4_diagnostic_vs_proactive(rel: pd.DataFrame):
     ax.set_xticklabels([str(int(y)) for y in years])
     ax.set_xlabel("Year")
     ax.set_ylabel("Paper assignments")
-    ax.legend(loc="upper left", frameon=True)
+    _style_legend(ax.legend(loc="upper left", frameon=True))
     ax.grid(axis="y", alpha=0.3)
     ax.grid(axis="x", visible=False)
 
@@ -333,7 +378,7 @@ def fig5_top_venues(rel: pd.DataFrame, top_n: int = 15):
                     .head(top_n)
                     .iloc[::-1])  # reverse for horizontal bar
 
-    fig, ax = plt.subplots(figsize=(9, 6))
+    fig, ax = plt.subplots(figsize=(9, 6), facecolor=BG_TRANSPARENT)
     colors = plt.cm.viridis(np.linspace(0.3, 0.85, len(venue_counts)))
 
     bars = ax.barh(venue_counts.index, venue_counts.values,
@@ -361,7 +406,7 @@ def fig6_multilabel(rel: pd.DataFrame):
     q_per_paper = rel.groupby("title")["question_id"].nunique()
     dist = q_per_paper.value_counts().sort_index()
 
-    fig, ax = plt.subplots(figsize=(7, 4.5))
+    fig, ax = plt.subplots(figsize=(7, 4.5), facecolor=BG_TRANSPARENT)
     x = dist.index.values
     bars = ax.bar(x, dist.values,
                   color=["#577590", "#43aa8b", "#90be6d", "#f9c74f", "#f9844a", "#f4a261"][:len(x)],
@@ -424,7 +469,7 @@ def fig7_pillar_mentions(rel: pd.DataFrame):
         "#f0ab3d", "#4b5563"
     ]
 
-    fig, ax = plt.subplots(figsize=(10, 5))
+    fig, ax = plt.subplots(figsize=(10, 5), facecolor=BG_TRANSPARENT)
     x = np.arange(len(labels))
     bars = ax.bar(x, values, color=colors_bar, edgecolor="none", width=0.6, zorder=3)
 
@@ -459,7 +504,9 @@ def fig8_synergy_radar(rel: pd.DataFrame):
     values = [counts[q] for q in Q_ORDER]
     values += values[:1]
 
-    fig, ax = plt.subplots(figsize=(7, 7), subplot_kw=dict(polar=True))
+    fig, ax = plt.subplots(
+        figsize=(7, 7), subplot_kw=dict(polar=True), facecolor=BG_TRANSPARENT
+    )
 
     # Draw Q1 at the top, rotate clockwise
     ax.set_theta_offset(np.pi / 2)
@@ -467,7 +514,7 @@ def fig8_synergy_radar(rel: pd.DataFrame):
 
     # Draw labels with padding to prevent clipping
     plt.xticks(angles[:-1], categories, color=TEXT_MAIN, size=10, fontweight="bold")
-    ax.tick_params(axis='x', pad=18)
+    ax.tick_params(axis="x", pad=18)
 
     # Configure grid lines and y-ticks
     ax.set_rlabel_position(30)
@@ -480,11 +527,7 @@ def fig8_synergy_radar(rel: pd.DataFrame):
     ax.plot(angles, values, color="#6366f1", linewidth=2.5, linestyle="solid", zorder=4)
     ax.fill(angles, values, color="#6366f1", alpha=0.35, zorder=3)
 
-    # Customize grids to match light theme with high visibility
-    ax.grid(color='#4b5563', linestyle='-', linewidth=0.9, alpha=0.8)
-    ax.spines['polar'].set_color('#1f2937')
-    ax.spines['polar'].set_linewidth(1.5)
-    ax.set_facecolor(BG_PANEL)
+    _style_polar_axes(ax)
 
     fig.subplots_adjust(left=0.18, right=0.82, top=0.82, bottom=0.18)
     save(fig, "fig8_synergy_radar")
@@ -515,7 +558,9 @@ def fig9_thematic_radar(rel: pd.DataFrame):
     xai_pcts += xai_pcts[:1]
     llm_pcts += llm_pcts[:1]
 
-    fig, ax = plt.subplots(figsize=(7, 7), subplot_kw=dict(polar=True))
+    fig, ax = plt.subplots(
+        figsize=(7, 7), subplot_kw=dict(polar=True), facecolor=BG_TRANSPARENT
+    )
 
     # Draw Q1 at the top, rotate clockwise
     ax.set_theta_offset(np.pi / 2)
@@ -523,34 +568,26 @@ def fig9_thematic_radar(rel: pd.DataFrame):
 
     # Labels with padding
     plt.xticks(angles[:-1], categories, color=TEXT_MAIN, size=10, fontweight="bold")
-    ax.tick_params(axis='x', pad=18)
+    ax.tick_params(axis="x", pad=18)
 
     # Grid ticks (0% to 100%)
     ticks = [20, 40, 60, 80, 100]
-    plt.yticks(ticks, [f"{t}%" for t in ticks], color=TEXT_MAIN, size=8, fontweight="bold")
+    plt.yticks(ticks, [f"{t}%" for t in ticks], color=TEXT_MAIN, size=9, fontweight="bold")
     plt.ylim(0, 100)
 
     # Plot each pillar
-    # Fairness
     ax.plot(angles, fairness_pcts, color=PILLAR_COLORS["Fairness"], linewidth=2, label="Fairness", zorder=4)
     ax.fill(angles, fairness_pcts, color=PILLAR_COLORS["Fairness"], alpha=0.2, zorder=3)
 
-    # Explainability (XAI)
     ax.plot(angles, xai_pcts, color=PILLAR_COLORS["Explainability"], linewidth=2, label="XAI", zorder=4)
     ax.fill(angles, xai_pcts, color=PILLAR_COLORS["Explainability"], alpha=0.2, zorder=3)
 
-    # LLMs
     ax.plot(angles, llm_pcts, color=PILLAR_COLORS["LLMs"], linewidth=2, label="LLMs", zorder=4)
     ax.fill(angles, llm_pcts, color=PILLAR_COLORS["LLMs"], alpha=0.2, zorder=3)
 
-    # Grid styling
-    ax.grid(color='#4b5563', linestyle='-', linewidth=0.9, alpha=0.8)
-    ax.spines['polar'].set_color('#1f2937')
-    ax.spines['polar'].set_linewidth(1.5)
-    ax.set_facecolor(BG_PANEL)
+    _style_polar_axes(ax)
 
-    # Legend
-    plt.legend(loc="upper right", bbox_to_anchor=(1.22, 1.1), frameon=True)
+    _style_legend(plt.legend(loc="upper right", bbox_to_anchor=(1.22, 1.1), frameon=True))
 
     fig.subplots_adjust(left=0.18, right=0.82, top=0.82, bottom=0.18)
     save(fig, "fig9_thematic_radar")
