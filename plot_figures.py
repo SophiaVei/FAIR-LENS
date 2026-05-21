@@ -2,8 +2,8 @@
 """
 plot_figures.py
 Publication-quality figures for the FAIR-LENS systematic review.
-Reads outputs/tri_results_master.csv and writes high-res PNGs + PDFs
-to outputs/figures/.
+Reads outputs/tri_results_master.csv and writes transparent PNGs + PDFs
+to outputs/figures/ (fig1–fig23, aligned with the dashboard where noted).
 
 Usage:
     python plot_figures.py
@@ -12,11 +12,8 @@ Usage:
 import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.ticker as mticker
-import seaborn as sns
 from pathlib import Path
 import numpy as np
-from matplotlib.patches import FancyBboxPatch
-import matplotlib.patheffects as pe
 
 # ── Paths ────────────────────────────────────────────────────────────
 SCRIPT_DIR = Path(__file__).parent
@@ -45,19 +42,95 @@ Q_COLORS = {
     "Q6": "#577590",   # steel blue
 }
 
-# Pillar colors (used for the three vertices of the triangle)
+# Pillar colors (dashboard: mentions, thematic radar, topical coverage)
 PILLAR_COLORS = {
-    "Fairness":       "#e76f51",  # Deep terracotta orange
-    "Explainability": "#2a7f3f",  # Deep green
-    "LLMs":           "#1d4e89",  # Deep blue
+    "Fairness":       "#f4a261",
+    "Explainability": "#a3b18a",
+    "LLMs":           "#8ecae6",
 }
 
-# Edge/axis colors
-EDGE_COLORS = {
-    "F\u2194E": "#f4a261",   # orange
-    "F\u2194L": "#1d4e89",   # dark blue
-    "E\u2194L": "#2a7f3f",   # forest green
+# Pairwise co-mention colors (dashboard: co-mention intensity)
+PAIR_COLORS = {
+    "Fairness \u2194 Explainability": "#f9c74f",
+    "Fairness \u2194 LLMs":           "#f9844a",
+    "Explainability \u2194 LLMs":     "#90be6d",
 }
+
+# Edge/cluster colors (triangle edges, research clusters)
+EDGE_COLORS = {
+    "F\u2194E": "#f4a261",
+    "F\u2194L": "#1d4e89",
+    "E\u2194L": "#2a7f3f",
+}
+
+FOCUS_COLORS = {
+    "Proactive (Design)": "#f4a261",
+    "Diagnostic (Audit)": "#577590",
+}
+
+METHODOLOGY_COLORS = {
+    "framework":   "#f4a261",
+    "dataset":     "#219ebc",
+    "experiment":  "#8ecae6",
+    "mitigation":  "#ffb703",
+    "audit":       "#577590",
+    "benchmark":   "#43aa8b",
+    "survey":      "#90be6d",
+}
+
+MODEL_FAMILY_COLORS = {
+    "gpt":   "#8ecae6",
+    "llama": "#ffb703",
+    "bert":  "#fb8500",
+}
+
+MATURITY_LINE_COLORS = {
+    "accessibility": "#8ecae6",
+    "depth":         "#f4a261",
+}
+
+CADENCE_COLOR = "#8ecae6"
+SYNERGY_RADAR_COLOR = "#6366f1"
+
+# One color per "directions covered" count (1–6); ramp reuses Q palette low→high integration
+DIRECTION_COUNT_COLORS = {i: Q_COLORS[q] for i, q in zip(range(1, 7), reversed(Q_ORDER))}
+
+DISCIPLINE_PALETTE = ["#8ecae6", "#219ebc", "#023047", "#ffb703", "#fb8500", "#90be6d", "#43aa8b"]
+CLUSTER_PALETTE = DISCIPLINE_PALETTE
+TAXONOMY_BAR_PALETTE = ["#f4a261", "#f9844a", "#f9c74f", "#90be6d", "#43aa8b", "#577590", "#8ecae6"]
+KEYWORD_PALETTE = TAXONOMY_BAR_PALETTE
+
+TAXONOMY = {
+    "Domains": ["medical", "clinical", "healthcare", "finance", "legal", "education",
+                "hiring", "recruitment", "justice", "security", "software", "scientific"],
+    "XAI Methods": ["shap", "lime", "attention", "saliency", "integrated gradients", "counterfactual",
+                    "rationale", "probing", "mechanistic", "feature attribution", "attribution"],
+    "Fairness Concepts": ["gender", "race", "ethnic", "age", "multilingual", "language", "geographic",
+                          "socioeconomic", "stereotyp", "toxicity", "bias", "parity", "equality"],
+    "Models": ["gpt", "llama", "bert", "roberta", "mistral", "claude", "gemini", "t5", "palm",
+               "transformer", "bloom"],
+    "Paper Type": ["benchmark", "dataset", "mitigation", "audit", "survey", "human study",
+                   "experiment", "framework"],
+}
+
+VENUE_MAP = {
+    "NLP": ["acl", "emnlp", "naacl", "tacl", "coling", "lrec"],
+    "HCI/Social": ["chi", "cscw", "uist", "tochi", "human-computer"],
+    "Fairness/Ethics": ["facct", "aies", "ethics", "equity", "responsible"],
+    "General AI/ML": ["neurips", "iclr", "icml", "aaai", "ijcai", "kdd", "cvpr", "iccv"],
+    "Application": ["medical", "health", "legal", "law", "finance", "education", "software", "scientific"],
+}
+
+METHODOLOGY_TYPES = ["framework", "dataset", "experiment", "mitigation", "audit", "benchmark", "survey"]
+
+TITLE_STOP_WORDS = frozenset({
+    "the", "a", "an", "and", "or", "but", "in", "on", "at", "to", "for", "of", "with", "by", "from",
+    "as", "is", "was", "are", "were", "been", "be", "have", "has", "had", "do", "does", "did", "will",
+    "would", "could", "should", "may", "might", "must", "can", "this", "that", "these", "those", "i",
+    "you", "he", "she", "it", "we", "they", "what", "which", "who", "when", "where", "why", "how",
+    "all", "each", "every", "both", "few", "more", "most", "other", "some", "such", "no", "nor", "not",
+    "only", "own", "same", "so", "than", "too", "very", "via", "using", "based",
+})
 
 # Publication: transparent canvas, dark ink readable on white paper
 BG_TRANSPARENT = "none"
@@ -175,6 +248,61 @@ def load_data():
     return df, rel
 
 
+def unique_papers(rel: pd.DataFrame) -> pd.DataFrame:
+    return rel.drop_duplicates(subset=["title"])
+
+
+def extract_keywords(text: str) -> dict[str, list[str]]:
+    text = str(text).lower()
+    found = {cat: [] for cat in TAXONOMY}
+    for cat, keywords in TAXONOMY.items():
+        for kw in keywords:
+            if kw in text:
+                found[cat].append(kw)
+    return found
+
+
+def categorize_venue(venue) -> str:
+    v = str(venue).lower()
+    for cat, keywords in VENUE_MAP.items():
+        for kw in keywords:
+            if kw in v:
+                return cat
+    return "Other"
+
+
+def focus_label(qid: str) -> str:
+    if qid in ("Q1", "Q3"):
+        return "Proactive (Design)"
+    return "Diagnostic (Audit)"
+
+
+def build_question_topics(rel: pd.DataFrame) -> dict:
+    from collections import Counter
+
+    q_topic_data = {}
+    for qid in Q_ORDER:
+        q_rows = rel[rel["question_id"] == qid]
+        q_stats = {cat: Counter() for cat in TAXONOMY}
+        for _, row in q_rows.iterrows():
+            text = f"{row['title']} {row['abstract']} {row.get('directional_claim', '')}"
+            ext = extract_keywords(text)
+            for cat, kws in ext.items():
+                q_stats[cat].update(kws)
+        q_topic_data[qid] = {
+            cat: [{"name": k, "value": v} for k, v in count.most_common(8)]
+            for cat, count in q_stats.items()
+        }
+    return q_topic_data
+
+
+def cluster_color(cluster_name: str, index: int = 0) -> str:
+    for key, color in EDGE_COLORS.items():
+        if key in str(cluster_name):
+            return color
+    return CLUSTER_PALETTE[index % len(CLUSTER_PALETTE)]
+
+
 # ═══════════════════════════════════════════════════════════════════════
 # Figure 1 — Papers per question (horizontal bar)
 # ═══════════════════════════════════════════════════════════════════════
@@ -247,15 +375,15 @@ def fig2_yearly_trend(rel: pd.DataFrame):
 # ═══════════════════════════════════════════════════════════════════════
 def fig3_edge_distribution(rel: pd.DataFrame):
     edges = {
-        "Fairness \u2194 Explainability": {"qs": ["Q1", "Q2"], "color": "#f4a261"},
-        "Fairness \u2194 LLMs":           {"qs": ["Q3", "Q4"], "color": "#3a86a8"},
-        "Explainability \u2194 LLMs":     {"qs": ["Q5", "Q6"], "color": "#4a9a5e"},
+        "Fairness \u2194 Explainability": {"qs": ["Q1", "Q2"], "cluster": "F\u2194E"},
+        "Fairness \u2194 LLMs":           {"qs": ["Q3", "Q4"], "cluster": "F\u2194L"},
+        "Explainability \u2194 LLMs":     {"qs": ["Q5", "Q6"], "cluster": "E\u2194L"},
     }
 
     counts = rel.groupby("question_id").size()
     edge_names = list(edges.keys())
     edge_totals = [sum(counts.get(q, 0) for q in e["qs"]) for e in edges.values()]
-    edge_colors = [e["color"] for e in edges.values()]
+    edge_colors = [EDGE_COLORS[e["cluster"]] for e in edges.values()]
 
     fig, axes = plt.subplots(
         1, 2, figsize=(12, 5), gridspec_kw={"width_ratios": [1.5, 1]}, facecolor=BG_TRANSPARENT
@@ -270,10 +398,9 @@ def fig3_edge_distribution(rel: pd.DataFrame):
         q_a, q_b = info["qs"]
         c_a = counts.get(q_a, 0)
         c_b = counts.get(q_b, 0)
-        col = info["color"]
 
-        b1 = ax.barh(i - bar_h/2, c_a, bar_h, color=col, alpha=0.9, zorder=3)
-        b2 = ax.barh(i + bar_h/2, c_b, bar_h, color=col, alpha=0.55, zorder=3)
+        ax.barh(i - bar_h / 2, c_a, bar_h, color=Q_COLORS[q_a], edgecolor="none", zorder=3)
+        ax.barh(i + bar_h / 2, c_b, bar_h, color=Q_COLORS[q_b], edgecolor="none", zorder=3)
 
         ax.text(c_a + 3, i - bar_h/2, f"{Q_META[q_a]['short']}: {c_a}",
                 va="center", fontsize=9, color=TEXT_MAIN, fontweight="bold")
@@ -336,10 +463,12 @@ def fig4_diagnostic_vs_proactive(rel: pd.DataFrame):
     years = yearly.index.values
     x = np.arange(len(years))
 
-    ax.bar(x - width/2, yearly["Proactive (Design)"], width,
-           label="Proactive (Design)", color="#f4a261", edgecolor="none", zorder=3)
-    ax.bar(x + width/2, yearly["Diagnostic (Audit)"], width,
-           label="Diagnostic (Audit)", color="#8ecae6", edgecolor="none", zorder=3)
+    ax.bar(x - width / 2, yearly["Proactive (Design)"], width,
+           label="Proactive (Design)", color=FOCUS_COLORS["Proactive (Design)"],
+           edgecolor="none", zorder=3)
+    ax.bar(x + width / 2, yearly["Diagnostic (Audit)"], width,
+           label="Diagnostic (Audit)", color=FOCUS_COLORS["Diagnostic (Audit)"],
+           edgecolor="none", zorder=3)
 
     # Value labels on bars
     for i, yr in enumerate(years):
@@ -403,14 +532,14 @@ def fig5_top_venues(rel: pd.DataFrame, top_n: int = 15):
 # Figure 6 — Multi-label distribution (how many Qs per paper)
 # ═══════════════════════════════════════════════════════════════════════
 def fig6_multilabel(rel: pd.DataFrame):
-    q_per_paper = rel.groupby("title")["question_id"].nunique()
+    # Match dashboard: assignment rows per unique title
+    q_per_paper = rel.groupby("title").size()
     dist = q_per_paper.value_counts().sort_index()
 
     fig, ax = plt.subplots(figsize=(7, 4.5), facecolor=BG_TRANSPARENT)
     x = dist.index.values
-    bars = ax.bar(x, dist.values,
-                  color=["#577590", "#43aa8b", "#90be6d", "#f9c74f", "#f9844a", "#f4a261"][:len(x)],
-                  edgecolor="none", width=0.6, zorder=3)
+    bar_colors = [DIRECTION_COUNT_COLORS.get(int(k), TEXT_MUTED) for k in x]
+    bars = ax.bar(x, dist.values, color=bar_colors, edgecolor="none", width=0.6, zorder=3)
 
     for bar in bars:
         h = bar.get_height()
@@ -418,7 +547,7 @@ def fig6_multilabel(rel: pd.DataFrame):
                 str(int(h)), ha="center", va="bottom",
                 fontsize=11, fontweight="bold", color=TEXT_MAIN)
 
-    ax.set_xlabel("Number of questions addressed per paper")
+    ax.set_xlabel("Directions covered per paper")
     ax.set_ylabel("Number of papers")
     ax.set_xticks(x)
     ax.grid(axis="y", alpha=0.3)
@@ -430,8 +559,8 @@ def fig6_multilabel(rel: pd.DataFrame):
     ax.annotate(
         f"{multi}/{total} papers ({100*multi/total:.0f}%) span 2+ questions",
         xy=(2, dist.get(2, 0)), xytext=(3.5, dist.max() * 0.8),
-        fontsize=10, color="#d97706", fontweight="bold",
-        arrowprops=dict(arrowstyle="->", color="#d97706", lw=1.5),
+        fontsize=10, color=Q_COLORS["Q1"], fontweight="bold",
+        arrowprops=dict(arrowstyle="->", color=Q_COLORS["Q1"], lw=1.5),
     )
 
     fig.tight_layout()
@@ -460,13 +589,18 @@ def fig7_pillar_mentions(rel: pd.DataFrame):
     labels = [
         "Fairness\nonly", "XAI\nonly", "LLM\nonly",
         "F + E", "F + L", "E + L",
-        "All three", "None"
+        "All three", "None",
     ]
     values = [f_only, e_only, l_only, fe, fl, el, all_3, none_]
     colors_bar = [
-        "#f4a261", "#a3b18a", "#8ecae6",
-        "#d4956a", "#b87a44", "#6aaa99",
-        "#f0ab3d", "#4b5563"
+        PILLAR_COLORS["Fairness"],
+        PILLAR_COLORS["Explainability"],
+        PILLAR_COLORS["LLMs"],
+        PAIR_COLORS["Fairness \u2194 Explainability"],
+        PAIR_COLORS["Fairness \u2194 LLMs"],
+        PAIR_COLORS["Explainability \u2194 LLMs"],
+        "#f0ab3d",
+        TEXT_MUTED,
     ]
 
     fig, ax = plt.subplots(figsize=(10, 5), facecolor=BG_TRANSPARENT)
@@ -524,8 +658,8 @@ def fig8_synergy_radar(rel: pd.DataFrame):
     plt.ylim(0, max_val * 1.05)
 
     # Plot data
-    ax.plot(angles, values, color="#6366f1", linewidth=2.5, linestyle="solid", zorder=4)
-    ax.fill(angles, values, color="#6366f1", alpha=0.35, zorder=3)
+    ax.plot(angles, values, color=SYNERGY_RADAR_COLOR, linewidth=2.5, linestyle="solid", zorder=4)
+    ax.fill(angles, values, color=SYNERGY_RADAR_COLOR, alpha=0.35, zorder=3)
 
     _style_polar_axes(ax)
 
@@ -594,6 +728,448 @@ def fig9_thematic_radar(rel: pd.DataFrame):
 
 
 # ═══════════════════════════════════════════════════════════════════════
+# Figures 10–23 — Dashboard parity (insights tab + triangle)
+# ═══════════════════════════════════════════════════════════════════════
+def fig10_publication_cadence(rel: pd.DataFrame):
+    yearly = rel.dropna(subset=["year"]).groupby("year").size().sort_index()
+
+    fig, ax = plt.subplots(figsize=(9, 5), facecolor=BG_TRANSPARENT)
+    ax.fill_between(yearly.index, yearly.values, color=CADENCE_COLOR, alpha=0.35)
+    ax.plot(yearly.index, yearly.values, color=CADENCE_COLOR, linewidth=2.5, zorder=3)
+    ax.set_xlabel("Year")
+    ax.set_ylabel("Paper assignments")
+    ax.xaxis.set_major_locator(mticker.MaxNLocator(integer=True))
+    ax.set_ylim(0)
+    fig.tight_layout()
+    save(fig, "fig10_publication_cadence")
+
+
+def fig11_directional_balance(rel: pd.DataFrame):
+    counts = rel.groupby("question_id").size().reindex(Q_ORDER).fillna(0).astype(int)
+
+    fig, ax = plt.subplots(figsize=(6, 6), facecolor=BG_TRANSPARENT)
+    ax.pie(
+        counts.values,
+        labels=None,
+        colors=[Q_COLORS[q] for q in Q_ORDER],
+        autopct="%1.0f%%",
+        startangle=90,
+        pctdistance=0.78,
+        wedgeprops=dict(width=0.45, edgecolor=TEXT_MAIN, linewidth=1),
+    )
+    for t in ax.texts:
+        if "%" in t.get_text():
+            t.set_fontweight("bold")
+            t.set_color(TEXT_MAIN)
+    _style_legend(
+        ax.legend(
+            [f"{Q_META[q]['short']} ({counts[q]})" for q in Q_ORDER],
+            loc="center left",
+            bbox_to_anchor=(1.02, 0.5),
+            frameon=True,
+        )
+    )
+    fig.tight_layout()
+    save(fig, "fig11_directional_balance")
+
+
+def fig12_maturity_matrix(rel: pd.DataFrame):
+    points = []
+    for q in Q_ORDER:
+        q_rows = rel[rel["question_id"] == q]
+        total = len(q_rows) or 1
+        with_url = q_rows["url"].notna() & (q_rows["url"].astype(str) != "nan")
+        multi = (
+            q_rows["mentions_fairness"].astype(bool).astype(int)
+            + q_rows["mentions_xai"].astype(bool).astype(int)
+            + q_rows["mentions_llm"].astype(bool).astype(int)
+        ) >= 2
+        points.append({
+            "q": q,
+            "accessibility": with_url.sum() / total * 100,
+            "depth": multi.sum() / total * 100,
+            "count": len(q_rows),
+        })
+
+    fig, ax = plt.subplots(figsize=(8, 6), facecolor=BG_TRANSPARENT)
+    for p in points:
+        ax.scatter(
+            p["accessibility"], p["depth"],
+            s=80 + p["count"] * 4,
+            color=Q_COLORS[p["q"]],
+            edgecolors=TEXT_MAIN,
+            linewidths=0.6,
+            zorder=3,
+            label=p["q"],
+        )
+        ax.annotate(p["q"], (p["accessibility"], p["depth"]),
+                    fontsize=9, fontweight="bold", color=TEXT_MAIN,
+                    xytext=(4, 4), textcoords="offset points")
+
+    ax.set_xlabel("Accessibility (% with links)")
+    ax.set_ylabel("Thematic depth (% multi-theme)")
+    ax.set_xlim(0, 100)
+    ax.set_ylim(0, 100)
+    ax.grid(alpha=0.35)
+    fig.tight_layout()
+    save(fig, "fig12_maturity_matrix")
+
+
+def fig13_discipline_distribution(rel: pd.DataFrame):
+    papers = unique_papers(rel)
+    papers = papers.copy()
+    papers["venue_cat"] = papers["venue"].apply(categorize_venue)
+    dist = papers["venue_cat"].value_counts()
+
+    fig, ax = plt.subplots(figsize=(6, 6), facecolor=BG_TRANSPARENT)
+    colors = [DISCIPLINE_PALETTE[i % len(DISCIPLINE_PALETTE)] for i in range(len(dist))]
+    ax.pie(
+        dist.values,
+        labels=None,
+        colors=colors,
+        autopct="%1.0f%%",
+        startangle=90,
+        pctdistance=0.78,
+        wedgeprops=dict(width=0.45, edgecolor=TEXT_MAIN, linewidth=1),
+    )
+    for t in ax.texts:
+        if "%" in t.get_text():
+            t.set_fontweight("bold")
+            t.set_color(TEXT_MAIN)
+    _style_legend(
+        ax.legend(
+            [f"{n} ({v})" for n, v in zip(dist.index, dist.values)],
+            loc="center left",
+            bbox_to_anchor=(1.02, 0.5),
+            frameon=True,
+        )
+    )
+    fig.tight_layout()
+    save(fig, "fig13_discipline_distribution")
+
+
+def fig14_methodology_distribution(rel: pd.DataFrame, question_topics: dict):
+    x = np.arange(len(Q_ORDER))
+    width = 0.65
+    bottom = np.zeros(len(Q_ORDER))
+
+    fig, ax = plt.subplots(figsize=(10, 5), facecolor=BG_TRANSPARENT)
+    for mtype in METHODOLOGY_TYPES:
+        vals = []
+        for q in Q_ORDER:
+            topics = question_topics[q].get("Paper Type", [])
+            found = next((t["value"] for t in topics if t["name"] == mtype), 0)
+            vals.append(found)
+        ax.bar(x, vals, width, bottom=bottom, label=mtype.capitalize(),
+               color=METHODOLOGY_COLORS[mtype], edgecolor="none", zorder=3)
+        bottom += np.array(vals)
+
+    ax.set_xticks(x)
+    ax.set_xticklabels(Q_ORDER)
+    ax.set_ylabel("Keyword hits (assignments)")
+    _style_legend(
+        ax.legend(
+            loc="upper center",
+            bbox_to_anchor=(0.5, -0.12),
+            ncol=4,
+            frameon=True,
+        )
+    )
+    ax.grid(axis="y", alpha=0.3)
+    ax.grid(axis="x", visible=False)
+    fig.tight_layout()
+    fig.subplots_adjust(bottom=0.22)
+    save(fig, "fig14_methodology_distribution")
+
+
+def fig15_topical_coverage(rel: pd.DataFrame):
+    papers = unique_papers(rel)
+    stats = {
+        "Fairness mentions": int(papers["mentions_fairness"].astype(bool).sum()),
+        "Explainability mentions": int(papers["mentions_xai"].astype(bool).sum()),
+        "LLM mentions": int(papers["mentions_llm"].astype(bool).sum()),
+    }
+    labels = list(stats.keys())
+    values = list(stats.values())
+    colors = [
+        PILLAR_COLORS["Fairness"],
+        PILLAR_COLORS["Explainability"],
+        PILLAR_COLORS["LLMs"],
+    ]
+
+    fig, ax = plt.subplots(figsize=(7, 4.5), facecolor=BG_TRANSPARENT)
+    y = np.arange(len(labels))
+    bars = ax.barh(y, values, color=colors, edgecolor="none", height=0.55, zorder=3)
+    for bar, val in zip(bars, values):
+        ax.text(val + 2, bar.get_y() + bar.get_height() / 2, str(val),
+                va="center", fontsize=10, fontweight="bold", color=TEXT_MAIN)
+    ax.set_yticks(y)
+    ax.set_yticklabels(labels)
+    ax.invert_yaxis()
+    ax.set_xlabel("Unique papers")
+    ax.grid(axis="x", alpha=0.3)
+    ax.grid(axis="y", visible=False)
+    fig.tight_layout()
+    save(fig, "fig15_topical_coverage")
+
+
+def fig16_comention_intensity(rel: pd.DataFrame):
+    papers = unique_papers(rel)
+    f = papers["mentions_fairness"].astype(bool)
+    e = papers["mentions_xai"].astype(bool)
+    l = papers["mentions_llm"].astype(bool)
+    pairs = {
+        "Fairness \u2194 Explainability": int((f & e).sum()),
+        "Fairness \u2194 LLMs": int((f & l).sum()),
+        "Explainability \u2194 LLMs": int((e & l).sum()),
+    }
+
+    labels = list(pairs.keys())
+    values = [pairs[k] for k in labels]
+    colors = [PAIR_COLORS[k] for k in labels]
+
+    fig, ax = plt.subplots(figsize=(7, 4.5), facecolor=BG_TRANSPARENT)
+    y = np.arange(len(labels))
+    bars = ax.barh(y, values, color=colors, edgecolor="none", height=0.55, zorder=3)
+    for bar, val in zip(bars, values):
+        ax.text(val + 1, bar.get_y() + bar.get_height() / 2, str(val),
+                va="center", fontsize=10, fontweight="bold", color=TEXT_MAIN)
+    ax.set_yticks(y)
+    ax.set_yticklabels(labels)
+    ax.invert_yaxis()
+    ax.set_xlabel("Unique papers")
+    ax.grid(axis="x", alpha=0.3)
+    ax.grid(axis="y", visible=False)
+    fig.tight_layout()
+    save(fig, "fig16_comention_intensity")
+
+
+def fig17_maturity_trends(rel: pd.DataFrame):
+    rows = []
+    for year, grp in rel.dropna(subset=["year"]).groupby("year"):
+        total = len(grp) or 1
+        with_url = grp["url"].notna() & (grp["url"].astype(str) != "nan")
+        multi = (
+            grp["mentions_fairness"].astype(bool).astype(int)
+            + grp["mentions_xai"].astype(bool).astype(int)
+            + grp["mentions_llm"].astype(bool).astype(int)
+        ) >= 2
+        rows.append({
+            "year": int(year),
+            "accessibility": with_url.sum() / total * 100,
+            "depth": multi.sum() / total * 100,
+        })
+    trends = pd.DataFrame(rows).sort_values("year")
+
+    fig, ax = plt.subplots(figsize=(9, 5), facecolor=BG_TRANSPARENT)
+    ax.plot(trends["year"], trends["accessibility"],
+            color=MATURITY_LINE_COLORS["accessibility"], linewidth=2.5,
+            marker="o", markersize=6, label="Accessibility (% URLs)")
+    ax.plot(trends["year"], trends["depth"],
+            color=MATURITY_LINE_COLORS["depth"], linewidth=2.5,
+            marker="o", markersize=6, label="Thematic depth (% multi-theme)")
+    ax.set_xlabel("Year")
+    ax.set_ylabel("Percentage")
+    ax.set_ylim(0, 100)
+    ax.xaxis.set_major_locator(mticker.MaxNLocator(integer=True))
+    _style_legend(ax.legend(loc="upper left", frameon=True))
+    ax.grid(alpha=0.35)
+    fig.tight_layout()
+    save(fig, "fig17_maturity_trends")
+
+
+def fig18_model_lineage(rel: pd.DataFrame):
+    papers = unique_papers(rel)
+    rows = []
+    for year in sorted(papers["year"].dropna().unique()):
+        yp = papers[papers["year"] == year]
+        row = {"year": int(year)}
+        for family, key in [("gpt", "gpt"), ("llama", "llama"), ("bert", "bert")]:
+            row[family] = int(yp.apply(
+                lambda r: key in str(r["title"]).lower() or key in str(r["abstract"]).lower(),
+                axis=1,
+            ).sum())
+        rows.append(row)
+    evo = pd.DataFrame(rows)
+
+    fig, ax = plt.subplots(figsize=(9, 5), facecolor=BG_TRANSPARENT)
+    years = evo["year"].values
+    bottom = np.zeros(len(years))
+    for family in ("gpt", "llama", "bert"):
+        vals = evo[family].values
+        ax.fill_between(years, bottom, bottom + vals,
+                        label=family.upper() if family == "gpt" else family.capitalize(),
+                        color=MODEL_FAMILY_COLORS[family], alpha=0.75, linewidth=0)
+        ax.plot(years, bottom + vals, color=MODEL_FAMILY_COLORS[family], linewidth=1.5)
+        bottom = bottom + vals
+
+    ax.set_xlabel("Year")
+    ax.set_ylabel("Unique papers mentioning family")
+    ax.xaxis.set_major_locator(mticker.MaxNLocator(integer=True))
+    _style_legend(ax.legend(loc="upper left", frameon=True))
+    fig.tight_layout()
+    save(fig, "fig18_model_lineage")
+
+
+def fig19_focus_evolution(rel: pd.DataFrame):
+    df = rel.copy()
+    df["focus"] = df["question_id"].map(focus_label)
+    yearly = df.groupby(["year", "focus"]).size().unstack(fill_value=0).sort_index()
+
+    fig, ax = plt.subplots(figsize=(9, 5), facecolor=BG_TRANSPARENT)
+    years = yearly.index.values
+    x = np.arange(len(years))
+    width = 0.55
+
+    for i, col in enumerate(["Diagnostic (Audit)", "Proactive (Design)"]):
+        if col not in yearly.columns:
+            continue
+        offset = -width / 2 if col == "Diagnostic (Audit)" else width / 2
+        ax.bar(x + offset, yearly[col], width, label=col,
+               color=FOCUS_COLORS[col], edgecolor="none", zorder=3)
+
+    ax.set_xticks(x)
+    ax.set_xticklabels([str(int(y)) for y in years])
+    ax.set_xlabel("Year")
+    ax.set_ylabel("Paper assignments")
+    _style_legend(ax.legend(loc="upper left", frameon=True))
+    ax.grid(axis="y", alpha=0.3)
+    ax.grid(axis="x", visible=False)
+    fig.tight_layout()
+    save(fig, "fig19_focus_evolution")
+
+
+def fig20_taxonomy_paper_type(question_topics: dict):
+    fig, axes = plt.subplots(2, 3, figsize=(14, 8), facecolor=BG_TRANSPARENT)
+    axes = axes.flatten()
+    category = "Paper Type"
+
+    for ax, q in zip(axes, Q_ORDER):
+        topics = question_topics[q].get(category, [])
+        if not topics:
+            ax.set_visible(False)
+            continue
+        names = [t["name"] for t in topics]
+        vals = [t["value"] for t in topics]
+        colors = [TAXONOMY_BAR_PALETTE[i % len(TAXONOMY_BAR_PALETTE)] for i in range(len(names))]
+        y = np.arange(len(names))
+        ax.barh(y, vals, color=colors, edgecolor="none", height=0.6)
+        ax.set_yticks(y)
+        ax.set_yticklabels(names, fontsize=8)
+        ax.invert_yaxis()
+        ax.set_title(q, fontsize=11, fontweight="bold", color=Q_COLORS[q])
+        ax.grid(axis="x", alpha=0.25)
+        ax.grid(axis="y", visible=False)
+
+    fig.tight_layout()
+    save(fig, "fig20_taxonomy_paper_type")
+
+
+def fig21_research_clusters(rel: pd.DataFrame):
+    counts = rel.groupby("cluster").size().sort_values(ascending=False)
+    colors = [cluster_color(c, i) for i, c in enumerate(counts.index)]
+
+    fig, ax = plt.subplots(figsize=(6, 6), facecolor=BG_TRANSPARENT)
+    ax.pie(
+        counts.values,
+        labels=None,
+        colors=colors,
+        autopct="%1.0f%%",
+        startangle=90,
+        pctdistance=0.78,
+        wedgeprops=dict(width=0.45, edgecolor=TEXT_MAIN, linewidth=1),
+    )
+    for t in ax.texts:
+        if "%" in t.get_text():
+            t.set_fontweight("bold")
+            t.set_color(TEXT_MAIN)
+    _style_legend(
+        ax.legend(
+            [f"{n} ({v})" for n, v in counts.items()],
+            loc="center left",
+            bbox_to_anchor=(1.02, 0.5),
+            frameon=True,
+        )
+    )
+    fig.tight_layout()
+    save(fig, "fig21_research_clusters")
+
+
+def fig22_keyword_frequency(rel: pd.DataFrame):
+    from collections import Counter
+
+    papers = unique_papers(rel)
+    word_counts: Counter = Counter()
+    for title in papers["title"].dropna():
+        for word in str(title).lower().split():
+            w = "".join(ch for ch in word if ch.isalnum())
+            if len(w) > 3 and w not in TITLE_STOP_WORDS and not w.isdigit():
+                word_counts[w] += 1
+
+    top = word_counts.most_common(20)
+    if not top:
+        return
+
+    labels = [w.capitalize() for w, _ in reversed(top)]
+    values = [v for _, v in reversed(top)]
+    colors = [KEYWORD_PALETTE[i % len(KEYWORD_PALETTE)] for i in range(len(labels))]
+
+    fig, ax = plt.subplots(figsize=(9, 6), facecolor=BG_TRANSPARENT)
+    y = np.arange(len(labels))
+    ax.barh(y, values, color=colors, edgecolor="none", height=0.65, zorder=3)
+    for bar, val in zip(ax.patches, values):
+        ax.text(val + 0.3, bar.get_y() + bar.get_height() / 2, str(val),
+                va="center", fontsize=9, fontweight="bold", color=TEXT_MAIN)
+    ax.set_yticks(y)
+    ax.set_yticklabels(labels)
+    ax.set_xlabel("Occurrences in titles")
+    ax.grid(axis="x", alpha=0.3)
+    ax.grid(axis="y", visible=False)
+    fig.tight_layout()
+    save(fig, "fig22_keyword_frequency")
+
+
+def fig23_relationship_triangle(rel: pd.DataFrame):
+    counts = rel.groupby("cluster").size()
+    fe = int(counts.get("F\u2194E", 0))
+    fl = int(counts.get("F\u2194L", 0))
+    el = int(counts.get("E\u2194L", 0))
+
+    fig, ax = plt.subplots(figsize=(7, 6.5), facecolor=BG_TRANSPARENT)
+    ax.set_aspect("equal")
+    ax.axis("off")
+
+    # Equilateral triangle vertices (Fairness top)
+    verts = np.array([[0.5, 0.92], [0.08, 0.12], [0.92, 0.12]])
+    labels = ["Fairness", "Explainability", "LLMs"]
+    edge_mid = [
+        ((verts[0] + verts[1]) / 2, "F\u2194E", fe, EDGE_COLORS["F\u2194E"]),
+        ((verts[0] + verts[2]) / 2, "F\u2194L", fl, EDGE_COLORS["F\u2194L"]),
+        ((verts[1] + verts[2]) / 2, "E\u2194L", el, EDGE_COLORS["E\u2194L"]),
+    ]
+
+    triangle = plt.Polygon(verts, closed=True, fill=False,
+                           edgecolor=POLAR_SPINE_COLOR, linewidth=2, zorder=1)
+    ax.add_patch(triangle)
+
+    for v, lab in zip(verts, labels):
+        ax.scatter(v[0], v[1], s=120, color=PILLAR_COLORS.get(lab, TEXT_MAIN), zorder=3,
+                   edgecolors=TEXT_MAIN, linewidths=1)
+        offset = [0, 0.06] if lab == "Fairness" else [-0.12, -0.05] if lab == "Explainability" else [0.05, -0.05]
+        ax.text(v[0] + offset[0], v[1] + offset[1], lab,
+                ha="center", va="center", fontsize=11, fontweight="bold", color=TEXT_MAIN)
+
+    for mid, edge_name, count, color in edge_mid:
+        ax.text(mid[0], mid[1], f"{edge_name}\n{count}",
+                ha="center", va="center", fontsize=10, fontweight="bold", color=color)
+
+    ax.set_xlim(0, 1)
+    ax.set_ylim(0, 1)
+    fig.tight_layout()
+    save(fig, "fig23_relationship_triangle")
+
+
+# ═══════════════════════════════════════════════════════════════════════
 # Main
 # ═══════════════════════════════════════════════════════════════════════
 def main():
@@ -605,6 +1181,9 @@ def main():
     total_assign = len(rel)
     print(f"  {total_papers} unique papers, {total_assign} assignments\n")
 
+    print("Building taxonomy (for methodology / taxonomy figures) ...")
+    question_topics = build_question_topics(rel)
+
     print("Generating figures:")
     fig1_papers_per_question(rel)
     fig2_yearly_trend(rel)
@@ -615,6 +1194,20 @@ def main():
     fig7_pillar_mentions(rel)
     fig8_synergy_radar(rel)
     fig9_thematic_radar(rel)
+    fig10_publication_cadence(rel)
+    fig11_directional_balance(rel)
+    fig12_maturity_matrix(rel)
+    fig13_discipline_distribution(rel)
+    fig14_methodology_distribution(rel, question_topics)
+    fig15_topical_coverage(rel)
+    fig16_comention_intensity(rel)
+    fig17_maturity_trends(rel)
+    fig18_model_lineage(rel)
+    fig19_focus_evolution(rel)
+    fig20_taxonomy_paper_type(question_topics)
+    fig21_research_clusters(rel)
+    fig22_keyword_frequency(rel)
+    fig23_relationship_triangle(rel)
 
     print(f"\nAll figures saved to {OUTPUT_DIR}/")
 
