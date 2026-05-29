@@ -496,7 +496,7 @@ def fig4_diagnostic_vs_proactive(rel: pd.DataFrame):
 # ═══════════════════════════════════════════════════════════════════════
 # Figure 5 — Top venues (horizontal bar)
 # ═══════════════════════════════════════════════════════════════════════
-def fig5_top_venues(rel: pd.DataFrame, top_n: int = 15):
+def fig5_top_venues(rel: pd.DataFrame, top_n: int = 10):
     # Deduplicate: count each unique paper per venue only once
     papers = rel.drop_duplicates(subset=["title"]).copy()
     venue_counts = (papers["venue"]
