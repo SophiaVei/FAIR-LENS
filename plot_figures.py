@@ -731,15 +731,34 @@ def fig9_thematic_radar(rel: pd.DataFrame):
 # Figures 10–23 — Dashboard parity (insights tab + triangle)
 # ═══════════════════════════════════════════════════════════════════════
 def fig10_publication_cadence(rel: pd.DataFrame):
-    yearly = rel.dropna(subset=["year"]).groupby("year").size().sort_index()
+    papers = rel.drop_duplicates(subset=["title"]).copy()
+    yearly = papers.dropna(subset=["year"]).groupby("year").size().sort_index()
 
-    fig, ax = plt.subplots(figsize=(9, 5), facecolor=BG_TRANSPARENT)
-    ax.fill_between(yearly.index, yearly.values, color=CADENCE_COLOR, alpha=0.35)
-    ax.plot(yearly.index, yearly.values, color=CADENCE_COLOR, linewidth=2.5, zorder=3)
+    fig, ax = plt.subplots(figsize=(10, 5.5), facecolor=BG_TRANSPARENT)
+
+    # Gradient-style fill with layered alphas for depth
+    ax.fill_between(yearly.index, yearly.values, color=CADENCE_COLOR, alpha=0.15, zorder=1)
+    ax.fill_between(yearly.index, yearly.values, color=CADENCE_COLOR, alpha=0.20,
+                    step=None, zorder=1)
+
+    # Main line with markers
+    ax.plot(yearly.index, yearly.values, color=CADENCE_COLOR, linewidth=2.8,
+            marker="o", markersize=7, markerfacecolor="white",
+            markeredgecolor=CADENCE_COLOR, markeredgewidth=2.2, zorder=4)
+
+    # Data labels above each point
+    for x, y in zip(yearly.index, yearly.values):
+        ax.text(x, y + yearly.max() * 0.04, str(int(y)),
+                ha="center", va="bottom", fontsize=10, fontweight="bold",
+                color=TEXT_MAIN, zorder=5)
+
     ax.set_xlabel("Year")
-    ax.set_ylabel("Paper assignments")
+    ax.set_ylabel("Number of papers")
     ax.xaxis.set_major_locator(mticker.MaxNLocator(integer=True))
-    ax.set_ylim(0)
+    ax.set_ylim(0, yearly.max() * 1.18)
+    ax.grid(axis="y", alpha=0.3)
+    ax.grid(axis="x", visible=False)
+
     fig.tight_layout()
     save(fig, "fig10_publication_cadence")
 
