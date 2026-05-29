@@ -507,7 +507,7 @@ def fig5_top_venues(rel: pd.DataFrame, top_n: int = 10):
                     .head(top_n)
                     .iloc[::-1])  # reverse for horizontal bar
 
-    fig, ax = plt.subplots(figsize=(9, 6), facecolor=BG_TRANSPARENT)
+    fig, ax = plt.subplots(figsize=(12, 6), facecolor=BG_TRANSPARENT)
     colors = plt.cm.viridis(np.linspace(0.3, 0.85, len(venue_counts)))
 
     bars = ax.barh(venue_counts.index, venue_counts.values,
