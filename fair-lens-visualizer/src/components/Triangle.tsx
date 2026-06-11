@@ -131,6 +131,7 @@ const ACTIVE_STROKE = "#f0ab3d";
 const WEDGE_STROKE = "rgba(255, 255, 255, 0.15)";
 const ARROW_STROKE = "#ffae42";
 const LABEL_FILL = "rgba(255, 255, 255, 0.7)";
+const displayQuestionId = (qid: string) => qid.replace(/^Q(?=[1-6]$)/, "RP");
 
 const Triangle: React.FC<TriangleProps> = ({
   activeQuestions,
@@ -168,7 +169,7 @@ const Triangle: React.FC<TriangleProps> = ({
         <title id="triangleTitle">FAIR–LENS Triangle</title>
         <desc id="triangleDesc">
           Triangle with vertices Fairness/Bias, Explainability, and LLMs,
-          subdivided into six directional regions (Q1–Q6). You can select one
+          subdivided into six directional research pathways (RP1-RP6). You can select one
           or more regions at the same time; arrows indicate the chosen
           directions.
         </desc>
@@ -215,7 +216,7 @@ const Triangle: React.FC<TriangleProps> = ({
               onClick={() => onToggleQuestion(w.id)}
             >
               <title>
-                {w.id}: {w.label}
+                {displayQuestionId(w.id)}: {w.label}
               </title>
             </polygon>
           );
@@ -237,8 +238,8 @@ const Triangle: React.FC<TriangleProps> = ({
       </svg>
 
       <p className="triangle-hint hide-on-export">
-        Click one or more regions (Q1–Q6) or legend items to highlight those
-        directions and filter the paper list. Click again to unselect.
+        Click one or more regions (RP1-RP6) or legend items to highlight those
+        research pathways and filter the paper list. Click again to unselect.
       </p>
     </div>
   );

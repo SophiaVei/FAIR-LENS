@@ -62,32 +62,34 @@ export interface Paper {
 
 const questionMeta: Record<QuestionId, { label: string; description: string }> = {
   Q1: {
-    label: "Q1: Fairness → Explainability",
+    label: "RP1: Fairness → Explainability",
     description: "Fairness/bias concerns motivate or shape explainability/XAI methods.",
   },
   Q2: {
-    label: "Q2: Explainability → Fairness",
+    label: "RP2: Explainability → Fairness",
     description: "XAI methods are used to detect, measure, or mitigate bias/unfairness.",
   },
   Q3: {
-    label: "Q3: Fairness → LLMs",
+    label: "RP3: Fairness → LLMs",
     description: "Fairness/bias is defined or operationalized specifically for LLMs.",
   },
   Q4: {
-    label: "Q4: LLMs → Fairness",
+    label: "RP4: LLMs → Fairness",
     description: "LLMs affect, amplify, or address fairness/discrimination.",
   },
   Q5: {
-    label: "Q5: Explainability → LLMs",
+    label: "RP5: Explainability → LLMs",
     description: "XAI methods are applied to analyze or interpret LLM behaviour.",
   },
   Q6: {
-    label: "Q6: LLMs → Explainability",
+    label: "RP6: LLMs → Explainability",
     description: "LLMs advance or challenge explainability (e.g., self-explanations, CoT).",
   },
 };
 
 const questionOrder = Object.keys(questionMeta) as QuestionId[];
+const displayQuestionId = (qid: string) => qid.replace(/^Q(?=[1-6]$)/, "RP");
+const displayQuestionIds = (qids: string[]) => qids.map(displayQuestionId).join(", ");
 
 type YearFilter = {
   min: number | null;
@@ -278,7 +280,7 @@ const PaperDetailModal: React.FC<{ paper: Paper; onClose: () => void }> = ({ pap
         <div className="detail-meta">
           {paper.year && <span>{paper.year}</span>}
           {paper.venue && <span>{paper.venue}</span>}
-          <span>Question · {paper.question_id}</span>
+          <span>Research pathway · {displayQuestionId(String(paper.question_id))}</span>
         </div>
         {paper.directional_claim && (
           <div className="detail-section">
@@ -334,7 +336,7 @@ const ExplorerView: React.FC<ExplorerProps> = ({
           <h1>FAIR–LENS</h1>
           <p className="subtitle">
             Interactive view of how included papers connect <strong>Fairness/Bias</strong>, <strong>Explainability</strong>, and{" "}
-            <strong>LLMs</strong> via six directional questions (Q1–Q6).
+            <strong>LLMs</strong> via six directional research pathways (RP1-RP6).
           </p>
           <div className="hero-actions">
             <button className="ghost-button" onClick={handleReset}>
@@ -351,7 +353,7 @@ const ExplorerView: React.FC<ExplorerProps> = ({
           <div className="stat-card">
             <span className="stat-label">Unique relevant papers</span>
             <strong className="stat-value">{uniquePapers || "—"}</strong>
-            <span className="stat-meta">Distinct papers answering Q1–Q6</span>
+            <span className="stat-meta">Distinct papers assigned to RP1-RP6</span>
           </div>
           <div className="stat-card">
             <span className="stat-label">Visible rows</span>
@@ -359,7 +361,7 @@ const ExplorerView: React.FC<ExplorerProps> = ({
             <span className="stat-meta">
               {activeQuestions.length
                 ? `${activeQuestions.length} focus areas`
-                : "All questions. Relevant papers to all Qs presenting the overlaps when no focus area is selected."}
+                : "All research pathways. Relevant papers across all pathways are shown when no focus area is selected."}
             </span>
           </div>
           <div className="stat-card">
@@ -401,7 +403,7 @@ const ExplorerView: React.FC<ExplorerProps> = ({
           <article className="panel legend-panel">
             <div className="panel-head">
               <div>
-                <p className="eyebrow">Directional questions</p>
+                <p className="eyebrow">Research pathways</p>
                 <h3>Pick your focus</h3>
               </div>
               <div className="legend-actions">
@@ -419,7 +421,7 @@ const ExplorerView: React.FC<ExplorerProps> = ({
                 return (
                   <button key={qid} className={`legend-chip ${isActive ? "is-active" : ""}`} onClick={() => toggleQuestion(qid)}>
                     <div className="chip-heading">
-                      <span className="chip-id">{qid}</span>
+                      <span className="chip-id">{displayQuestionId(qid)}</span>
                       <span className="chip-count">{totalsByQuestion[qid]} papers</span>
                     </div>
                     <p className="chip-title">{questionMeta[qid].label}</p>
@@ -497,14 +499,14 @@ const ExplorerView: React.FC<ExplorerProps> = ({
                   }
                 }}
               >
-                {qid}
+                {displayQuestionId(qid)}
               </span>
             ))}
           </div>
 
           <p className="count-text">
             Showing <strong>{filteredPapers.length}</strong> papers. Duplicates arise when a paper belongs to more than one directional
-            question.
+            research pathway.
           </p>
 
           <div className="paper-scroll">
@@ -536,7 +538,7 @@ const ExplorerView: React.FC<ExplorerProps> = ({
                   {p.mentions_fairness && <span className="tag tag-fairness">Fairness/Bias</span>}
                   {p.mentions_xai && <span className="tag tag-xai">Explainability</span>}
                   {p.mentions_llm && <span className="tag tag-llm">LLMs</span>}
-                  <span className="tag tag-qid">{p.question_id}</span>
+                  <span className="tag tag-qid">{displayQuestionId(String(p.question_id))}</span>
                 </div>
               </article>
             ))}
@@ -621,7 +623,7 @@ const InsightsView: React.FC<InsightsProps> = ({ papers, questionMeta, insights 
     { name: "Explainability ↔ LLMs", value: mentionStats.xaiLlm, fill: "#90be6d" },
   ];
 
-  // Question trends over time
+  // Research pathway trends over time
   const questionTrends = useMemo(() => {
     const trends: Record<number, Record<QuestionId, number>> = {};
     papers.forEach((paper) => {
@@ -660,7 +662,7 @@ const InsightsView: React.FC<InsightsProps> = ({ papers, questionMeta, insights 
     return questionOrder.map((qid) => {
       const count = papers.filter((p) => (p.question_id as QuestionId) === qid).length;
       return {
-        subject: qid,
+        subject: displayQuestionId(qid),
         fullName: questionMeta[qid].label.split(":")[1].trim(),
         value: count,
       };
@@ -672,7 +674,7 @@ const InsightsView: React.FC<InsightsProps> = ({ papers, questionMeta, insights 
       const qPapers = papers.filter((p) => p.question_id === qid);
       const total = qPapers.length || 1;
       return {
-        subject: qid,
+        subject: displayQuestionId(qid),
         Fairness: (qPapers.filter(p => p.mentions_fairness).length / total) * 100,
         XAI: (qPapers.filter(p => p.mentions_xai).length / total) * 100,
         LLMs: (qPapers.filter(p => p.mentions_llm).length / total) * 100,
@@ -690,7 +692,7 @@ const InsightsView: React.FC<InsightsProps> = ({ papers, questionMeta, insights 
       ).length;
       
       return {
-        name: qid,
+        name: displayQuestionId(qid),
         fullName: questionMeta[qid].label.split(":")[1].trim(),
         accessibility: (withUrl / total) * 100,
         depth: (multiTheme / total) * 100,
@@ -700,12 +702,13 @@ const InsightsView: React.FC<InsightsProps> = ({ papers, questionMeta, insights 
   }, [papers, questionMeta, questionOrder]);
 
   const methodologyData = useMemo(() => {
-    if (!insights?.question_topics) return [];
+    const questionTopics = insights?.question_topics;
+    if (!questionTopics) return [];
     
     const categories = ["framework", "dataset", "experiment", "mitigation", "audit", "benchmark", "survey"];
     
     return questionOrder.map((qid) => {
-      const topics = insights.question_topics[qid]?.["Paper Type"] || [];
+      const topics = questionTopics[qid]?.["Paper Type"] || [];
       const row: any = { name: qid };
       categories.forEach(cat => {
         const found = topics.find((t: any) => t.name === cat);
@@ -879,9 +882,9 @@ const InsightsView: React.FC<InsightsProps> = ({ papers, questionMeta, insights 
           <article className="insight-card" id="chart-directional">
             <div className="panel-head">
               <div>
-                <p className="eyebrow">Questions</p>
+                <p className="eyebrow">Research pathways</p>
                 <h3>Directional balance</h3>
-                <p style={{ margin: "0.5rem 0 0", fontSize: "0.9rem", color: "var(--text-muted)" }}>Distribution of papers across the six research questions</p>
+                <p style={{ margin: "0.5rem 0 0", fontSize: "0.9rem", color: "var(--text-muted)" }}>Distribution of papers across the six research pathways</p>
               </div>
               <button
                 className="ghost-button hide-on-export"
@@ -925,7 +928,7 @@ const InsightsView: React.FC<InsightsProps> = ({ papers, questionMeta, insights 
               <div>
                 <p className="eyebrow">Structural Analysis</p>
                 <h3>Research Synergy Profile</h3>
-                <p style={{ margin: "0.5rem 0 0", fontSize: "0.9rem", color: "var(--text-muted)" }}>Spatial distribution of papers across the 6-question framework</p>
+                <p style={{ margin: "0.5rem 0 0", fontSize: "0.9rem", color: "var(--text-muted)" }}>Spatial distribution of papers across the 6-pathway framework</p>
               </div>
               <button
                 className="ghost-button hide-on-export"
@@ -963,7 +966,7 @@ const InsightsView: React.FC<InsightsProps> = ({ papers, questionMeta, insights 
               </ResponsiveContainer>
             </div>
             <p className="insight-text" style={{ fontSize: "0.85rem", fontStyle: "italic" }}>
-              Visualizes the field's gravitational pull—showing a strong structural skew toward <strong>Visibility</strong> (Q5/Q6) over <strong>Alignment</strong> (Q3/Q4).
+              Visualizes the field's gravitational pull—showing a strong structural skew toward <strong>Visibility</strong> (RP5/RP6) over <strong>Alignment</strong> (RP3/RP4).
             </p>
           </article>
 
@@ -972,7 +975,7 @@ const InsightsView: React.FC<InsightsProps> = ({ papers, questionMeta, insights 
               <div>
                 <p className="eyebrow">Thematic Purity</p>
                 <h3>Thematic Distribution</h3>
-                <p style={{ margin: "0.5rem 0 0", fontSize: "0.9rem", color: "var(--text-muted)" }}>Percentage of papers mentioning each core theme by question</p>
+                <p style={{ margin: "0.5rem 0 0", fontSize: "0.9rem", color: "var(--text-muted)" }}>Percentage of papers mentioning each core theme by research pathway</p>
               </div>
               <button
                 className="ghost-button hide-on-export"
@@ -1001,7 +1004,7 @@ const InsightsView: React.FC<InsightsProps> = ({ papers, questionMeta, insights 
               </ResponsiveContainer>
             </div>
             <p className="insight-text" style={{ fontSize: "0.85rem", fontStyle: "italic" }}>
-              High-fidelity mapping: Q3/Q4 are <strong>Fairness-pure</strong>, while Q5/Q6 are <strong>XAI-dominated</strong> with minimal fairness intersection.
+              High-fidelity mapping: RP3/RP4 are <strong>Fairness-pure</strong>, while RP5/RP6 are <strong>XAI-dominated</strong> with minimal fairness intersection.
             </p>
           </article>
 
@@ -1063,8 +1066,8 @@ const InsightsView: React.FC<InsightsProps> = ({ papers, questionMeta, insights 
                       return null;
                     }}
                   />
-                  <Scatter name="Questions" data={maturityData} fill="#6366f1">
-                    {maturityData.map((entry, index) => (
+                  <Scatter name="Research pathways" data={maturityData} fill="#6366f1">
+                    {maturityData.map((_, index) => (
                       <Cell key={`cell-${index}`} fill={["#f4a261", "#f9844a", "#f9c74f", "#90be6d", "#43aa8b", "#577590"][index % 6]} />
                     ))}
                   </Scatter>
@@ -1075,7 +1078,7 @@ const InsightsView: React.FC<InsightsProps> = ({ papers, questionMeta, insights 
                {questionOrder.map((qid, idx) => (
                  <div key={qid} style={{ display: "flex", alignItems: "center", gap: "0.4rem", fontSize: "0.75rem", color: "var(--text-muted)" }}>
                    <div style={{ width: "8px", height: "8px", borderRadius: "50%", backgroundColor: ["#f4a261", "#f9844a", "#f9c74f", "#90be6d", "#43aa8b", "#577590"][idx] }} />
-                   <span>{qid}</span>
+                   <span>{displayQuestionId(qid)}</span>
                  </div>
                ))}
             </div>
@@ -1138,7 +1141,7 @@ const InsightsView: React.FC<InsightsProps> = ({ papers, questionMeta, insights 
               <div>
                 <p className="eyebrow">Methodology</p>
                 <h3>Research Approach Distribution</h3>
-                <p style={{ margin: "0.5rem 0 0", fontSize: "0.9rem", color: "var(--text-muted)" }}>Comparing the nature of contributions (Frameworks, Experiments, Audits, etc.) across questions</p>
+                <p style={{ margin: "0.5rem 0 0", fontSize: "0.9rem", color: "var(--text-muted)" }}>Comparing the nature of contributions (Frameworks, Experiments, Audits, etc.) across research pathways</p>
               </div>
               <button
                 className="ghost-button hide-on-export"
@@ -1171,7 +1174,7 @@ const InsightsView: React.FC<InsightsProps> = ({ papers, questionMeta, insights 
               </ResponsiveContainer>
             </div>
             <p className="insight-text" style={{ fontSize: "0.85rem", fontStyle: "italic", marginTop: "1rem" }}>
-              Reveals that <strong>Visibility</strong> (Q5/Q6) is dominated by experiments and audits, while <strong>Accountability</strong> (Q1) sees a higher proportion of new frameworks and datasets.
+              Reveals that <strong>Visibility</strong> (RP5/RP6) is dominated by experiments and audits, while <strong>Accountability</strong> (RP1) sees a higher proportion of new frameworks and datasets.
             </p>
           </article>
 
@@ -1350,7 +1353,7 @@ const InsightsView: React.FC<InsightsProps> = ({ papers, questionMeta, insights 
                     onChange={(e) => setActiveTaxonomyQid(e.target.value as QuestionId)}
                     className="select-input"
                  >
-                    {Object.keys(questionMeta).map(qid => <option key={qid} value={qid}>{qid}</option>)}
+                    {Object.keys(questionMeta).map(qid => <option key={qid} value={qid}>{displayQuestionId(qid)}</option>)}
                  </select>
                  <button
                   className="ghost-button"
@@ -1391,8 +1394,8 @@ const InsightsView: React.FC<InsightsProps> = ({ papers, questionMeta, insights 
             <div className="panel-head">
               <div>
                 <p className="eyebrow">Evolution</p>
-                <h2>Question trends over time</h2>
-                <p style={{ margin: "0.5rem 0 0", fontSize: "0.9rem", color: "var(--text-muted)" }}>How focus on each research question has changed year by year</p>
+                <h2>Research pathway trends over time</h2>
+                <p style={{ margin: "0.5rem 0 0", fontSize: "0.9rem", color: "var(--text-muted)" }}>How focus on each research pathway has changed year by year</p>
               </div>
               <button
                 className="ghost-button hide-on-export"
@@ -1437,12 +1440,12 @@ const InsightsView: React.FC<InsightsProps> = ({ papers, questionMeta, insights 
                   <YAxis allowDecimals={false} stroke="rgba(255,255,255,0.5)" />
                   <RechartsTooltip content={<ChartTooltip />} />
                   <Legend iconType="circle" />
-                  <Area type="monotone" dataKey="Q1" stroke="#f4a261" strokeWidth={3} fill="url(#q1Gradient)" />
-                  <Area type="monotone" dataKey="Q2" stroke="#f9844a" strokeWidth={3} fill="url(#q2Gradient)" />
-                  <Area type="monotone" dataKey="Q3" stroke="#f9c74f" strokeWidth={3} fill="url(#q3Gradient)" />
-                  <Area type="monotone" dataKey="Q4" stroke="#90be6d" strokeWidth={3} fill="url(#q4Gradient)" />
-                  <Area type="monotone" dataKey="Q5" stroke="#43aa8b" strokeWidth={3} fill="url(#q5Gradient)" />
-                  <Area type="monotone" dataKey="Q6" stroke="#577590" strokeWidth={3} fill="url(#q6Gradient)" />
+                  <Area type="monotone" dataKey="Q1" name="RP1" stroke="#f4a261" strokeWidth={3} fill="url(#q1Gradient)" />
+                  <Area type="monotone" dataKey="Q2" name="RP2" stroke="#f9844a" strokeWidth={3} fill="url(#q2Gradient)" />
+                  <Area type="monotone" dataKey="Q3" name="RP3" stroke="#f9c74f" strokeWidth={3} fill="url(#q3Gradient)" />
+                  <Area type="monotone" dataKey="Q4" name="RP4" stroke="#90be6d" strokeWidth={3} fill="url(#q4Gradient)" />
+                  <Area type="monotone" dataKey="Q5" name="RP5" stroke="#43aa8b" strokeWidth={3} fill="url(#q5Gradient)" />
+                  <Area type="monotone" dataKey="Q6" name="RP6" stroke="#577590" strokeWidth={3} fill="url(#q6Gradient)" />
                 </AreaChart>
               </ResponsiveContainer>
             </div>
@@ -1549,7 +1552,7 @@ const InsightsView: React.FC<InsightsProps> = ({ papers, questionMeta, insights 
               </ResponsiveContainer>
             </div>
             <p className="hide-on-export" style={{ fontSize: "0.85rem", color: "var(--text-muted)", marginTop: "1rem", textAlign: "center" }}>
-              <strong>Note:</strong> Proactive design (Q1, Q3) consistently lags behind diagnostic auditing across all years.
+              <strong>Note:</strong> Proactive design (RP1, RP3) consistently lags behind diagnostic auditing across all years.
             </p>
           </article>
 
@@ -1721,7 +1724,7 @@ const SynthesisView: React.FC<SynthesisProps> = ({ papers, totalsByQuestion, uni
             { n: 1, title: "Search", desc: "Lens search & exports" },
             { n: 2, title: "Screening", desc: "deduplication, English, peer-reviewed" },
             { n: 3, title: "Prefilter", desc: "exclude only clear E0–E2" },
-            { n: 4, title: "Directional coding", desc: "Q1–Q6, multi-label" },
+            { n: 4, title: "Directional coding", desc: "RP1-RP6, multi-label" },
             { n: 5, title: "Synthesis", desc: "three evidence axes" },
           ].map((step, i) => (
             <React.Fragment key={step.n}>
@@ -1755,7 +1758,7 @@ const SynthesisView: React.FC<SynthesisProps> = ({ papers, totalsByQuestion, uni
               </div>
             </div>
             <div className="synth-badge">multi-label evidence</div>
-            <p className="synth-fine">A paper may contribute to more than one question.</p>
+            <p className="synth-fine">A paper may contribute to more than one research pathway.</p>
           </div>
 
           {/* CENTER — Triangle */}
@@ -1774,19 +1777,19 @@ const SynthesisView: React.FC<SynthesisProps> = ({ papers, totalsByQuestion, uni
               <line x1="60" y1="280" x2="340" y2="280" stroke="rgba(163,177,138,0.35)" strokeWidth="2" />
 
               {/* Q labels on edges */}
-              <text x="118" y="145" fill="#f4a261" fontSize="13" fontWeight="bold">Q1</text>
+              <text x="118" y="145" fill="#f4a261" fontSize="13" fontWeight="bold">RP1</text>
               <text x="108" y="160" fill="rgba(255,255,255,0.45)" fontSize="10">F→E</text>
-              <text x="138" y="215" fill="#a3b18a" fontSize="13" fontWeight="bold">Q2</text>
+              <text x="138" y="215" fill="#a3b18a" fontSize="13" fontWeight="bold">RP2</text>
               <text x="128" y="230" fill="rgba(255,255,255,0.45)" fontSize="10">E→F</text>
 
-              <text x="265" y="145" fill="#f4a261" fontSize="13" fontWeight="bold">Q3</text>
+              <text x="265" y="145" fill="#f4a261" fontSize="13" fontWeight="bold">RP3</text>
               <text x="265" y="160" fill="rgba(255,255,255,0.45)" fontSize="10">F→L</text>
-              <text x="250" y="215" fill="#8ecae6" fontSize="13" fontWeight="bold">Q4</text>
+              <text x="250" y="215" fill="#8ecae6" fontSize="13" fontWeight="bold">RP4</text>
               <text x="250" y="230" fill="rgba(255,255,255,0.45)" fontSize="10">L→F</text>
 
-              <text x="148" y="302" fill="#a3b18a" fontSize="13" fontWeight="bold">Q5</text>
+              <text x="148" y="302" fill="#a3b18a" fontSize="13" fontWeight="bold">RP5</text>
               <text x="143" y="317" fill="rgba(255,255,255,0.45)" fontSize="10">E→L</text>
-              <text x="225" y="302" fill="#8ecae6" fontSize="13" fontWeight="bold">Q6</text>
+              <text x="225" y="302" fill="#8ecae6" fontSize="13" fontWeight="bold">RP6</text>
               <text x="220" y="317" fill="rgba(255,255,255,0.45)" fontSize="10">L→E</text>
 
               {/* Center label */}
@@ -2006,8 +2009,7 @@ const App: React.FC = () => {
   } else if (activeQuestions.length === 1) {
     listTitle = questionMeta[activeQuestions[0]].label;
   } else {
-    const ids = activeQuestions.join(", ");
-    listTitle = `Selected questions: ${ids}`;
+    listTitle = `Selected research pathways: ${displayQuestionIds(activeQuestions)}`;
   }
 
   if (loading) {
