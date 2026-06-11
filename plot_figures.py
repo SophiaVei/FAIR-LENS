@@ -12,8 +12,10 @@ Usage:
 import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.ticker as mticker
+import matplotlib.dates as mdates
 from pathlib import Path
 import numpy as np
+import re
 
 # ── Paths ────────────────────────────────────────────────────────────
 SCRIPT_DIR = Path(__file__).parent
@@ -250,6 +252,45 @@ def load_data():
 
 def unique_papers(rel: pd.DataFrame) -> pd.DataFrame:
     return rel.drop_duplicates(subset=["title"])
+
+
+def infer_partial_year_cutoff(papers: pd.DataFrame) -> pd.Timestamp | None:
+    """
+    Infer a defensible cutoff for the partial final year from publisher URL timestamps.
+
+    We only use exact-ish signals already present in the local data, currently the
+    `version=<unix_timestamp>` pattern seen in some publisher PDF URLs. If found for
+    the final year, we advance to the next month boundary so the x-axis ends at the
+    last covered month rather than implying the whole year is observed.
+    """
+    if papers.empty or "year" not in papers.columns:
+        return None
+
+    max_year = pd.to_numeric(papers["year"], errors="coerce").dropna()
+    if max_year.empty:
+        return None
+    max_year = int(max_year.max())
+
+    exact_dates: list[pd.Timestamp] = []
+    year_mask = pd.to_numeric(papers["year"], errors="coerce") == max_year
+    for url in papers.loc[year_mask, "url"].fillna("").astype(str):
+        match = re.search(r"[?&]version=(\d{10})\b", url)
+        if not match:
+            continue
+        try:
+            ts = pd.to_datetime(int(match.group(1)), unit="s", utc=True).tz_localize(None)
+        except (ValueError, TypeError, OverflowError):
+            continue
+        exact_dates.append(ts)
+
+    if not exact_dates:
+        return None
+
+    latest_exact = max(exact_dates)
+    if latest_exact.year != max_year:
+        return None
+
+    return latest_exact.normalize() + pd.offsets.MonthBegin(1)
 
 
 def extract_keywords(text: str) -> dict[str, list[str]]:
@@ -733,28 +774,52 @@ def fig9_thematic_radar(rel: pd.DataFrame):
 def fig10_publication_cadence(rel: pd.DataFrame):
     papers = rel.drop_duplicates(subset=["title"]).copy()
     yearly = papers.dropna(subset=["year"]).groupby("year").size().sort_index()
+    partial_cutoff = infer_partial_year_cutoff(papers)
 
     fig, ax = plt.subplots(figsize=(10, 5.5), facecolor=BG_TRANSPARENT)
 
+    use_partial_cutoff = (
+        partial_cutoff is not None
+        and not yearly.empty
+        and int(yearly.index.max()) == partial_cutoff.year
+        and len(yearly) >= 2
+    )
+
+    if use_partial_cutoff:
+        x_values = [pd.Timestamp(year=int(y), month=12, day=31) for y in yearly.index[:-1]]
+        x_values.append(partial_cutoff)
+        xticks = x_values
+        xticklabels = [str(int(y)) for y in yearly.index[:-1]] + [partial_cutoff.strftime("%m/%Y")]
+    else:
+        x_values = yearly.index.tolist()
+
     # Gradient-style fill with layered alphas for depth
-    ax.fill_between(yearly.index, yearly.values, color=CADENCE_COLOR, alpha=0.15, zorder=1)
-    ax.fill_between(yearly.index, yearly.values, color=CADENCE_COLOR, alpha=0.20,
+    ax.fill_between(x_values, yearly.values, color=CADENCE_COLOR, alpha=0.15, zorder=1)
+    ax.fill_between(x_values, yearly.values, color=CADENCE_COLOR, alpha=0.20,
                     step=None, zorder=1)
 
     # Main line with markers
-    ax.plot(yearly.index, yearly.values, color=CADENCE_COLOR, linewidth=2.8,
+    ax.plot(x_values, yearly.values, color=CADENCE_COLOR, linewidth=2.8,
             marker="o", markersize=7, markerfacecolor="white",
             markeredgecolor=CADENCE_COLOR, markeredgewidth=2.2, zorder=4)
 
     # Data labels above each point
-    for x, y in zip(yearly.index, yearly.values):
+    for x, y in zip(x_values, yearly.values):
         ax.text(x, y + yearly.max() * 0.04, str(int(y)),
                 ha="center", va="bottom", fontsize=10, fontweight="bold",
                 color=TEXT_MAIN, zorder=5)
 
     ax.set_xlabel("Year")
     ax.set_ylabel("Number of papers")
-    ax.xaxis.set_major_locator(mticker.MaxNLocator(integer=True))
+
+    if use_partial_cutoff:
+        ax.set_xticks(xticks)
+        ax.set_xticklabels(xticklabels)
+        ax.xaxis.set_minor_locator(mdates.MonthLocator(interval=3))
+        ax.set_xlim(x_values[0] - pd.Timedelta(days=45), partial_cutoff)
+    else:
+        ax.xaxis.set_major_locator(mticker.MaxNLocator(integer=True))
+
     ax.set_ylim(0, yearly.max() * 1.18)
     ax.grid(axis="y", alpha=0.3)
     ax.grid(axis="x", visible=False)
