@@ -62,27 +62,27 @@ export interface Paper {
 
 const questionMeta: Record<QuestionId, { label: string; description: string }> = {
   Q1: {
-    label: "RP1: Fairness → Explainability",
+    label: "RP1: Fairness -> Explainability",
     description: "Fairness/bias concerns motivate or shape explainability/XAI methods.",
   },
   Q2: {
-    label: "RP2: Explainability → Fairness",
+    label: "RP2: Explainability -> Fairness",
     description: "XAI methods are used to detect, measure, or mitigate bias/unfairness.",
   },
   Q3: {
-    label: "RP3: Fairness → LLMs",
+    label: "RP3: Fairness -> LLMs",
     description: "Fairness/bias is defined or operationalized specifically for LLMs.",
   },
   Q4: {
-    label: "RP4: LLMs → Fairness",
+    label: "RP4: LLMs -> Fairness",
     description: "LLMs affect, amplify, or address fairness/discrimination.",
   },
   Q5: {
-    label: "RP5: Explainability → LLMs",
+    label: "RP5: Explainability -> LLMs",
     description: "XAI methods are applied to analyze or interpret LLM behaviour.",
   },
   Q6: {
-    label: "RP6: LLMs → Explainability",
+    label: "RP6: LLMs -> Explainability",
     description: "LLMs advance or challenge explainability (e.g., self-explanations, CoT).",
   },
 };
@@ -91,6 +91,89 @@ const questionOrder = Object.keys(questionMeta) as QuestionId[];
 const displayQuestionId = (qid: string) => qid.replace(/^Q(?=[1-6]$)/, "RP");
 const displayQuestionIds = (qids: string[]) => qids.map(displayQuestionId).join(", ");
 
+const lensDisplayMap: Record<string, string> = {
+  Accountability: "Accountability",
+  Alignment: "Assurance",
+  Visibility: "Transparency",
+  "Fairness -> Explainability": "Accountability",
+  "Fairness -> LLMs": "Assurance",
+  "Explainability -> LLMs": "Transparency",
+  "F↔E": "Accountability",
+  "F↔L": "Assurance",
+  "E↔L": "Transparency",
+};
+const displayLens = (name: string) => lensDisplayMap[name] || name;
+
+const displayQuestionMeta: Record<
+  QuestionId,
+  {
+    label: string;
+    description: string;
+    pathwayName: string;
+    code: string;
+    direction: string;
+    role: string;
+    lens: string;
+  }
+> = {
+  Q1: {
+    label: "RP1 | Enable Credibility",
+    description: "EN·CRD | Fairness -> Explainability | Enabler | Accountability",
+    pathwayName: "Enable Credibility",
+    code: "EN·CRD",
+    direction: "Fairness -> Explainability",
+    role: "Enabler",
+    lens: "Accountability",
+  },
+  Q2: {
+    label: "RP2 | Audit Fairness",
+    description: "AU·FAIR | Explainability -> Fairness | Auditor | Accountability",
+    pathwayName: "Audit Fairness",
+    code: "AU·FAIR",
+    direction: "Explainability -> Fairness",
+    role: "Auditor",
+    lens: "Accountability",
+  },
+  Q3: {
+    label: "RP3 | Enable Alignment",
+    description: "EN·ALN | Fairness -> LLMs | Enabler | Assurance",
+    pathwayName: "Enable Alignment",
+    code: "EN·ALN",
+    direction: "Fairness -> LLMs",
+    role: "Enabler",
+    lens: "Assurance",
+  },
+  Q4: {
+    label: "RP4 | Audit Outcomes",
+    description: "AU·OUT | LLMs -> Fairness | Auditor | Assurance",
+    pathwayName: "Audit Outcomes",
+    code: "AU·OUT",
+    direction: "LLMs -> Fairness",
+    role: "Auditor",
+    lens: "Assurance",
+  },
+  Q5: {
+    label: "RP5 | Audit Behavior",
+    description: "AU·BEH | Explainability -> LLMs | Auditor | Transparency",
+    pathwayName: "Audit Behavior",
+    code: "AU·BEH",
+    direction: "Explainability -> LLMs",
+    role: "Auditor",
+    lens: "Transparency",
+  },
+  Q6: {
+    label: "RP6 | Enable Explanations",
+    description: "EN·EXP | LLMs -> Explainability | Enabler | Transparency",
+    pathwayName: "Enable Explanations",
+    code: "EN·EXP",
+    direction: "LLMs -> Explainability",
+    role: "Enabler",
+    lens: "Transparency",
+  },
+};
+
+const displayQuestionCode = (qid: QuestionId) => displayQuestionMeta[qid].code;
+const displayQuestionShort = (qid: QuestionId) => `${displayQuestionId(qid)} · ${displayQuestionCode(qid)}`;
 type YearFilter = {
   min: number | null;
   max: number | null;
@@ -98,7 +181,6 @@ type YearFilter = {
 
 type ExplorerProps = {
   filteredPapers: Paper[];
-  questionMeta: typeof questionMeta;
   questionOrder: QuestionId[];
   activeQuestions: QuestionId[];
   toggleQuestion: (qid: QuestionId) => void;
@@ -275,16 +357,16 @@ const PaperDetailModal: React.FC<{ paper: Paper; onClose: () => void }> = ({ pap
         <button className="ghost-button detail-close" onClick={onClose}>
           Close
         </button>
-        <p className="eyebrow">{paper.cluster || "Directional insight"}</p>
+        <p className="eyebrow">{displayLens(paper.cluster || "") || "Pathway insight"}</p>
         <h2>{paper.title}</h2>
         <div className="detail-meta">
           {paper.year && <span>{paper.year}</span>}
           {paper.venue && <span>{paper.venue}</span>}
-          <span>Research pathway · {displayQuestionId(String(paper.question_id))}</span>
+          <span>Research pathway | {displayQuestionId(String(paper.question_id))}</span>
         </div>
         {paper.directional_claim && (
           <div className="detail-section">
-            <h4>Directional claim</h4>
+            <h4>Pathway claim</h4>
             <p>{paper.directional_claim}</p>
           </div>
         )}
@@ -309,7 +391,6 @@ const PaperDetailModal: React.FC<{ paper: Paper; onClose: () => void }> = ({ pap
 
 const ExplorerView: React.FC<ExplorerProps> = ({
   filteredPapers,
-  questionMeta,
   questionOrder,
   activeQuestions,
   toggleQuestion,
@@ -336,7 +417,7 @@ const ExplorerView: React.FC<ExplorerProps> = ({
           <h1>FAIR–LENS</h1>
           <p className="subtitle">
             Interactive view of how included papers connect <strong>Fairness/Bias</strong>, <strong>Explainability</strong>, and{" "}
-            <strong>LLMs</strong> via six directional research pathways (RP1-RP6).
+            <strong>LLMs</strong> via six research pathways (RP1-RP6).
           </p>
           <div className="hero-actions">
             <button className="ghost-button" onClick={handleReset}>
@@ -424,8 +505,8 @@ const ExplorerView: React.FC<ExplorerProps> = ({
                       <span className="chip-id">{displayQuestionId(qid)}</span>
                       <span className="chip-count">{totalsByQuestion[qid]} papers</span>
                     </div>
-                    <p className="chip-title">{questionMeta[qid].label}</p>
-                    <span className="chip-desc">{questionMeta[qid].description}</span>
+                    <p className="chip-title">{displayQuestionMeta[qid].label}</p>
+                    <span className="chip-desc">{displayQuestionMeta[qid].description}</span>
                   </button>
                 );
               })}
@@ -505,7 +586,7 @@ const ExplorerView: React.FC<ExplorerProps> = ({
           </div>
 
           <p className="count-text">
-            Showing <strong>{filteredPapers.length}</strong> papers. Duplicates arise when a paper belongs to more than one directional
+            Showing <strong>{filteredPapers.length}</strong> papers. Duplicates arise when a paper belongs to more than one
             research pathway.
           </p>
 
@@ -513,7 +594,7 @@ const ExplorerView: React.FC<ExplorerProps> = ({
             {filteredPapers.length === 0 && (
               <div className="empty-state">
                 <Sparkles size={20} />
-                <p>No papers match the current filters. Try expanding the year range or selecting more directions.</p>
+                <p>No papers match the current filters. Try expanding the year range or selecting more pathways.</p>
               </div>
             )}
 
@@ -521,7 +602,7 @@ const ExplorerView: React.FC<ExplorerProps> = ({
               <article key={`${p.title}-${idx}`} className="paper-card">
                 <div className="paper-card-head">
                   <div>
-                    {p.cluster && <span className="paper-cluster">{p.cluster}</span>}
+                  {p.cluster && <span className="paper-cluster">{displayLens(p.cluster)}</span>}
                     <h3>{p.title}</h3>
                   </div>
                   <div className="paper-meta">
@@ -572,7 +653,7 @@ const InsightsView: React.FC<InsightsProps> = ({ papers, questionMeta, insights 
   const questionSeries = useMemo(
     () =>
       questionOrder.map((qid) => ({
-        name: questionMeta[qid].label,
+        name: displayQuestionMeta[qid].label,
         value: papers.filter((p) => (p.question_id as QuestionId) === qid).length,
         qid,
       })),
@@ -618,9 +699,9 @@ const InsightsView: React.FC<InsightsProps> = ({ papers, questionMeta, insights 
   ];
 
   const comboSeries = [
-    { name: "Fairness ↔ Explainability", value: mentionStats.fairnessXai, fill: "#f9c74f" },
-    { name: "Fairness ↔ LLMs", value: mentionStats.fairnessLlm, fill: "#f9844a" },
-    { name: "Explainability ↔ LLMs", value: mentionStats.xaiLlm, fill: "#90be6d" },
+    { name: "Accountability", value: mentionStats.fairnessXai, fill: "#f9c74f" },
+    { name: "Assurance", value: mentionStats.fairnessLlm, fill: "#f9844a" },
+    { name: "Transparency", value: mentionStats.xaiLlm, fill: "#90be6d" },
   ];
 
   // Research pathway trends over time
@@ -653,7 +734,7 @@ const InsightsView: React.FC<InsightsProps> = ({ papers, questionMeta, insights 
       counts[cluster] = (counts[cluster] || 0) + 1;
     });
     return Object.entries(counts).map(([name, value]) => ({
-      name: name.replace("↔", " ↔ "),
+      name: displayLens(name.replace("↔", " ↔ ")),
       value,
     }));
   }, [papers]);
@@ -663,7 +744,7 @@ const InsightsView: React.FC<InsightsProps> = ({ papers, questionMeta, insights 
       const count = papers.filter((p) => (p.question_id as QuestionId) === qid).length;
       return {
         subject: displayQuestionId(qid),
-        fullName: questionMeta[qid].label.split(":")[1].trim(),
+        fullName: `${displayQuestionMeta[qid].pathwayName} (${displayQuestionMeta[qid].code})`,
         value: count,
       };
     });
@@ -693,7 +774,7 @@ const InsightsView: React.FC<InsightsProps> = ({ papers, questionMeta, insights 
       
       return {
         name: displayQuestionId(qid),
-        fullName: questionMeta[qid].label.split(":")[1].trim(),
+        fullName: `${displayQuestionMeta[qid].pathwayName} (${displayQuestionMeta[qid].code})`,
         accessibility: (withUrl / total) * 100,
         depth: (multiTheme / total) * 100,
         count: total,
@@ -883,7 +964,7 @@ const InsightsView: React.FC<InsightsProps> = ({ papers, questionMeta, insights 
             <div className="panel-head">
               <div>
                 <p className="eyebrow">Research pathways</p>
-                <h3>Directional balance</h3>
+                <h3>Research pathway balance</h3>
                 <p style={{ margin: "0.5rem 0 0", fontSize: "0.9rem", color: "var(--text-muted)" }}>Distribution of papers across the six research pathways</p>
               </div>
               <button
@@ -966,7 +1047,7 @@ const InsightsView: React.FC<InsightsProps> = ({ papers, questionMeta, insights 
               </ResponsiveContainer>
             </div>
             <p className="insight-text" style={{ fontSize: "0.85rem", fontStyle: "italic" }}>
-              Visualizes the field's gravitational pull—showing a strong structural skew toward <strong>Visibility</strong> (RP5/RP6) over <strong>Alignment</strong> (RP3/RP4).
+              Visualizes the field's gravitational pull—showing a strong structural skew toward <strong>Transparency</strong> (RP5/RP6) over <strong>Assurance</strong> (RP3/RP4).
             </p>
           </article>
 
@@ -1078,7 +1159,7 @@ const InsightsView: React.FC<InsightsProps> = ({ papers, questionMeta, insights 
                {questionOrder.map((qid, idx) => (
                  <div key={qid} style={{ display: "flex", alignItems: "center", gap: "0.4rem", fontSize: "0.75rem", color: "var(--text-muted)" }}>
                    <div style={{ width: "8px", height: "8px", borderRadius: "50%", backgroundColor: ["#f4a261", "#f9844a", "#f9c74f", "#90be6d", "#43aa8b", "#577590"][idx] }} />
-                   <span>{displayQuestionId(qid)}</span>
+                    <span>{displayQuestionShort(qid)}</span>
                  </div>
                ))}
             </div>
@@ -1174,7 +1255,7 @@ const InsightsView: React.FC<InsightsProps> = ({ papers, questionMeta, insights 
               </ResponsiveContainer>
             </div>
             <p className="insight-text" style={{ fontSize: "0.85rem", fontStyle: "italic", marginTop: "1rem" }}>
-              Reveals that <strong>Visibility</strong> (RP5/RP6) is dominated by experiments and audits, while <strong>Accountability</strong> (RP1) sees a higher proportion of new frameworks and datasets.
+              Reveals that <strong>Transparency</strong> (RP5/RP6) is dominated by experiments and audits, while <strong>Accountability</strong> (RP1/RP2) shows stronger framework and dataset activity.
             </p>
           </article>
 
@@ -1302,7 +1383,7 @@ const InsightsView: React.FC<InsightsProps> = ({ papers, questionMeta, insights 
               <div>
                 <p className="eyebrow">Integration</p>
                 <h3>Evidence intersectionality</h3>
-                <p style={{ margin: "0.5rem 0 0", fontSize: "0.9rem", color: "var(--text-muted)" }}>Number of papers covering multiple FAIR-LENS directions simultaneously</p>
+                <p style={{ margin: "0.5rem 0 0", fontSize: "0.9rem", color: "var(--text-muted)" }}>Number of papers covering multiple FAIR-LENS pathways simultaneously</p>
               </div>
               <button
                 className="ghost-button hide-on-export"
@@ -1329,7 +1410,7 @@ const InsightsView: React.FC<InsightsProps> = ({ papers, questionMeta, insights 
               </ResponsiveContainer>
             </div>
             <p style={{ fontSize: "0.85rem", color: "var(--text-muted)", marginTop: "1rem", textAlign: "center" }}>
-              Papers covering <strong>4+ directions</strong> (shown in orange) represent the most integrated research in the corpus.
+              Papers covering <strong>4+ pathways</strong> (shown in orange) represent the most integrated research in the corpus.
             </p>
           </article>
 
@@ -1337,8 +1418,8 @@ const InsightsView: React.FC<InsightsProps> = ({ papers, questionMeta, insights 
             <div className="panel-head">
               <div>
                 <p className="eyebrow">Taxonomy Explorer</p>
-                <h3>Thematic focus by direction</h3>
-                <p style={{ margin: "0.5rem 0 0", fontSize: "0.9rem", color: "var(--text-muted)" }}>Top terms extracted from paper abstracts for each direction</p>
+                <h3>Thematic focus by pathway</h3>
+                <p style={{ margin: "0.5rem 0 0", fontSize: "0.9rem", color: "var(--text-muted)" }}>Top terms extracted from paper abstracts for each pathway</p>
               </div>
               <div className="taxonomy-controls hide-on-export" style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
                  <select 
@@ -1353,7 +1434,7 @@ const InsightsView: React.FC<InsightsProps> = ({ papers, questionMeta, insights 
                     onChange={(e) => setActiveTaxonomyQid(e.target.value as QuestionId)}
                     className="select-input"
                  >
-                    {Object.keys(questionMeta).map(qid => <option key={qid} value={qid}>{displayQuestionId(qid)}</option>)}
+                    {Object.keys(questionMeta).map(qid => <option key={qid} value={qid}>{displayQuestionShort(qid as QuestionId)}</option>)}
                  </select>
                  <button
                   className="ghost-button"
@@ -1711,7 +1792,7 @@ const SynthesisView: React.FC<SynthesisProps> = ({ papers, totalsByQuestion, uni
           <p className="eyebrow" style={{ color: "#f4a261" }}>Concluding Synthesis</p>
           <h1>FAIR–LENS Pipeline</h1>
           <p className="subtitle">
-            From systematic search to directional evidence — a complete methodological overview and its central finding.
+            From systematic search to pathway evidence — a complete methodological overview and its central finding.
           </p>
         </div>
       </header>
@@ -1724,8 +1805,8 @@ const SynthesisView: React.FC<SynthesisProps> = ({ papers, totalsByQuestion, uni
             { n: 1, title: "Search", desc: "Lens search & exports" },
             { n: 2, title: "Screening", desc: "deduplication, English, peer-reviewed" },
             { n: 3, title: "Prefilter", desc: "exclude only clear E0–E2" },
-            { n: 4, title: "Directional coding", desc: "RP1-RP6, multi-label" },
-            { n: 5, title: "Synthesis", desc: "three evidence axes" },
+            { n: 4, title: "Pathway coding", desc: "RP1-RP6, multi-label" },
+            { n: 5, title: "Synthesis", desc: "three evidence lenses" },
           ].map((step, i) => (
             <React.Fragment key={step.n}>
               <div className="synth-step">
@@ -1794,7 +1875,7 @@ const SynthesisView: React.FC<SynthesisProps> = ({ papers, totalsByQuestion, uni
 
               {/* Center label */}
               <text x="200" y="195" fill="white" textAnchor="middle" fontSize="15" fontWeight="bold" letterSpacing="2">FAIR-LENS</text>
-              <text x="200" y="213" fill="rgba(255,255,255,0.5)" textAnchor="middle" fontSize="10">directional</text>
+              <text x="200" y="213" fill="rgba(255,255,255,0.5)" textAnchor="middle" fontSize="10">pathway</text>
               <text x="200" y="226" fill="rgba(255,255,255,0.5)" textAnchor="middle" fontSize="10">framework</text>
 
               {/* Nodes */}
@@ -1809,31 +1890,31 @@ const SynthesisView: React.FC<SynthesisProps> = ({ papers, totalsByQuestion, uni
             </svg>
           </div>
 
-          {/* RIGHT — Evidence axes */}
+          {/* RIGHT — Evidence lenses */}
           <div className="synth-axes">
-            <h3 className="synth-heading">Evidence axes</h3>
+            <h3 className="synth-heading">Evidence lenses</h3>
             <p className="synth-sub">The corpus is unevenly distributed across the triangle.</p>
 
             <div className="synth-axis-list">
               <div className="synth-axis-item">
                 <div className="synth-axis-count" style={{ background: "#f4a261", color: "#000" }}>{fairXai}</div>
                 <div className="synth-axis-detail">
-                  <strong style={{ color: "#f4a261" }}>Fairness ↔ Explainability</strong>
-                  <span>accountability through explanation</span>
+                  <strong style={{ color: "#f4a261" }}>Accountability</strong>
+                  <span>accountability lens through explanation</span>
                 </div>
               </div>
               <div className="synth-axis-item">
                 <div className="synth-axis-count" style={{ background: "#1d4e89", color: "#fff" }}>{fairLlm}</div>
                 <div className="synth-axis-detail">
-                  <strong style={{ color: "#8ecae6" }}>Fairness ↔ LLMs</strong>
-                  <span>smallest axis; proactive fairness remains limited</span>
+                  <strong style={{ color: "#8ecae6" }}>Assurance</strong>
+                  <span>smallest lens; proactive fairness remains limited</span>
                 </div>
               </div>
               <div className="synth-axis-item">
                 <div className="synth-axis-count" style={{ background: "#2a7f3f", color: "#fff" }}>{xaiLlm}</div>
                 <div className="synth-axis-detail">
-                  <strong style={{ color: "#a3b18a" }}>Explainability ↔ LLMs</strong>
-                  <span>dominant visibility axis</span>
+                  <strong style={{ color: "#a3b18a" }}>Transparency</strong>
+                  <span>dominant transparency lens</span>
                 </div>
               </div>
             </div>
@@ -2005,9 +2086,9 @@ const App: React.FC = () => {
 
   let listTitle: string;
   if (activeQuestions.length === 0) {
-    listTitle = "All directional papers";
+    listTitle = "All pathway papers";
   } else if (activeQuestions.length === 1) {
-    listTitle = questionMeta[activeQuestions[0]].label;
+    listTitle = displayQuestionMeta[activeQuestions[0]].label;
   } else {
     listTitle = `Selected research pathways: ${displayQuestionIds(activeQuestions)}`;
   }
@@ -2050,7 +2131,6 @@ const App: React.FC = () => {
           element={
             <ExplorerView
               filteredPapers={filteredPapers}
-              questionMeta={questionMeta}
               questionOrder={questionOrder}
               activeQuestions={activeQuestions}
               toggleQuestion={toggleQuestion}
@@ -2070,7 +2150,7 @@ const App: React.FC = () => {
             />
           }
         />
-        <Route path="/insights" element={<InsightsView papers={papers} questionMeta={questionMeta} insights={insights} />} />
+        <Route path="/insights" element={<InsightsView papers={papers} questionMeta={displayQuestionMeta} insights={insights} />} />
         <Route path="/framework" element={<SynthesisView papers={papers} totalsByQuestion={totalsByQuestion} uniquePapers={uniquePapers} />} />
       </Routes>
       {detailPaper && <PaperDetailModal paper={detailPaper} onClose={() => setDetailPaper(null)} />}

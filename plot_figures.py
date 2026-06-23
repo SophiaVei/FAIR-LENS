@@ -24,24 +24,109 @@ OUTPUT_DIR = SCRIPT_DIR / "outputs" / "figures"
 
 # ── Question metadata (matches questions.py exactly) ─────────────────
 Q_META = {
-    "Q1": {"short": "Q1: F\u2192E",  "label": "Fairness \u2192 Explainability",     "cluster": "F\u2194E"},
-    "Q2": {"short": "Q2: E\u2192F",  "label": "Explainability \u2192 Fairness",     "cluster": "F\u2194E"},
-    "Q3": {"short": "Q3: F\u2192L",  "label": "Fairness \u2192 LLMs",              "cluster": "F\u2194L"},
-    "Q4": {"short": "Q4: L\u2192F",  "label": "LLMs \u2192 Fairness",              "cluster": "F\u2194L"},
-    "Q5": {"short": "Q5: E\u2192L",  "label": "Explainability \u2192 LLMs",         "cluster": "E\u2194L"},
-    "Q6": {"short": "Q6: L\u2192E",  "label": "LLMs \u2192 Explainability",         "cluster": "E\u2194L"},
+    "Q1": {
+        "short": "RP1 \u00b7 EN\u00b7CRD",
+        "name": "Enable Credibility",
+        "code": "EN\u00b7CRD",
+        "label": "Fairness \u2192 Explainability",
+        "role": "Enabler",
+        "lens": "Accountability",
+        "cluster": "F\u2194E",
+    },
+    "Q2": {
+        "short": "RP2 \u00b7 AU\u00b7FAIR",
+        "name": "Audit Fairness",
+        "code": "AU\u00b7FAIR",
+        "label": "Explainability \u2192 Fairness",
+        "role": "Auditor",
+        "lens": "Accountability",
+        "cluster": "F\u2194E",
+    },
+    "Q3": {
+        "short": "RP3 \u00b7 EN\u00b7ALN",
+        "name": "Enable Alignment",
+        "code": "EN\u00b7ALN",
+        "label": "Fairness \u2192 LLMs",
+        "role": "Enabler",
+        "lens": "Assurance",
+        "cluster": "F\u2194L",
+    },
+    "Q4": {
+        "short": "RP4 \u00b7 AU\u00b7OUT",
+        "name": "Audit Outcomes",
+        "code": "AU\u00b7OUT",
+        "label": "LLMs \u2192 Fairness",
+        "role": "Auditor",
+        "lens": "Assurance",
+        "cluster": "F\u2194L",
+    },
+    "Q5": {
+        "short": "RP5 \u00b7 AU\u00b7BEH",
+        "name": "Audit Behavior",
+        "code": "AU\u00b7BEH",
+        "label": "Explainability \u2192 LLMs",
+        "role": "Auditor",
+        "lens": "Transparency",
+        "cluster": "E\u2194L",
+    },
+    "Q6": {
+        "short": "RP6 \u00b7 EN\u00b7EXP",
+        "name": "Enable Explanations",
+        "code": "EN\u00b7EXP",
+        "label": "LLMs \u2192 Explainability",
+        "role": "Enabler",
+        "lens": "Transparency",
+        "cluster": "E\u2194L",
+    },
 }
 Q_ORDER = ["Q1", "Q2", "Q3", "Q4", "Q5", "Q6"]
+
+
+def display_qid(qid: str) -> str:
+    return qid.replace("Q", "RP", 1)
+
+
+def rp_short_label(qid: str) -> str:
+    meta = Q_META[qid]
+    return f"{display_qid(qid)} \u00b7 {meta['code']}"
+
+
+def rp_plot_label(qid: str) -> str:
+    meta = Q_META[qid]
+    return f"{display_qid(qid)}\n{meta['code']}"
+
+
+def lens_name(cluster_code: str) -> str:
+    return {
+        "F\u2194E": "Accountability",
+        "F\u2194L": "Assurance",
+        "E\u2194L": "Transparency",
+    }.get(cluster_code, cluster_code)
+
+
+def display_cluster_name(name: str) -> str:
+    text = str(name).strip()
+    return {
+        "Accountability": "Accountability",
+        "Alignment": "Assurance",
+        "Visibility": "Transparency",
+        "F\u2194E": "Accountability",
+        "F\u2194L": "Assurance",
+        "E\u2194L": "Transparency",
+        "Fairness \u2194 Explainability": "Accountability",
+        "Fairness \u2194 LLMs": "Assurance",
+        "Explainability \u2194 LLMs": "Transparency",
+    }.get(text, text)
 
 # ── Color palette (matches the dashboard UI) ─────────────────────────
 # Per-question colors (used in bar charts, pie charts)
 Q_COLORS = {
-    "Q1": "#f4a261",   # warm orange
-    "Q2": "#f9844a",   # coral
-    "Q3": "#f9c74f",   # gold
-    "Q4": "#90be6d",   # lime green
-    "Q5": "#43aa8b",   # teal
-    "Q6": "#577590",   # steel blue
+    "Q1": "#1fa774",   # Enable Credibility
+    "Q2": "#6bd3a8",   # Audit Fairness
+    "Q3": "#c73e5d",   # Enable Alignment
+    "Q4": "#e07a8f",   # Audit Outcomes
+    "Q5": "#7fb3ff",   # Audit Behavior
+    "Q6": "#3b82f6",   # Enable Explanations
 }
 
 # Pillar colors (dashboard: mentions, thematic radar, topical coverage)
@@ -53,16 +138,16 @@ PILLAR_COLORS = {
 
 # Pairwise co-mention colors (dashboard: co-mention intensity)
 PAIR_COLORS = {
-    "Fairness \u2194 Explainability": "#f9c74f",
-    "Fairness \u2194 LLMs":           "#f9844a",
-    "Explainability \u2194 LLMs":     "#90be6d",
+    "Fairness \u2194 Explainability": "#0b6e4f",  # Accountability
+    "Fairness \u2194 LLMs":           "#8b1e3f",  # Assurance
+    "Explainability \u2194 LLMs":     "#1d4ed8",  # Transparency
 }
 
 # Edge/cluster colors (triangle edges, research clusters)
 EDGE_COLORS = {
-    "F\u2194E": "#f4a261",
-    "F\u2194L": "#1d4e89",
-    "E\u2194L": "#2a7f3f",
+    "F\u2194E": "#0b6e4f",  # Accountability
+    "F\u2194L": "#8b1e3f",  # Assurance
+    "E\u2194L": "#1d4ed8",  # Transparency
 }
 
 FOCUS_COLORS = {
@@ -91,7 +176,7 @@ MATURITY_LINE_COLORS = {
     "depth":         "#f4a261",
 }
 
-CADENCE_COLOR = "#8ecae6"
+CADENCE_COLOR = "#aeccee"
 SYNERGY_RADAR_COLOR = "#6366f1"
 
 # One color per "directions covered" count (1–6); ramp reuses Q palette low→high integration
@@ -179,8 +264,8 @@ def setup_style():
         "ytick.labelsize":     10,
         # Text
         "text.color":          TEXT_MAIN,
-        "font.family":         "sans-serif",
-        "font.sans-serif":     ["Inter", "Segoe UI", "Helvetica Neue", "Arial"],
+        "font.family":         "Canva Sans",
+        "font.sans-serif":     ["Canva Sans", "Inter", "Segoe UI", "Helvetica Neue", "Arial", "sans-serif"],
         "font.size":           11,
         # Legend
         "legend.facecolor":    "none",
@@ -210,6 +295,12 @@ def _style_legend(leg):
     frame.set_alpha(0.0)
     for text in leg.get_texts():
         text.set_color(TEXT_MAIN)
+    handles = getattr(leg, "legend_handles", None) or getattr(leg, "legendHandles", [])
+    for handle in handles:
+        if hasattr(handle, "set_edgecolor"):
+            handle.set_edgecolor("none")
+        if hasattr(handle, "set_linewidth"):
+            handle.set_linewidth(0)
 
 
 def _style_polar_axes(ax):
@@ -352,7 +443,7 @@ def fig1_papers_per_question(rel: pd.DataFrame):
 
     fig, ax = plt.subplots(figsize=(8, 4.5), facecolor=BG_TRANSPARENT)
     bars = ax.barh(
-        [Q_META[q]["short"] for q in Q_ORDER],
+        [rp_short_label(q) for q in Q_ORDER],
         [counts[q] for q in Q_ORDER],
         color=[Q_COLORS[q] for q in Q_ORDER],
         edgecolor="none",
@@ -367,7 +458,7 @@ def fig1_papers_per_question(rel: pd.DataFrame):
                 f"{int(w)}", va="center", ha="left",
                 fontsize=11, fontweight="bold", color=TEXT_MAIN)
 
-    ax.set_xlabel("Number of paper assignments")
+    ax.set_xlabel("Number of research pathway assignments")
     ax.invert_yaxis()
     ax.set_xlim(0, counts.max() * 1.15)
     ax.grid(axis="x", alpha=0.3)
@@ -394,14 +485,14 @@ def fig2_yearly_trend(rel: pd.DataFrame):
     for q in Q_ORDER:
         vals = yearly[q].values
         ax.fill_between(years, bottom, bottom + vals,
-                        label=Q_META[q]["short"],
+                        label=rp_short_label(q),
                         color=Q_COLORS[q], alpha=0.85, linewidth=0)
         ax.plot(years, bottom + vals, color=Q_COLORS[q],
                 linewidth=1.2, alpha=0.9)
         bottom = bottom + vals
 
     ax.set_xlabel("Year")
-    ax.set_ylabel("Paper assignments")
+    ax.set_ylabel("Research pathway assignments")
     _style_legend(ax.legend(loc="upper left", ncol=3, frameon=True))
     ax.xaxis.set_major_locator(mticker.MaxNLocator(integer=True))
     ax.set_xlim(years.min(), years.max())
@@ -416,9 +507,9 @@ def fig2_yearly_trend(rel: pd.DataFrame):
 # ═══════════════════════════════════════════════════════════════════════
 def fig3_edge_distribution(rel: pd.DataFrame):
     edges = {
-        "Fairness \u2194 Explainability": {"qs": ["Q1", "Q2"], "cluster": "F\u2194E"},
-        "Fairness \u2194 LLMs":           {"qs": ["Q3", "Q4"], "cluster": "F\u2194L"},
-        "Explainability \u2194 LLMs":     {"qs": ["Q5", "Q6"], "cluster": "E\u2194L"},
+        "Accountability": {"qs": ["Q1", "Q2"], "cluster": "F\u2194E"},
+        "Assurance":      {"qs": ["Q3", "Q4"], "cluster": "F\u2194L"},
+        "Transparency":   {"qs": ["Q5", "Q6"], "cluster": "E\u2194L"},
     }
 
     counts = rel.groupby("question_id").size()
@@ -443,18 +534,31 @@ def fig3_edge_distribution(rel: pd.DataFrame):
         ax.barh(i - bar_h / 2, c_a, bar_h, color=Q_COLORS[q_a], edgecolor="none", zorder=3)
         ax.barh(i + bar_h / 2, c_b, bar_h, color=Q_COLORS[q_b], edgecolor="none", zorder=3)
 
-        ax.text(c_a + 3, i - bar_h/2, f"{Q_META[q_a]['short']}: {c_a}",
-                va="center", fontsize=9, color=TEXT_MAIN, fontweight="bold")
-        ax.text(c_b + 3, i + bar_h/2, f"{Q_META[q_b]['short']}: {c_b}",
+        ax.text(c_a + 3, i - bar_h/2, f"{rp_short_label(q_a)}: {c_a}",
+                va="center", fontsize=9, color=TEXT_MAIN)
+        ax.text(c_b + 3, i + bar_h/2, f"{rp_short_label(q_b)}: {c_b}",
                 va="center", fontsize=9, color=TEXT_MUTED)
 
     ax.set_yticks(y_positions)
-    ax.set_yticklabels(edge_names, fontsize=10)
+    ax.set_yticklabels([""] * len(edge_names))
+    ax.tick_params(axis="y", length=0)
     ax.invert_yaxis()
     ax.set_xlabel("Paper assignments")
     ax.set_xlim(0, max(counts.values) * 1.3)
     ax.grid(axis="x", alpha=0.3)
     ax.grid(axis="y", visible=False)
+
+    marker_x = max(counts.values) * 0.03
+    for i, (_, info) in enumerate(edges.items()):
+        ax.scatter(
+            marker_x,
+            i,
+            s=220,
+            color=EDGE_COLORS[info["cluster"]],
+            edgecolors=TEXT_MAIN,
+            linewidths=1.0,
+            zorder=4,
+        )
 
     # Right: donut chart of total edge distribution
     ax2 = axes[1]
@@ -462,23 +566,24 @@ def fig3_edge_distribution(rel: pd.DataFrame):
         edge_totals, labels=None,
         colors=edge_colors, autopct="%1.0f%%",
         startangle=90, pctdistance=0.78,
-        wedgeprops=dict(width=0.45, edgecolor=TEXT_MAIN, linewidth=1),
+        wedgeprops=dict(width=0.45, edgecolor="none", linewidth=0),
     )
     for t in autotexts:
         t.set_fontsize(11)
         t.set_fontweight("bold")
-        t.set_color(TEXT_MAIN)
+        t.set_color("#ffffff")
 
     # Center text
     ax2.text(0, 0, f"{sum(edge_totals)}\nassignments",
-             ha="center", va="center", fontsize=13, fontweight="bold",
+             ha="center", va="center", fontsize=12, fontweight="bold",
              color=TEXT_MAIN)
 
-    ax2.legend(
+    leg = ax2.legend(
         [f"{n}  ({t})" for n, t in zip(edge_names, edge_totals)],
         loc="lower center", bbox_to_anchor=(0.5, -0.15),
         fontsize=9, frameon=False, ncol=1
     )
+    _style_legend(leg)
 
     fig.tight_layout()
     save(fig, "fig3_edge_distribution")
@@ -588,7 +693,7 @@ def fig6_multilabel(rel: pd.DataFrame):
                 str(int(h)), ha="center", va="bottom",
                 fontsize=11, fontweight="bold", color=TEXT_MAIN)
 
-    ax.set_xlabel("Directions covered per paper")
+    ax.set_xlabel("Pathways covered per paper")
     ax.set_ylabel("Number of papers")
     ax.set_xticks(x)
     ax.grid(axis="y", alpha=0.3)
@@ -597,11 +702,17 @@ def fig6_multilabel(rel: pd.DataFrame):
     # Annotation
     multi = int((q_per_paper >= 2).sum())
     total = int(q_per_paper.shape[0])
+    multi_x_start = 1.5
+    multi_x_end = float(x.max()) + 0.5
+    note_color = TEXT_MAIN
     ax.annotate(
-        f"{multi}/{total} papers ({100*multi/total:.0f}%) span 2+ questions",
-        xy=(2, dist.get(2, 0)), xytext=(3.5, dist.max() * 0.8),
-        fontsize=10, color=Q_COLORS["Q1"], fontweight="bold",
-        arrowprops=dict(arrowstyle="->", color=Q_COLORS["Q1"], lw=1.5),
+        f"{multi}/{total} papers ({100*multi/total:.0f}%) span 2+ research pathways",
+        xy=((multi_x_start + multi_x_end) / 2 + 0.2, dist.max() * 0.57),
+        xytext=(float(x.max()) + 0.7, dist.max() * 0.80),
+        fontsize=10, color=note_color, fontweight="bold",
+        ha="right",
+        bbox=dict(facecolor="white", edgecolor="none", alpha=0.92, boxstyle="round,pad=0.25"),
+        arrowprops=dict(arrowstyle="->", color=note_color, lw=1.5),
     )
 
     fig.tight_layout()
@@ -670,8 +781,9 @@ def fig7_pillar_mentions(rel: pd.DataFrame):
 # ═══════════════════════════════════════════════════════════════════════
 def fig8_synergy_radar(rel: pd.DataFrame):
     counts = rel.groupby("question_id").size().reindex(Q_ORDER).fillna(0).astype(int)
+    radar_color = "#7fb3ff"
 
-    categories = [Q_META[q]["short"].replace(": ", ":\n") for q in Q_ORDER]
+    categories = [rp_plot_label(q) for q in Q_ORDER]
     N = len(categories)
     angles = [n / float(N) * 2 * np.pi for n in range(N)]
     angles += angles[:1]
@@ -691,18 +803,59 @@ def fig8_synergy_radar(rel: pd.DataFrame):
     plt.xticks(angles[:-1], categories, color=TEXT_MAIN, size=10, fontweight="bold")
     ax.tick_params(axis="x", pad=18)
 
+    max_val = max(values)
+    radial_limit = max_val * 1.05
+
+    # Color each spoke to match its research pathway.
+    for angle, q in zip(angles[:-1], Q_ORDER):
+        ax.plot(
+            [angle, angle],
+            [0, radial_limit],
+            color=Q_COLORS[q],
+            linewidth=1.2,
+            alpha=0.55,
+            zorder=1,
+        )
+
     # Configure grid lines and y-ticks
     ax.set_rlabel_position(30)
-    max_val = max(values)
     ticks = np.linspace(0, max_val, 5, dtype=int)
-    plt.yticks(ticks, [str(t) for t in ticks], color=TEXT_MAIN, size=9, fontweight="bold")
-    plt.ylim(0, max_val * 1.05)
+    ax.set_yticks(ticks)
+    ax.set_yticklabels([])
+    plt.ylim(0, radial_limit)
 
     # Plot data
-    ax.plot(angles, values, color=SYNERGY_RADAR_COLOR, linewidth=2.5, linestyle="solid", zorder=4)
-    ax.fill(angles, values, color=SYNERGY_RADAR_COLOR, alpha=0.35, zorder=3)
+    ax.plot(angles, values, color=radar_color, linewidth=2.5, linestyle="solid", zorder=4)
+    ax.fill(angles, values, color=radar_color, alpha=0.35, zorder=3)
+    ax.scatter(
+        angles[:-1],
+        values[:-1],
+        s=54,
+        c=[Q_COLORS[q] for q in Q_ORDER],
+        edgecolors="white",
+        linewidths=1.2,
+        zorder=5,
+    )
 
     _style_polar_axes(ax)
+
+    for label, q in zip(ax.get_xticklabels(), Q_ORDER):
+        label.set_color(Q_COLORS[q])
+        label.set_fontweight("bold")
+    label_angle = np.deg2rad(20)
+    for tick in ticks:
+        ax.text(
+            label_angle,
+            tick + (max_val * 0.02 if tick > 0 else 0),
+            str(int(tick)),
+            color=TEXT_MAIN,
+            fontsize=9,
+            fontweight="bold",
+            ha="center",
+            va="center",
+            zorder=20,
+            clip_on=False,
+        )
 
     fig.subplots_adjust(left=0.18, right=0.82, top=0.82, bottom=0.18)
     save(fig, "fig8_synergy_radar")
@@ -712,7 +865,7 @@ def fig8_synergy_radar(rel: pd.DataFrame):
 # Figure 9 — Thematic Distribution Radar Chart (theme mentions by Q1-Q6)
 # ═══════════════════════════════════════════════════════════════════════
 def fig9_thematic_radar(rel: pd.DataFrame):
-    categories = [Q_META[q]["short"].replace(": ", ":\n") for q in Q_ORDER]
+    categories = [rp_plot_label(q) for q in Q_ORDER]
     N = len(categories)
     angles = [n / float(N) * 2 * np.pi for n in range(N)]
     angles += angles[:1]
@@ -847,7 +1000,7 @@ def fig11_directional_balance(rel: pd.DataFrame):
             t.set_color(TEXT_MAIN)
     _style_legend(
         ax.legend(
-            [f"{Q_META[q]['short']} ({counts[q]})" for q in Q_ORDER],
+            [f"{rp_short_label(q)} ({counts[q]})" for q in Q_ORDER],
             loc="center left",
             bbox_to_anchor=(1.02, 0.5),
             frameon=True,
@@ -884,9 +1037,9 @@ def fig12_maturity_matrix(rel: pd.DataFrame):
             edgecolors=TEXT_MAIN,
             linewidths=0.6,
             zorder=3,
-            label=p["q"],
+            label=rp_short_label(p["q"]),
         )
-        ax.annotate(p["q"], (p["accessibility"], p["depth"]),
+        ax.annotate(rp_short_label(p["q"]), (p["accessibility"], p["depth"]),
                     fontsize=9, fontweight="bold", color=TEXT_MAIN,
                     xytext=(4, 4), textcoords="offset points")
 
@@ -949,7 +1102,7 @@ def fig14_methodology_distribution(rel: pd.DataFrame, question_topics: dict):
         bottom += np.array(vals)
 
     ax.set_xticks(x)
-    ax.set_xticklabels(Q_ORDER)
+    ax.set_xticklabels([rp_plot_label(q) for q in Q_ORDER])
     ax.set_ylabel("Keyword hits (assignments)")
     _style_legend(
         ax.legend(
@@ -1141,7 +1294,7 @@ def fig20_taxonomy_paper_type(question_topics: dict):
         ax.set_yticks(y)
         ax.set_yticklabels(names, fontsize=8)
         ax.invert_yaxis()
-        ax.set_title(q, fontsize=11, fontweight="bold", color=Q_COLORS[q])
+        ax.set_title(rp_short_label(q), fontsize=11, fontweight="bold", color=Q_COLORS[q])
         ax.grid(axis="x", alpha=0.25)
         ax.grid(axis="y", visible=False)
 
@@ -1152,6 +1305,7 @@ def fig20_taxonomy_paper_type(question_topics: dict):
 def fig21_research_clusters(rel: pd.DataFrame):
     counts = rel.groupby("cluster").size().sort_values(ascending=False)
     colors = [cluster_color(c, i) for i, c in enumerate(counts.index)]
+    labels = [display_cluster_name(n) for n in counts.index]
 
     fig, ax = plt.subplots(figsize=(6, 6), facecolor=BG_TRANSPARENT)
     ax.pie(
@@ -1169,7 +1323,7 @@ def fig21_research_clusters(rel: pd.DataFrame):
             t.set_color(TEXT_MAIN)
     _style_legend(
         ax.legend(
-            [f"{n} ({v})" for n, v in counts.items()],
+            [f"{n} ({v})" for n, v in zip(labels, counts.values)],
             loc="center left",
             bbox_to_anchor=(1.02, 0.5),
             frameon=True,
@@ -1227,9 +1381,9 @@ def fig23_relationship_triangle(rel: pd.DataFrame):
     verts = np.array([[0.5, 0.92], [0.08, 0.12], [0.92, 0.12]])
     labels = ["Fairness", "Explainability", "LLMs"]
     edge_mid = [
-        ((verts[0] + verts[1]) / 2, "F\u2194E", fe, EDGE_COLORS["F\u2194E"]),
-        ((verts[0] + verts[2]) / 2, "F\u2194L", fl, EDGE_COLORS["F\u2194L"]),
-        ((verts[1] + verts[2]) / 2, "E\u2194L", el, EDGE_COLORS["E\u2194L"]),
+        ((verts[0] + verts[1]) / 2, lens_name("F\u2194E"), fe, EDGE_COLORS["F\u2194E"]),
+        ((verts[0] + verts[2]) / 2, lens_name("F\u2194L"), fl, EDGE_COLORS["F\u2194L"]),
+        ((verts[1] + verts[2]) / 2, lens_name("E\u2194L"), el, EDGE_COLORS["E\u2194L"]),
     ]
 
     triangle = plt.Polygon(verts, closed=True, fill=False,

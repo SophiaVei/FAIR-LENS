@@ -1,4 +1,3 @@
-// src/components/Triangle.tsx
 import React from "react";
 import type { QuestionId } from "../App";
 
@@ -7,76 +6,23 @@ interface TriangleProps {
   onToggleQuestion: (qid: QuestionId) => void;
 }
 
-type PairGroup = "FE" | "FL" | "EL"; // Fairness–Explainability, Fairness–LLMs, Explainability–LLMs
+type PairGroup = "FE" | "FL" | "EL";
 
 type Wedge = {
   id: QuestionId;
-  label: string;
-  points: string; // SVG polygon points
+  points: string;
   pair: PairGroup;
 };
 
-/**
- * Triangle vertices:
- *  A (Fairness)        = (100, 20)
- *  B (Explainability)  = (20, 180)
- *  C (LLMs)            = (180, 180)
- *  Center O            = (100, 120)
- *  midAB               = (60, 100)
- *  midBC               = (100, 180)
- *  midCA               = (140, 100)
- */
 const wedges: Wedge[] = [
-  //
-  // FAIRNESS ↔ EXPLAINABILITY (LEFT EDGE)  → pair FE
-  //
-  {
-    id: "Q1",
-    label: "Fairness → Explainability",
-    points: "100,120 100,20 60,100", // O, A, midAB
-    pair: "FE",
-  },
-  {
-    id: "Q2",
-    label: "Explainability → Fairness",
-    points: "100,120 60,100 20,180", // O, midAB, B
-    pair: "FE",
-  },
-
-  //
-  // EXPLAINABILITY ↔ LLMS (BOTTOM EDGE)  → pair EL
-  //
-  {
-    id: "Q5",
-    label: "Explainability → LLMs",
-    points: "100,120 20,180 100,180", // O, B, midBC
-    pair: "EL",
-  },
-  {
-    id: "Q6",
-    label: "LLMs → Explainability",
-    points: "100,120 100,180 180,180", // O, midBC, C
-    pair: "EL",
-  },
-
-  //
-  // LLMS ↔ FAIRNESS (RIGHT EDGE)  → pair FL
-  //
-  {
-    id: "Q3",
-    label: "Fairness → LLMs",
-    points: "100,120 180,180 140,100", // O, C, midCA
-    pair: "FL",
-  },
-  {
-    id: "Q4",
-    label: "LLMs → Fairness",
-    points: "100,120 140,100 100,20", // O, midCA, A
-    pair: "FL",
-  },
+  { id: "Q1", points: "100,120 100,20 60,100", pair: "FE" },
+  { id: "Q2", points: "100,120 60,100 20,180", pair: "FE" },
+  { id: "Q5", points: "100,120 20,180 100,180", pair: "EL" },
+  { id: "Q6", points: "100,120 100,180 180,180", pair: "EL" },
+  { id: "Q3", points: "100,120 180,180 140,100", pair: "FL" },
+  { id: "Q4", points: "100,120 140,100 100,20", pair: "FL" },
 ];
 
-// Vertex identifiers for arrow mapping
 type VertexKey = "fairness" | "explainability" | "llms";
 
 const vertices: Record<VertexKey, { x: number; y: number }> = {
@@ -85,7 +31,6 @@ const vertices: Record<VertexKey, { x: number; y: number }> = {
   llms: { x: 180, y: 180 },
 };
 
-// From–to mapping for each directional question
 const arrowMap: Record<QuestionId, { from: VertexKey; to: VertexKey }> = {
   Q1: { from: "fairness", to: "explainability" },
   Q2: { from: "explainability", to: "fairness" },
@@ -95,8 +40,15 @@ const arrowMap: Record<QuestionId, { from: VertexKey; to: VertexKey }> = {
   Q6: { from: "llms", to: "explainability" },
 };
 
-// Utility: shorten a segment at both ends by `offset` so the arrow
-// does not overlap the vertex points too strongly.
+const pathwayMeta: Record<QuestionId, { name: string; code: string; direction: string }> = {
+  Q1: { name: "Enable Credibility", code: "EN·CRD", direction: "Fairness -> Explainability" },
+  Q2: { name: "Audit Fairness", code: "AU·FAIR", direction: "Explainability -> Fairness" },
+  Q3: { name: "Enable Alignment", code: "EN·ALN", direction: "Fairness -> LLMs" },
+  Q4: { name: "Audit Outcomes", code: "AU·OUT", direction: "LLMs -> Fairness" },
+  Q5: { name: "Audit Behavior", code: "AU·BEH", direction: "Explainability -> LLMs" },
+  Q6: { name: "Enable Explanations", code: "EN·EXP", direction: "LLMs -> Explainability" },
+};
+
 function shortenSegment(
   p1: { x: number; y: number },
   p2: { x: number; y: number },
@@ -120,7 +72,7 @@ function shortenSegment(
     },
   };
 }
-// Color map for each pair group (matches the CSS values)
+
 const pairFillColors: Record<PairGroup, string> = {
   FE: "rgba(157, 234, 201, 0.35)",
   EL: "rgba(255, 212, 176, 0.35)",
@@ -137,12 +89,11 @@ const Triangle: React.FC<TriangleProps> = ({
   activeQuestions,
   onToggleQuestion,
 }) => {
-  // Build an arrow line per active question
   const arrowLines = activeQuestions.map((qid) => {
     const mapping = arrowMap[qid];
     const start = vertices[mapping.from];
     const end = vertices[mapping.to];
-    const { from, to } = shortenSegment(start, end, 10); // 10px inset from vertices
+    const { from, to } = shortenSegment(start, end, 10);
 
     return (
       <line
@@ -166,15 +117,14 @@ const Triangle: React.FC<TriangleProps> = ({
         className="triangle-svg"
         aria-labelledby="triangleTitle triangleDesc"
       >
-        <title id="triangleTitle">FAIR–LENS Triangle</title>
+        <title id="triangleTitle">FAIR-LENS Triangle</title>
         <desc id="triangleDesc">
           Triangle with vertices Fairness/Bias, Explainability, and LLMs,
-          subdivided into six directional research pathways (RP1-RP6). You can select one
+          subdivided into six research pathways (RP1-RP6). You can select one
           or more regions at the same time; arrows indicate the chosen
-          directions.
+          pathways.
         </desc>
 
-        {/* Arrowhead definition */}
         <defs>
           <marker
             id="triangleArrowhead"
@@ -189,7 +139,6 @@ const Triangle: React.FC<TriangleProps> = ({
           </marker>
         </defs>
 
-        {/* Outer triangle border */}
         <polygon
           points="100,20 20,180 180,180"
           fill="none"
@@ -197,10 +146,10 @@ const Triangle: React.FC<TriangleProps> = ({
           strokeWidth={1.2}
         />
 
-        {/* Wedges */}
         {wedges.map((w) => {
           const isActive = activeQuestions.includes(w.id);
           const pairClass = `triangle-pair-${w.pair.toLowerCase()}`;
+          const meta = pathwayMeta[w.id];
           return (
             <polygon
               key={w.id}
@@ -216,16 +165,14 @@ const Triangle: React.FC<TriangleProps> = ({
               onClick={() => onToggleQuestion(w.id)}
             >
               <title>
-                {displayQuestionId(w.id)}: {w.label}
+                {displayQuestionId(w.id)} · {meta.code}: {meta.name} ({meta.direction})
               </title>
             </polygon>
           );
         })}
 
-        {/* One arrow per active question */}
         {arrowLines}
 
-        {/* Vertex labels */}
         <text x="100" y="12" textAnchor="middle" className="vertex-label" fill={LABEL_FILL} style={{ fontSize: "0.72rem" }}>
           Fairness / Bias
         </text>
