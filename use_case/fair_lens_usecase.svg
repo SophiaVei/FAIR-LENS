@@ -1,0 +1,296 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="760" viewBox="0 120 1600 760">
+  <defs>
+    <style>
+      .title{font-family:'Canva Sans',Arial,Helvetica,sans-serif;font-size:60px;font-weight:800;letter-spacing:2px;fill:#071637}
+      .subtitle{font-family:'Canva Sans',Arial,Helvetica,sans-serif;font-size:25px;font-style:italic;fill:#071637}
+      .small{font-family:'Canva Sans',Arial,Helvetica,sans-serif;font-size:16px;fill:#071637}
+      .med{font-family:'Canva Sans',Arial,Helvetica,sans-serif;font-size:18px;fill:#071637}
+      .bold{font-family:'Canva Sans',Arial,Helvetica,sans-serif;font-size:18px;font-weight:400;fill:#071637}
+      .cardtitle{font-family:'Canva Sans',Arial,Helvetica,sans-serif;font-size:18px;font-weight:800}
+      .carddir{font-family:'Canva Sans',Arial,Helvetica,sans-serif;font-size:16px;font-style:italic;fill:#071637}
+      .lenslabel{font-family:'Canva Sans',Arial,Helvetica,sans-serif;font-size:26px;font-weight:800;letter-spacing:0.5px}
+      .tlabel{font-family:'Canva Sans',Arial,Helvetica,sans-serif;font-size:18px;font-weight:800;fill:#86b2e3}
+      .ttext{font-family:'Canva Sans',Arial,Helvetica,sans-serif;font-size:16px;fill:#86b2e3}
+      .axis{stroke-width:2;fill:none}
+      .dash{stroke-dasharray:3 7;stroke-width:3;fill:none;stroke-linecap:round}
+      .box{fill:#ffffff;stroke-width:1.6}
+      .legend{font-family:'Canva Sans',Arial,Helvetica,sans-serif;font-size:18px;font-weight:700;fill:#071637}
+      .icon{font-family:'Canva Sans',Arial,Helvetica,sans-serif;font-size:44px;font-weight:700}
+    </style>
+    <symbol id="icon-scale" viewBox="0 0 24 24">
+      <g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 4v15"/>
+        <path d="M6 7h12"/>
+        <path d="M6 19h12"/>
+        <path d="M9 7l-3 6h6l-3-6z"/>
+        <path d="M15 7l-3 6h6l-3-6z"/>
+      </g>
+    </symbol>
+    <symbol id="icon-search" viewBox="0 0 24 24">
+      <g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="10.5" cy="10.5" r="5"/>
+        <path d="M14.5 14.5L20 20"/>
+      </g>
+    </symbol>
+    <symbol id="icon-target" viewBox="0 0 24 24">
+      <g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="7"/>
+        <circle cx="12" cy="12" r="3"/>
+        <path d="M12 2v3M12 19v3M2 12h3M19 12h3"/>
+      </g>
+    </symbol>
+    <symbol id="icon-bars" viewBox="0 0 24 24">
+      <g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M4 19h16"/>
+        <path d="M7 19v-7"/>
+        <path d="M12 19V9"/>
+        <path d="M17 19V5"/>
+      </g>
+    </symbol>
+    <symbol id="icon-eye" viewBox="0 0 24 24">
+      <g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M2 12s3.5-5 10-5 10 5 10 5-3.5 5-10 5S2 12 2 12z"/>
+        <circle cx="12" cy="12" r="2.5"/>
+      </g>
+    </symbol>
+    <symbol id="icon-sliders" viewBox="0 0 24 24">
+      <g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M6 4v16M12 4v16M18 4v16"/>
+        <circle cx="6" cy="9" r="2.2"/>
+        <circle cx="12" cy="15" r="2.2"/>
+        <circle cx="18" cy="11" r="2.2"/>
+      </g>
+    </symbol>
+    <symbol id="icon-chat" viewBox="0 0 24 24">
+      <g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M5 6h14a3 3 0 0 1 3 3v6a3 3 0 0 1-3 3H11l-5 4v-4H5a3 3 0 0 1-3-3V9a3 3 0 0 1 3-3z"/>
+        <circle cx="9" cy="12" r="1" fill="currentColor" stroke="none"/>
+        <circle cx="12.5" cy="12" r="1" fill="currentColor" stroke="none"/>
+        <circle cx="16" cy="12" r="1" fill="currentColor" stroke="none"/>
+      </g>
+    </symbol>
+    <symbol id="icon-doc-question" viewBox="0 0 24 24">
+      <g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M7 3h7l4 4v14H7z"/>
+        <path d="M14 3v4h4"/>
+        <path d="M11 10.5a2 2 0 1 1 2.7 1.9c-1 .4-1.7 1-1.7 2"/>
+        <circle cx="12" cy="18.5" r="0.8" fill="currentColor" stroke="none"/>
+      </g>
+    </symbol>
+    <symbol id="icon-doc-lines" viewBox="0 0 24 24">
+      <g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M7 3h7l4 4v14H7z"/>
+        <path d="M14 3v4h4"/>
+        <path d="M10 11h5"/>
+        <path d="M10 14h5"/>
+        <path d="M10 17h4"/>
+      </g>
+    </symbol>
+    <symbol id="icon-people" viewBox="0 0 24 24">
+      <g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="9" cy="9" r="2.5"/>
+        <circle cx="16" cy="10" r="2"/>
+        <path d="M4.5 17c1-2.3 2.9-3.5 4.5-3.5s3.5 1.2 4.5 3.5"/>
+        <path d="M13 17c.7-1.8 2-2.8 3.5-2.8 1.3 0 2.5.7 3.2 2.8"/>
+      </g>
+    </symbol>
+    <symbol id="icon-warning" viewBox="0 0 24 24">
+      <g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 4l9 16H3z"/>
+        <path d="M12 10v4"/>
+        <circle cx="12" cy="17" r="0.8" fill="currentColor" stroke="none"/>
+      </g>
+    </symbol>
+    <symbol id="icon-flask" viewBox="0 0 24 24">
+      <g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M10 3v5l-5 10a2 2 0 0 0 1.8 3h10.4A2 2 0 0 0 19 18L14 8V3"/>
+        <path d="M8 12h8"/>
+        <path d="M9.5 15h5"/>
+      </g>
+    </symbol>
+    <symbol id="icon-puzzle" viewBox="0 0 24 24">
+      <g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M10 4V3h4v1a2 2 0 1 0 4 0V3h2v4h-1a2 2 0 1 0 0 4h1v4h-2v-1a2 2 0 1 0-4 0v1h-4v-1a2 2 0 1 0-4 0v1H4v-4h1a2 2 0 1 0 0-4H4V3h2v1a2 2 0 1 0 4 0z"/>
+      </g>
+    </symbol>
+    <symbol id="icon-clipboard-check" viewBox="0 0 24 24">
+      <g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="6" y="5" width="12" height="16" rx="2"/>
+        <path d="M9 5V4a1.5 1.5 0 0 1 1.5-1.5h3A1.5 1.5 0 0 1 15 4v1"/>
+        <path d="M9.5 13.5l2 2 4-5"/>
+      </g>
+    </symbol>
+    <symbol id="icon-diamond" viewBox="0 0 24 24">
+      <g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="8" y="8" width="8" height="8" transform="rotate(45 12 12)"/>
+        <circle cx="12" cy="12" r="1.3" fill="currentColor" stroke="none"/>
+      </g>
+    </symbol>
+  </defs>
+
+  <rect x="0" y="0" width="1600" height="930" fill="#ffffff"/>
+
+  <!-- lens labels -->
+  <text x="18" y="240" class="lenslabel" fill="#0b6e4f" text-anchor="middle" transform="rotate(-90 18 240)">Accountability</text>
+  <text x="18" y="432" class="lenslabel" fill="#8b1e3f" text-anchor="middle" transform="rotate(-90 18 432)">Assurance</text>
+  <text x="18" y="624" class="lenslabel" fill="#1d4ed8" text-anchor="middle" transform="rotate(-90 18 624)">Transparency</text>
+
+  <!-- left FAIR-LENS cards -->
+  <rect x="40" y="151" rx="9" ry="9" width="286" height="86" fill="#effaf4" stroke="#1fa774" stroke-width="1.2"/>
+  <use href="#icon-scale" x="54" y="176" width="37" height="37" style="color:#1fa774"/>
+  <text x="134" y="190" class="cardtitle" fill="#1fa774">RP1: EN&#8901;CRD</text>
+  <text x="134" y="216" class="carddir">Fairness &#8594; Explainability</text>
+
+  <rect x="40" y="247" rx="9" ry="9" width="286" height="86" fill="#f4fcf8" stroke="#6bd3a8" stroke-width="1.2"/>
+  <use href="#icon-search" x="54" y="264" width="37" height="37" style="color:#6bd3a8"/>
+  <text x="134" y="286" class="cardtitle" fill="#6bd3a8">RP2: AU&#8901;FAIR</text>
+  <text x="134" y="312" class="carddir">Explainability &#8594; Fairness</text>
+
+  <rect x="40" y="343" rx="9" ry="9" width="286" height="86" fill="#fdf1f4" stroke="#c73e5d" stroke-width="1.2"/>
+  <use href="#icon-target" x="54" y="360" width="37" height="37" style="color:#c73e5d"/>
+  <text x="134" y="382" class="cardtitle" fill="#c73e5d">RP3: EN&#8901;ALN</text>
+  <text x="134" y="408" class="carddir">Fairness &#8594; LLMs</text>
+
+  <rect x="40" y="439" rx="9" ry="9" width="286" height="86" fill="#fff4f7" stroke="#e07a8f" stroke-width="1.2"/>
+  <use href="#icon-bars" x="54" y="464" width="37" height="37" style="color:#e07a8f"/>
+  <text x="134" y="478" class="cardtitle" fill="#e07a8f">RP4: AU&#8901;OUT</text>
+  <text x="134" y="504" class="carddir">LLMs &#8594; Fairness</text>
+
+  <rect x="40" y="535" rx="9" ry="9" width="286" height="86" fill="#eff5ff" stroke="#3b82f6" stroke-width="1.2"/>
+  <use href="#icon-eye" x="52" y="552" width="39" height="39" style="color:#3b82f6"/>
+  <text x="134" y="574" class="cardtitle" fill="#3b82f6">RP5: AU&#8901;BEH</text>
+  <text x="134" y="600" class="carddir">Explainability &#8594; LLMs</text>
+
+  <rect x="40" y="631" rx="9" ry="9" width="286" height="86" fill="#f4f9ff" stroke="#7fb3ff" stroke-width="1.2"/>
+  <use href="#icon-chat" x="51" y="647" width="40" height="40" style="color:#7fb3ff"/>
+  <text x="134" y="670" class="cardtitle" fill="#7fb3ff">RP6: EN&#8901;EXP</text>
+  <text x="134" y="696" class="carddir">LLMs &#8594; Explainability</text>
+
+  <!-- horizontal lanes -->
+  <line x1="326" y1="192" x2="1582" y2="192" class="axis" stroke="#1fa774"/>
+  <line x1="326" y1="288" x2="1582" y2="288" class="axis" stroke="#6bd3a8"/>
+  <line x1="326" y1="384" x2="1582" y2="384" class="axis" stroke="#c73e5d"/>
+  <line x1="326" y1="480" x2="1582" y2="480" class="axis" stroke="#e07a8f"/>
+  <line x1="326" y1="576" x2="1582" y2="576" class="axis" stroke="#3b82f6"/>
+  <line x1="326" y1="672" x2="1582" y2="672" class="axis" stroke="#7fb3ff"/>
+
+  <!-- bottom timeline -->
+  <line x1="18" y1="729" x2="1590" y2="729" stroke="#86b2e3" stroke-width="4"/>
+  <polygon points="1590,729 1568,717 1568,741" fill="#86b2e3"/>
+
+  <!-- T circles -->
+  <circle cx="363" cy="729" r="27" fill="#86b2e3"/>
+  <circle cx="363" cy="729" r="20" fill="none" stroke="#ffffff" stroke-width="2"/>
+  <use href="#icon-diamond" x="350" y="716" width="27" height="27" style="color:#ffffff"/>
+  <text x="363" y="773" text-anchor="middle" class="tlabel">T0</text>
+  <text x="363" y="797" text-anchor="middle" class="ttext">Scope</text>
+
+  <circle cx="480" cy="729" r="27" fill="#86b2e3"/>
+  <use href="#icon-doc-lines" x="467" y="716" width="27" height="27" style="color:#ffffff"/>
+  <text x="480" y="773" text-anchor="middle" class="tlabel">T1</text>
+  <text x="480" y="797" text-anchor="middle" class="ttext">Define fairness</text>
+  <text x="480" y="819" text-anchor="middle" class="ttext">requirements</text>
+
+  <circle cx="668" cy="729" r="27" fill="#86b2e3"/>
+  <use href="#icon-flask" x="655" y="716" width="27" height="27" style="color:#ffffff"/>
+  <text x="668" y="773" text-anchor="middle" class="tlabel">T2</text>
+  <text x="668" y="797" text-anchor="middle" class="ttext">Run fairness</text>
+  <text x="668" y="819" text-anchor="middle" class="ttext">tests</text>
+
+  <circle cx="811" cy="729" r="27" fill="#86b2e3"/>
+  <use href="#icon-search" x="798" y="716" width="27" height="27" style="color:#ffffff"/>
+  <text x="811" y="773" text-anchor="middle" class="tlabel">T3</text>
+  <text x="811" y="797" text-anchor="middle" class="ttext">Inspect model</text>
+  <text x="811" y="819" text-anchor="middle" class="ttext">behavior</text>
+
+  <circle cx="989" cy="729" r="27" fill="#86b2e3"/>
+  <use href="#icon-puzzle" x="976" y="718" width="27" height="27" style="color:#ffffff"/>
+  <text x="989" y="773" text-anchor="middle" class="tlabel">T4</text>
+  <text x="989" y="797" text-anchor="middle" class="ttext">Diagnose disparity</text>
+  <text x="989" y="819" text-anchor="middle" class="ttext">source</text>
+
+  <circle cx="1217" cy="729" r="27" fill="#86b2e3"/>
+  <use href="#icon-chat" x="1204" y="716" width="27" height="27" style="color:#ffffff"/>
+  <text x="1217" y="773" text-anchor="middle" class="tlabel">T5</text>
+  <text x="1217" y="797" text-anchor="middle" class="ttext">Validate generated</text>
+  <text x="1217" y="819" text-anchor="middle" class="ttext">explanations</text>
+
+  <circle cx="1466" cy="729" r="27" fill="#86b2e3"/>
+  <use href="#icon-clipboard-check" x="1453" y="716" width="27" height="27" style="color:#ffffff"/>
+  <text x="1466" y="773" text-anchor="middle" class="tlabel">T6</text>
+  <text x="1466" y="797" text-anchor="middle" class="ttext">Prepare deployment/</text>
+  <text x="1466" y="819" text-anchor="middle" class="ttext">audit report</text>
+
+  <!-- process cards -->
+  <circle cx="340" cy="192" r="6" fill="#ffffff" stroke="#1fa774" stroke-width="3"/>
+  <rect x="346" y="155" rx="10" ry="10" width="220" height="80" class="box" stroke="#1fa774"/>
+  <use href="#icon-doc-question" x="354" y="174" width="39" height="39" style="color:#1fa774"/>
+  <text x="423" y="177" class="bold">Why are</text>
+  <text x="423" y="202" class="bold">explanations</text>
+  <text x="423" y="227" class="bold">needed?</text>
+  <line x1="363" y1="235" x2="363" y2="702" class="dash" stroke="#1fa774"/>
+  <circle cx="363" cy="235" r="5" fill="#1fa774"/>
+
+  <circle cx="395" cy="384" r="6" fill="#ffffff" stroke="#c73e5d" stroke-width="3"/>
+  <rect x="401" y="337" rx="10" ry="10" width="300" height="89" class="box" stroke="#c73e5d"/>
+  <use href="#icon-people" x="407" y="360" width="40" height="40" style="color:#c73e5d"/>
+  <text x="489" y="365" class="bold">Define groups, languages,</text>
+  <text x="489" y="390" class="bold">prompts, harm types,</text>
+  <text x="489" y="415" class="bold">and fairness criteria</text>
+  <line x1="480" y1="426" x2="480" y2="702" class="dash" stroke="#c73e5d"/>
+  <circle cx="480" cy="426" r="5" fill="#c73e5d"/>
+
+  <circle cx="554" cy="480" r="6" fill="#ffffff" stroke="#e07a8f" stroke-width="3"/>
+  <rect x="560" y="434" rx="10" ry="10" width="365" height="90" class="box" stroke="#e07a8f"/>
+  <use href="#icon-warning" x="568" y="459" width="39" height="39" style="color:#e07a8f"/>
+  <text x="644" y="462" class="bold">Test for refusal asymmetry,</text>
+  <text x="644" y="487" class="bold">toxicity, omissions, helpfulness,</text>
+  <text x="644" y="512" class="bold">and unequal service quality</text>
+  <line x1="668" y1="524" x2="668" y2="702" class="dash" stroke="#e07a8f"/>
+  <circle cx="668" cy="524" r="5" fill="#e07a8f"/>
+
+  <circle cx="673" cy="576" r="6" fill="#ffffff" stroke="#3b82f6" stroke-width="3"/>
+  <rect x="679" y="541" rx="10" ry="10" width="320" height="80" class="box" stroke="#3b82f6"/>
+  <use href="#icon-sliders" x="683" y="558" width="39" height="39" style="color:#3b82f6"/>
+  <text x="751" y="563" class="bold">Inspect prompt sensitivity,</text>
+  <text x="751" y="588" class="bold">influential tokens, retrieved</text>
+  <text x="751" y="613" class="bold">context, and model behavior</text>
+  <line x1="814" y1="621" x2="814" y2="702" class="dash" stroke="#3b82f6"/>
+  <circle cx="814" cy="621" r="5" fill="#3b82f6"/>
+
+  <circle cx="944" cy="288" r="6" fill="#ffffff" stroke="#6bd3a8" stroke-width="3"/>
+  <rect x="950" y="243" rx="10" ry="10" width="320" height="88" class="box" stroke="#6bd3a8"/>
+  <use href="#icon-search" x="958" y="268" width="39" height="39" style="color:#6bd3a8"/>
+  <text x="1022" y="268" class="bold">Use SHAP/LIME to</text>
+  <text x="1022" y="293" class="bold">localize identity cues,</text>
+  <text x="1022" y="318" class="bold">proxies, or missing context</text>
+  <line x1="989" y1="331" x2="989" y2="702" class="dash" stroke="#6bd3a8"/>
+  <circle cx="989" cy="331" r="5" fill="#6bd3a8"/>
+
+  <circle cx="1054" cy="672" r="6" fill="#ffffff" stroke="#7fb3ff" stroke-width="3"/>
+  <rect x="1060" y="604" rx="10" ry="10" width="350" height="88" class="box" stroke="#7fb3ff"/>
+  <use href="#icon-chat" x="1069" y="627" width="40" height="40" style="color:#7fb3ff"/>
+  <text x="1140" y="626" class="bold">Check whether generated</text>
+  <text x="1140" y="651" class="bold">explanations are grounded,</text>
+  <text x="1140" y="676" class="bold">stable, and faithful</text>
+  <line x1="1217" y1="692" x2="1217" y2="702" class="dash" stroke="#7fb3ff"/>
+  <circle cx="1217" cy="692" r="5" fill="#7fb3ff"/>
+
+  <rect x="1275" y="155" rx="10" ry="10" width="285" height="82" class="box" stroke="#1fa774"/>
+  <circle cx="1269" cy="192" r="6" fill="#ffffff" stroke="#1fa774" stroke-width="3"/>
+  <use href="#icon-doc-lines" x="1280" y="178" width="39" height="39" style="color:#1fa774"/>
+  <text x="1351" y="177" class="bold">Contestability and</text>
+  <text x="1351" y="202" class="bold">user-facing explanation</text>
+  <text x="1351" y="227" class="bold">requirements</text>
+  <line x1="1466" y1="237" x2="1466" y2="702" class="dash" stroke="#1fa774"/>
+  <circle cx="1466" cy="237" r="5" fill="#1fa774"/>
+
+  <rect x="1245" y="344" rx="10" ry="10" width="310" height="84" class="box" stroke="#c73e5d"/>
+  <circle cx="1239" cy="384" r="6" fill="#ffffff" stroke="#c73e5d" stroke-width="3"/>
+  <use href="#icon-clipboard-check" x="1254" y="368" width="39" height="39" style="color:#c73e5d"/>
+  <text x="1325" y="367" class="bold">Translate findings into</text>
+  <text x="1325" y="392" class="bold">monitoring and</text>
+  <text x="1325" y="417" class="bold">deployment requirements</text>
+  <line x1="1466" y1="428" x2="1466" y2="702" class="dash" stroke="#c73e5d"/>
+  <circle cx="1466" cy="428" r="5" fill="#c73e5d"/>
+</svg>
