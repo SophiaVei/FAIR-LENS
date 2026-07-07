@@ -25,54 +25,54 @@ OUTPUT_DIR = SCRIPT_DIR / "outputs" / "figures"
 # ── Question metadata (matches questions.py exactly) ─────────────────
 Q_META = {
     "Q1": {
-        "short": "RP1 \u00b7 EN\u00b7CRD",
+        "short": "RP1 \u00b7 EN F\u2192E",
         "name": "Enable Credibility",
-        "code": "EN\u00b7CRD",
+        "code": "EN F\u2192E",
         "label": "Fairness \u2192 Explainability",
         "role": "Enabler",
         "lens": "Accountability",
         "cluster": "F\u2194E",
     },
     "Q2": {
-        "short": "RP2 \u00b7 AU\u00b7FAIR",
+        "short": "RP2 \u00b7 AU E\u2192F",
         "name": "Audit Fairness",
-        "code": "AU\u00b7FAIR",
+        "code": "AU E\u2192F",
         "label": "Explainability \u2192 Fairness",
         "role": "Auditor",
         "lens": "Accountability",
         "cluster": "F\u2194E",
     },
     "Q3": {
-        "short": "RP3 \u00b7 EN\u00b7ALN",
+        "short": "RP3 \u00b7 EN F\u2192L",
         "name": "Enable Alignment",
-        "code": "EN\u00b7ALN",
+        "code": "EN F\u2192L",
         "label": "Fairness \u2192 LLMs",
         "role": "Enabler",
         "lens": "Assurance",
         "cluster": "F\u2194L",
     },
     "Q4": {
-        "short": "RP4 \u00b7 AU\u00b7OUT",
+        "short": "RP4 \u00b7 AU L\u2192F",
         "name": "Audit Outcomes",
-        "code": "AU\u00b7OUT",
+        "code": "AU L\u2192F",
         "label": "LLMs \u2192 Fairness",
         "role": "Auditor",
         "lens": "Assurance",
         "cluster": "F\u2194L",
     },
     "Q5": {
-        "short": "RP5 \u00b7 AU\u00b7BEH",
+        "short": "RP5 \u00b7 AU E\u2192L",
         "name": "Audit Behavior",
-        "code": "AU\u00b7BEH",
+        "code": "AU E\u2192L",
         "label": "Explainability \u2192 LLMs",
         "role": "Auditor",
         "lens": "Transparency",
         "cluster": "E\u2194L",
     },
     "Q6": {
-        "short": "RP6 \u00b7 EN\u00b7EXP",
+        "short": "RP6 \u00b7 EN L\u2192E",
         "name": "Enable Explanations",
-        "code": "EN\u00b7EXP",
+        "code": "EN L\u2192E",
         "label": "LLMs \u2192 Explainability",
         "role": "Enabler",
         "lens": "Transparency",
@@ -461,8 +461,9 @@ def fig1_papers_per_question(rel: pd.DataFrame):
     ax.set_xlabel("Number of research pathway assignments")
     ax.invert_yaxis()
     ax.set_xlim(0, counts.max() * 1.15)
-    ax.grid(axis="x", alpha=0.3)
-    ax.grid(axis="y", visible=False)
+    ax.grid(False)
+    ax.xaxis.grid(False, which="both")
+    ax.yaxis.grid(False, which="both")
 
     fig.tight_layout()
     save(fig, "fig1_papers_per_question")
@@ -545,8 +546,9 @@ def fig3_edge_distribution(rel: pd.DataFrame):
     ax.invert_yaxis()
     ax.set_xlabel("Paper assignments")
     ax.set_xlim(0, max(counts.values) * 1.3)
-    ax.grid(axis="x", alpha=0.3)
-    ax.grid(axis="y", visible=False)
+    ax.grid(False)
+    ax.xaxis.grid(False, which="both")
+    ax.yaxis.grid(False, which="both")
 
     marker_x = max(counts.values) * 0.03
     for i, (_, info) in enumerate(edges.items()):
@@ -581,7 +583,7 @@ def fig3_edge_distribution(rel: pd.DataFrame):
     leg = ax2.legend(
         [f"{n}  ({t})" for n, t in zip(edge_names, edge_totals)],
         loc="lower center", bbox_to_anchor=(0.5, -0.15),
-        fontsize=9, frameon=False, ncol=1
+        fontsize=11, frameon=False, ncol=1
     )
     _style_legend(leg)
 

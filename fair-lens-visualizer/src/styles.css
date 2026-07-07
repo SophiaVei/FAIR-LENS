@@ -454,13 +454,14 @@ body {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
+  width: 52px;
+  height: 52px;
+  border-radius: 999px;
+  padding: 0.25rem;
   border: 1px solid rgba(255, 255, 255, 0.2);
   cursor: pointer;
-  font-size: 0.75rem;
   transition: border-color 0.2s ease, transform 0.2s ease, background 0.2s ease;
+  text-align: center;
 }
 
 .question-pill.is-active {
@@ -468,6 +469,27 @@ body {
   background: var(--brand-soft);
   color: #1e1305;
   transform: translateY(-2px);
+}
+
+.question-pill-code {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  gap: 0.12rem;
+}
+
+.question-pill-prefix {
+  font-size: 0.88rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+
+.question-pill-suffix {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
 }
 
 .count-text {
@@ -1143,4 +1165,4 @@ body {
   color: var(--text-muted);
   font-size: 0.95rem;
   margin: 0;
-}
+}

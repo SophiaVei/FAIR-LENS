@@ -41,12 +41,12 @@ const arrowMap: Record<QuestionId, { from: VertexKey; to: VertexKey }> = {
 };
 
 const pathwayMeta: Record<QuestionId, { name: string; code: string; direction: string }> = {
-  Q1: { name: "Enable Credibility", code: "EN·CRD", direction: "Fairness -> Explainability" },
-  Q2: { name: "Audit Fairness", code: "AU·FAIR", direction: "Explainability -> Fairness" },
-  Q3: { name: "Enable Alignment", code: "EN·ALN", direction: "Fairness -> LLMs" },
-  Q4: { name: "Audit Outcomes", code: "AU·OUT", direction: "LLMs -> Fairness" },
-  Q5: { name: "Audit Behavior", code: "AU·BEH", direction: "Explainability -> LLMs" },
-  Q6: { name: "Enable Explanations", code: "EN·EXP", direction: "LLMs -> Explainability" },
+  Q1: { name: "Enable Credibility", code: "EN F→E", direction: "Fairness → Explainability" },
+  Q2: { name: "Audit Fairness", code: "AU E→F", direction: "Explainability → Fairness" },
+  Q3: { name: "Enable Alignment", code: "EN F→L", direction: "Fairness → LLMs" },
+  Q4: { name: "Audit Outcomes", code: "AU L→F", direction: "LLMs → Fairness" },
+  Q5: { name: "Audit Behavior", code: "AU E→L", direction: "Explainability → LLMs" },
+  Q6: { name: "Enable Explanations", code: "EN L→E", direction: "LLMs → Explainability" },
 };
 
 function shortenSegment(
@@ -120,7 +120,7 @@ const Triangle: React.FC<TriangleProps> = ({
         <title id="triangleTitle">FAIR-LENS Triangle</title>
         <desc id="triangleDesc">
           Triangle with vertices Fairness/Bias, Explainability, and LLMs,
-          subdivided into six research pathways (RP1-RP6). You can select one
+          subdivided into six directional research pathways. You can select one
           or more regions at the same time; arrows indicate the chosen
           pathways.
         </desc>
@@ -185,7 +185,7 @@ const Triangle: React.FC<TriangleProps> = ({
       </svg>
 
       <p className="triangle-hint hide-on-export">
-        Click one or more regions (RP1-RP6) or legend items to highlight those
+        Click one or more regions or legend items to highlight those
         research pathways and filter the paper list. Click again to unselect.
       </p>
     </div>
