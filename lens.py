@@ -50,6 +50,8 @@ QUERY_PLAIN = "(" + " OR ".join([
 # Date Range & API Settings
 # -------------------------
 YEARS = (2016, 2026)  # inclusive; updated to catch 2026 papers
+# Set in PowerShell if you want to use the Lens API directly:
+#   $env:LENS_API_TOKEN = "your_lens_api_token"
 LENS_API_TOKEN = os.getenv("LENS_API_TOKEN", "").strip()
 
 # -------------------------
@@ -634,5 +636,3 @@ def run_lens(y1: int = YEARS[0], y2: int = YEARS[1]) -> pd.DataFrame:
 
 if __name__ == "__main__":
     run_lens(*YEARS)
-
-#  $env:LENS_API_TOKEN = "your_lens_api_token"

@@ -66,10 +66,10 @@ Abstract: {abstract}
 Apply the exclusion rules and respond with the STRICT JSON schema."""
 
 # ---- LLM backend configuration ----
-# Set your API key:  $env:OPENWEBUI_API_KEY = "sk-..."
-# Generate one at: https://filos.csd.auth.gr/ → Settings → Account → API Keys
+# Set your API key in PowerShell:
+#   $env:OPENWEBUI_API_KEY = "your_api_key"
 OPENWEBUI_API_KEY = os.getenv("OPENWEBUI_API_KEY", "").strip()
-OPENWEBUI_BASE_URL = os.getenv("OPENWEBUI_BASE_URL", "https://filos.csd.auth.gr")
+OPENWEBUI_BASE_URL = os.getenv("OPENWEBUI_BASE_URL", "https://filos.csd.auth.gr").strip().rstrip("/")
 
 def call_llm(system_prompt: str, user_prompt: str,
              model: str = "llama4:16x17b",
@@ -78,6 +78,9 @@ def call_llm(system_prompt: str, user_prompt: str,
     Call the Open WebUI server at filos.csd.auth.gr using its
     OpenAI-compatible /api/chat/completions endpoint.
     """
+    if not OPENWEBUI_API_KEY:
+        return "__ERROR__: Missing OPENWEBUI_API_KEY environment variable."
+
     if url is None:
         url = f"{OPENWEBUI_BASE_URL}/api/chat/completions"
 
@@ -143,6 +146,9 @@ def main():
     inp = Path(args.input)
     outdir = Path(args.outdir)
     outdir.mkdir(parents=True, exist_ok=True)
+
+    if not OPENWEBUI_API_KEY:
+        raise EnvironmentError("Missing OPENWEBUI_API_KEY. Set it before running this script.")
 
     print(f"[INFO] Loading {inp} …")
     df = load_dataframe(inp)
