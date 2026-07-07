@@ -216,18 +216,6 @@ Suggested caption: "Number of research pathways covered per paper in the final c
 
 Suggested caption: "Relative balance of pathway coverage across the FAIR-LENS research pathways."
 
-### Evidence table
-
-![Evidence table](outputs/figures/fairlens_evidence_table_enriched.png)
-
-Suggested caption: "Technique-centered evidence table summarizing pathway-specific methodological signals."
-
-### Relationship triangle
-
-![Relationship triangle](outputs/figures/fig23_relationship_triangle.png)
-
-Suggested caption: "Relationship triangle showing how the literature distributes across the three pairwise lenses."
-
 ## Supplementary Assets
 
 ### Framework diagram
