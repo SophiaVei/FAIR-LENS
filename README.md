@@ -6,12 +6,7 @@ This codebase is both a research pipeline and an artifact repository: it preserv
 
 ## Associated Paper
 
-Replace this block with the final paper citation once the manuscript title, venue, and DOI are fixed.
-
-> **Paper title:** `[Insert final paper title exactly as it appears in the manuscript]`  
-> **Authors:** `[Insert author list]`  
-> **Venue / status:** `[Insert venue, workshop, journal, or preprint venue]`  
-> **DOI / URL:** `[Insert DOI or public manuscript link]`
+This repository accompanies the FAIR-LENS manuscript and preserves the analysis outputs, figures, and dashboard assets used in the study. Citation details can be attached here once the publication record is finalized.
 
 ## What FAIR-LENS Covers
 
@@ -233,34 +228,26 @@ Suggested caption: "Technique-centered evidence table summarizing pathway-specif
 
 Suggested caption: "Relationship triangle showing how the literature distributes across the three pairwise lenses."
 
-## Additional Figures and Screenshots to Add
+## Supplementary Assets
 
-Some assets still need to be added manually if you want this README to function as a polished companion page for the paper and dashboard.
+### Framework diagram
 
-| File to add | What should go there | What to capture or export |
-|---|---|---|
-| `docs/paper/fig-framework.png` | The main FAIR-LENS conceptual overview figure from the paper | Export the final framework figure that introduces the three lenses and six research pathways |
-| `docs/ui/ui-overview.png` | Full dashboard landing/explorer screenshot | Capture the page with the RP chips, summary cards, and paper list visible |
-| `docs/ui/ui-insights.png` | Dashboard analytics screenshot | Capture the section showing the main analytics charts |
-| `docs/ui/ui-paper-detail.png` | Representative paper-detail screenshot | Open one paper card/modal where the directional claim and metadata are clearly visible |
+[Framework figure (PDF)](docs/paper/framework.pdf)
 
-Suggested captions:
+Conceptual overview of the FAIR-LENS lenses and directional research pathways.
 
-- `fig-framework.png`: "FAIR-LENS overview: three lenses and six directional research pathways linking fairness, explainability, and LLMs."
-- `ui-overview.png`: "Interactive FAIR-LENS dashboard for browsing coded papers and pathway assignments."
-- `ui-insights.png`: "Dashboard analytics view highlighting distributional, thematic, and lens-level patterns."
-- `ui-paper-detail.png`: "Example paper-detail view with directional claim and metadata."
+### Dashboard overview
 
-If you later add those files, you can uncomment and keep the image blocks below.
+![Dashboard overview](docs/ui/ui-overview.png)
 
-```md
-<!-- ![FAIR-LENS framework](docs/paper/fig-framework.png) -->
-<!-- ![Dashboard overview](docs/ui/ui-overview.png) -->
-<!-- ![Dashboard insights](docs/ui/ui-insights.png) -->
-<!-- ![Paper detail](docs/ui/ui-paper-detail.png) -->
-```
+Explorer view of the FAIR-LENS dashboard, showing the relationship map, pathway filters, and coded paper list.
 
-## Notes for Public Release
+### Dashboard insights
+
+![Dashboard insights](docs/ui/ui-insights.png)
+
+Insights view of the FAIR-LENS dashboard, highlighting cadence, pathway balance, structural profile, thematic distribution, and related analytics.
+
+## Notes
 
 - The repository includes checked-in outputs so the paper figures and dashboard can be inspected without rerunning the full pipeline.
-- Before a public release, add the final paper citation, the selected manuscript figures, and the preferred project license.
