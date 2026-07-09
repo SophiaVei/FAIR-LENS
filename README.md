@@ -204,6 +204,12 @@ Suggested caption: "Temporal growth of the FAIR-LENS literature across the revie
 
 Suggested caption: "Distribution of the coded literature across the three FAIR-LENS lenses."
 
+### Top venues
+
+![Top venues](outputs/figures/fig5_top_venues.png)
+
+Suggested caption: "Most frequent venues and publication outlets in the final FAIR-LENS corpus."
+
 ### Multilabel pathway coverage
 
 ![Multilabel pathway coverage](outputs/figures/fig6_multilabel.png)
