@@ -1,0 +1,7 @@
+﻿question_id,pathway,name,population_assignments,sample_assignments,inclusion_probability,assignment_weight
+Q1,RP1,Explanation Requirements,79,20,0.25316455696202533,3.95
+Q2,RP2,Fairness Evidence,120,20,0.16666666666666666,6.0
+Q3,RP3,Fairness Specification,61,20,0.32786885245901637,3.05
+Q4,RP4,Fairness Impacts,108,20,0.18518518518518517,5.4
+Q5,RP5,Model Behavior,272,20,0.07352941176470588,13.6
+Q6,RP6,Explanation Mediation,175,20,0.11428571428571428,8.75

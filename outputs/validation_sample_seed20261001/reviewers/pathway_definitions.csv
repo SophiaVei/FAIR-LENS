@@ -1,0 +1,7 @@
+﻿question_id,pathway,name,direction,definition
+Q1,RP1,Explanation Requirements,Fairness -> Explainability,"Fairness or bias concerns motivate, shape, or define explanation requirements for transparency, contestability, recourse, and accountability."
+Q2,RP2,Fairness Evidence,Explainability -> Fairness,"XAI or explanation methods are used to examine fairness problems, including bias, unfairness, proxy effects, identity cues, or uneven outcomes."
+Q3,RP3,Fairness Specification,Fairness -> LLMs,"Fairness or bias principles define, adapt, or operationalize criteria for LLM evaluation, benchmark construction, design, alignment, monitoring, or deployment."
+Q4,RP4,Fairness Impacts,LLMs -> Fairness,"LLM behavior or outputs are assessed as evidence of fairness-related outcomes, including bias, refusals, omissions, toxicity, harms, or unequal quality of service."
+Q5,RP5,Model Behavior,Explainability -> LLMs,"XAI or interpretability methods are applied to inspect LLM behavior, including prompts, outputs, tokens, retrieved context, representations, activations, or internal mechanisms."
+Q6,RP6,Explanation Mediation,LLMs -> Explainability,"LLMs support explanation practices by generating, translating, summarizing, evaluating, mediating, or producing natural-language explanations and rationales."
