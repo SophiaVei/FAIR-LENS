@@ -1,8 +1,9 @@
 {
-  "script_version": "1.0.0",
-  "created_utc": "2026-10-01T12:56:35.339981+00:00",
-  "audit_status": "sample_selected_human_review_not_performed_by_script",
-  "design": "equal-allocation stratified simple random sampling without replacement of positive assignments",
+  "script_version": "1.1.0",
+  "created_utc": "2026-10-02T07:09:43.285075+00:00",
+  "purpose": "Reproducible sampling and documentation of the FAIR-LENS pathway-coding validation sample.",
+  "design": "Equal-allocation stratified simple random sampling without replacement of positive paper-pathway assignments.",
+  "sampling_unit": "paper-pathway assignment",
   "stratification_variable": "question_id",
   "seed": 20261001,
   "per_pathway": 20,
@@ -10,9 +11,9 @@
   "stratum_seed_derivation": "SHA256(FAIR-LENS-positive-audit-v1|<seed>|<question_id>), interpreted as an integer",
   "python_version": "3.12.6",
   "python_implementation": "CPython",
-  "script_sha256": "5984ceea168e2c53e211d6728c9497513bc57a8ab51a7c3b7a2a087039fa426e",
+  "script_sha256": "0fc8ac4cd352f5f3f7d1200670d57e2a5be2353ce2b9a62a3426eff90da40b56",
   "source_ref_supplied": null,
-  "local_git_commit": "ac0f760448c80b82d2dae74a01b451e62c859807",
+  "local_git_commit": "6ec6c4200f4777abe8456a79e7570523a79ef3a5",
   "input_directory": "C:\\Users\\sophi\\FAIR-LEARN\\outputs",
   "input_files": [
     {
@@ -52,12 +53,12 @@
       "positive_assignments": 175
     }
   ],
-  "paper_identity": "NFKC-normalized, casefolded, whitespace-collapsed title plus normalized year; inherits upstream bibliographic deduplication",
+  "paper_identity": "NFKC-normalized, casefolded, whitespace-collapsed title plus normalized year; inherits upstream bibliographic deduplication.",
   "population_assignments": 815,
   "population_unique_papers": 340,
   "selected_assignments": 120,
   "selected_unique_papers": 93,
-  "review_sheet_rows_per_reviewer": 558,
+  "review_sheet_rows_per_reviewer": 120,
   "missing_abstracts_in_selected_papers": 1,
   "missing_urls_in_selected_papers": 48,
   "pathways": [
@@ -335,15 +336,15 @@
   ],
   "warnings": [],
   "output_sha256_at_generation": {
-    "coordinator\\adjudication.csv": "80f28c2559b279c3496d9e656ae546a40d47bdf74a89a4223d55620df77f5057",
+    "coordinator\\adjudication.csv": "63328346751d284a869cc779cb4600711729a7f62364abed27eb1872a3dd88bd",
     "coordinator\\pathway_summary.csv": "0428bc92cfa39bf8189e9421a147fcde190439461e281898b86de7c953432346",
-    "coordinator\\sampling_frame.csv": "eac1b7811a9072d2484bdb5c30c35c02fdf609c460ffdfa0989ad67ced3e0a14",
-    "coordinator\\selected_assignments.csv": "24545053f2ca84745ed41d5bd9c8675e7fd4b227d140345de3d8338874fd4691",
-    "README.md": "cc12f0726b0383fd9e55ee46b225816d729eed114f9406bc213027f82d043c30",
+    "coordinator\\sampling_frame.csv": "13194b566daa8255951cbdb148916997c80d484f3140638e82fd24c8ae8ef41b",
+    "coordinator\\selected_assignments.csv": "7358834807f0b109eb0d6d46c6f22a3c25ccbc0975f2471b76267dbf381654a0",
+    "README.md": "a8f141a5b50ba378cd1e9f916a6c5f960cd3d0a5cfb0cc60d811b91070a4ecd0",
     "reviewers\\papers_for_review.csv": "726ea807710b41ff4d494917ff4142a9384b506cae86d4b2e47a6a6cf59d665b",
     "reviewers\\pathway_definitions.csv": "eabd77ac0694b444c564cad0f05319a5a9069c2d66670643b570bc35f85f8484",
-    "reviewers\\reviewer_1.csv": "dc3fc85099d85c3bc4a6464cf9aca70205cda9d776bc4cffdba8ccee9f07dff2",
-    "reviewers\\reviewer_2.csv": "dc3fc85099d85c3bc4a6464cf9aca70205cda9d776bc4cffdba8ccee9f07dff2",
-    "sampling_method.tex": "c6addd4f176bf2cfc0d05642afc9a812cefe530bb882e33669698a8cda873baa"
+    "reviewers\\reviewer_1.csv": "e6b1de70d42b3c3eddd2a74e2247f828635fc1ce585214de50bfad432bd898ab",
+    "reviewers\\reviewer_2.csv": "e6b1de70d42b3c3eddd2a74e2247f828635fc1ce585214de50bfad432bd898ab",
+    "sampling_method.tex": "2a764cc9691358b9f11fea9f2d0a439de3d16227cc9d615c3bbe15daa9945e24"
   }
 }
