@@ -858,7 +858,7 @@ def export_sample(
             local_git_commit(input_dir),
 
         "input_directory":
-            str(Path(input_dir).resolve()),
+            Path(input_dir).as_posix(),
 
         "input_files":
             sources,
