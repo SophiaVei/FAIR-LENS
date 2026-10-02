@@ -1,0 +1,260 @@
+venue,paper_count,paper_share_pct,venue_group,needs_manual_review
+Scientific reports,15,4.41,Multidisciplinary / General Science,False
+IEEE Access,11,3.24,Engineering / Computer Science,False
+Findings of the Association for Computational Linguistics: EMNLP 2025,6,1.76,NLP / Computational Linguistics,False
+PLOS One,6,1.76,Multidisciplinary / General Science,False
+Proceedings of the AAAI Conference on Artificial Intelligence,5,1.47,General AI / ML / Data Mining,False
+BMC medical informatics and decision making,4,1.18,Biomedical / Health,False
+INTERNATIONAL JOURNAL OF SCIENTIFIC RESEARCH IN ENGINEERING AND MANAGEMENT,4,1.18,Engineering / Computer Science,False
+Procedia Computer Science,4,1.18,Engineering / Computer Science,False
+"2025 IEEE 16th Annual Information Technology, Electronics and Mobile Communication Conference (IEMCON)",3,0.88,Engineering / Computer Science,False
+"Bioengineering (Basel, Switzerland)",3,0.88,Engineering / Computer Science,False
+"Diagnostics (Basel, Switzerland)",3,0.88,Other / Unclassified,True
+Frontiers in artificial intelligence,3,0.88,General AI / ML / Data Mining,False
+IEEE Transactions on Consumer Electronics,3,0.88,Engineering / Computer Science,False
+Information,3,0.88,Information Systems / Data / Digital Society,False
+"Sensors (Basel, Switzerland)",3,0.88,Engineering / Computer Science,False
+2025 3rd International Conference on Cyber Resilience (ICCR),2,0.59,Engineering / Computer Science,False
+2025 IEEE International Conference on Data Mining Workshops (ICDMW),2,0.59,General AI / ML / Data Mining,False
+"2025 IEEE International Conference on Metrology for eXtended Reality, Artificial Intelligence and Neural Engineering (MetroXRAINE)",2,0.59,General AI / ML / Data Mining,False
+"2025 International Conference on Quantum Photonics, Artificial Intelligence, and Networking (QPAIN)",2,0.59,General AI / ML / Data Mining,False
+2026 IEEE 5th International Conference on AI in Cybersecurity (ICAIC),2,0.59,Engineering / Computer Science,False
+AI,2,0.59,Other / Unclassified,True
+Algorithms,2,0.59,Other / Unclassified,True
+Applied and Computational Engineering,2,0.59,Engineering / Computer Science,False
+Cureus,2,0.59,Other / Unclassified,True
+Informatica,2,0.59,Other / Unclassified,True
+International Journal of Computational Intelligence Systems,2,0.59,Engineering / Computer Science,False
+International Journal of Information Security,2,0.59,Engineering / Computer Science,False
+International Journal of Research and Scientific Innovation,2,0.59,Other / Unclassified,True
+JMIR medical informatics,2,0.59,Biomedical / Health,False
+Journal of clinical medicine,2,0.59,Biomedical / Health,False
+Machine Learning and Knowledge Extraction,2,0.59,General AI / ML / Data Mining,False
+NPJ digital medicine,2,0.59,Biomedical / Health,False
+Nature communications,2,0.59,Multidisciplinary / General Science,False
+Proceedings of the 5th ACM International Conference on AI in Finance,2,0.59,Engineering / Computer Science,False
+ShodhKosh: Journal of Visual and Performing Arts,2,0.59,Other / Unclassified,True
+2022 25th International Conference on Computer and Information Technology (ICCIT),1,0.29,Information Systems / Data / Digital Society,False
+2022 IEEE International Conference on Big Data (Big Data),1,0.29,Engineering / Computer Science,False
+2023 5th International Conference on Problems of Cybernetics and Informatics (PCI),1,0.29,Engineering / Computer Science,False
+"2024 Conference on AI, Science, Engineering, and Technology (AIxSET)",1,0.29,Engineering / Computer Science,False
+"2024 IEEE 21st International Conference on Smart Communities: Improving Quality of Life using AI, Robotics and IoT (HONET)",1,0.29,Engineering / Computer Science,False
+2024 IEEE International Conference on Bioinformatics and Biomedicine (BIBM),1,0.29,Biomedical / Health,False
+"2024 IEEE International Conference on Electronics, Computing and Communication Technologies (CONECCT)",1,0.29,Engineering / Computer Science,False
+2024 IEEE International Conference on Image Processing (ICIP),1,0.29,Engineering / Computer Science,False
+2024 International Conference on Emerging Research in Computational Science (ICERCS),1,0.29,Other / Unclassified,True
+2024 International Conference on Intelligent Systems and Computer Vision (ISCV),1,0.29,Engineering / Computer Science,False
+2024 International Conference on Machine Learning and Applications (ICMLA),1,0.29,General AI / ML / Data Mining,False
+2025 19th IIAI International Congress on Advanced Applied Informatics (IIAI-AAI-Winter),1,0.29,Engineering / Computer Science,False
+2025 2nd Asia Pacific Conference on Innovation in Technology (APCIT),1,0.29,Other / Unclassified,True
+2025 2nd Global AI Summit - International Conference on Artificial Intelligence and Emerging Technology (AI Summit),1,0.29,General AI / ML / Data Mining,False
+2025 3rd International Conference on Business Analytics for Technology and Security (ICBATS),1,0.29,Engineering / Computer Science,False
+2025 5th International Conference on Evolutionary Computing and Mobile Sustainable Networks (ICECMSN),1,0.29,Engineering / Computer Science,False
+2025 5th International Conference on Intelligent Technologies (CONIT),1,0.29,Other / Unclassified,True
+2025 6th International Conference for Emerging Technology (INCET),1,0.29,Other / Unclassified,True
+2025 7th International Conference on Artificial Intelligence and Speech Technology (AIST),1,0.29,General AI / ML / Data Mining,False
+"2025 7th International Conference on Signal Processing, Computing and Control (ISPCC)",1,0.29,Engineering / Computer Science,False
+"2025 8th International Conference on Emerging Technologies in Computer Engineering: Advances in Computing, Healthcare and Smart Systems (ICETCE)",1,0.29,Biomedical / Health,False
+2025 Advances in Science and Engineering Technology International Conferences (ASET),1,0.29,Engineering / Computer Science,False
+2025 Eleventh International Conference on eDemocracy & eGovernment (ICEDEG),1,0.29,Education / Social Science / Other Applied,False
+2025 Global Conference on Information Technology and Communication Networks (GITCON),1,0.29,Information Systems / Data / Digital Society,False
+2025 IEEE 11th International Conference on Network Softwarization (NetSoft),1,0.29,Engineering / Computer Science,False
+2025 IEEE 22nd India Council International Conference (INDICON),1,0.29,Engineering / Computer Science,False
+2025 IEEE 3rd Global Conference on Wireless Computing and Networking (GCWCN),1,0.29,Engineering / Computer Science,False
+"2025 IEEE 6th International Seminar on Artificial Intelligence, Networking and Information Technology (AINIT)",1,0.29,General AI / ML / Data Mining,False
+"2025 IEEE 7th International Conference on Computing, Communication and Automation (ICCCA)",1,0.29,Engineering / Computer Science,False
+2025 IEEE 9th International Conference on Information and Communication Technology (CICT),1,0.29,Engineering / Computer Science,False
+2025 IEEE EMBS International Conference on Biomedical and Health Informatics (BHI),1,0.29,Biomedical / Health,False
+2025 IEEE International Conference on Advances in Computing Research On Science Engineering and Technology (ACROSET),1,0.29,Engineering / Computer Science,False
+2025 IEEE International Conference on Decentralized Applications and Infrastructures (DAPPS),1,0.29,Engineering / Computer Science,False
+"2025 IEEE International Conference on Systems, Man, and Cybernetics (SMC)",1,0.29,Engineering / Computer Science,False
+2025 IEEE/CVF International Conference on Computer Vision Workshops (ICCVW),1,0.29,Engineering / Computer Science,False
+2025 International Conference on Advanced Computing Technologies (ICoACT),1,0.29,Engineering / Computer Science,False
+2025 International Conference on Advanced Machine Learning and Data Science (AMLDS),1,0.29,General AI / ML / Data Mining,False
+2025 International Conference on Artificial Intelligence and Quantum Computation-Based Sensor Application (ICAIQSA),1,0.29,General AI / ML / Data Mining,False
+2025 International Conference on Emerging Smart Computing and Informatics (ESCI),1,0.29,Engineering / Computer Science,False
+2025 International Conference on Engineering Innovations and Technologies (ICoEIT),1,0.29,Engineering / Computer Science,False
+2025 International Conference on Intelligent Communication Networks and Computational Techniques (ICICNCT),1,0.29,Other / Unclassified,True
+2025 International Telecommunications Conference (ITC-Egypt),1,0.29,Engineering / Computer Science,False
+2025 SICE Festival with Annual Conference (SICE FES),1,0.29,Other / Unclassified,True
+2025 Silicon Valley Cybersecurity Conference (SVCC),1,0.29,Engineering / Computer Science,False
+"2026 5th International Conference on Communication, Computing and Electronics Systems (ICCCES)",1,0.29,Engineering / Computer Science,False
+2026 6th International Conference on Advanced Research in Computing (ICARC),1,0.29,Engineering / Computer Science,False
+2026 7th International Conference on Advancements in Computational Sciences (ICACS),1,0.29,Other / Unclassified,True
+2026 7th International Conference on Mobile Computing and Sustainable Informatics (ICMCSI),1,0.29,Engineering / Computer Science,False
+"2026 Sixth International Conference on Advances in Electrical, Computing, Communications and Sustainable Technologies (ICAECT)",1,0.29,Engineering / Computer Science,False
+ACM SIGMETRICS Performance Evaluation Review,1,0.29,Engineering / Computer Science,False
+ACM Transactions on Computing for Healthcare,1,0.29,Biomedical / Health,False
+"ACM-BCB ... ... : the ... ACM Conference on Bioinformatics, Computational Biology and Biomedicine. ACM Conference on Bioinformatics, Computational Biology and Biomedicine",1,0.29,Biomedical / Health,False
+ADIPEC,1,0.29,Other / Unclassified,True
+AHFE International,1,0.29,Other / Unclassified,True
+AIMS Mathematics,1,0.29,Other / Unclassified,True
+Acute critical care,1,0.29,Other / Unclassified,True
+Advanced Engineering Informatics,1,0.29,Engineering / Computer Science,False
+Advances in Artificial Intelligence and Machine Learning,1,0.29,General AI / ML / Data Mining,False
+Advances in Human-Computer Interaction,1,0.29,Responsible AI / HCI / Ethics,False
+American International Journal of Computer Science and Technology,1,0.29,Engineering / Computer Science,False
+American Journal of Management and IOT Medical Computing,1,0.29,Biomedical / Health,False
+Annals of internal medicine,1,0.29,Biomedical / Health,False
+Applied Sciences,1,0.29,Engineering / Computer Science,False
+Applied clinical informatics,1,0.29,Biomedical / Health,False
+Artificial Intelligence Systems and Its Applications,1,0.29,General AI / ML / Data Mining,False
+Artificial Intelligence for Transportation,1,0.29,General AI / ML / Data Mining,False
+BFH: ARBOR,1,0.29,Other / Unclassified,True
+BMC palliative care,1,0.29,Biomedical / Health,False
+Bioscience trends,1,0.29,Other / Unclassified,True
+Brain Sciences,1,0.29,Other / Unclassified,True
+British Food Journal,1,0.29,Other / Unclassified,True
+Case Studies in Construction Materials,1,0.29,Other / Unclassified,True
+Clinical and experimental medicine,1,0.29,Biomedical / Health,False
+Clinical and experimental otorhinolaryngology,1,0.29,Biomedical / Health,False
+"Cognitive, affective & behavioral neuroscience",1,0.29,Other / Unclassified,True
+Companion Proceedings of the 30th International Conference on Intelligent User Interfaces,1,0.29,Responsible AI / HCI / Ethics,False
+Companion Proceedings of the 31st International Conference on Intelligent User Interfaces,1,0.29,Responsible AI / HCI / Ethics,False
+Companion of the 2024 on ACM International Joint Conference on Pervasive and Ubiquitous Computing,1,0.29,Engineering / Computer Science,False
+Complex Engineering Systems,1,0.29,Engineering / Computer Science,False
+Computational and structural biotechnology journal,1,0.29,Other / Unclassified,True
+Computer Networks,1,0.29,Other / Unclassified,True
+Computer Science Bulletin,1,0.29,Engineering / Computer Science,False
+"Computers, Materials & Continua",1,0.29,Other / Unclassified,True
+Digital Communications and Networks,1,0.29,Engineering / Computer Science,False
+Digital Medicine,1,0.29,Biomedical / Health,False
+Dinkum Journal of Medical Innovations,1,0.29,Biomedical / Health,False
+Discover Applied Sciences,1,0.29,Engineering / Computer Science,False
+Discover Computing,1,0.29,Engineering / Computer Science,False
+E+M Ekonomie a Management,1,0.29,Education / Social Science / Other Applied,False
+Egyptian Informatics Journal,1,0.29,Engineering / Computer Science,False
+Electronics,1,0.29,Engineering / Computer Science,False
+"Entropy (Basel, Switzerland)",1,0.29,Other / Unclassified,True
+European Heart Journal,1,0.29,Other / Unclassified,True
+Expert Systems,1,0.29,General AI / ML / Data Mining,False
+Findings of the Association for Computational Linguistics ACL 2024,1,0.29,NLP / Computational Linguistics,False
+Findings of the Association for Computational Linguistics: ACL 2025,1,0.29,NLP / Computational Linguistics,False
+Findings of the Association for Computational Linguistics: EACL 2026,1,0.29,NLP / Computational Linguistics,False
+Findings of the Association for Computational Linguistics: EMNLP 2023,1,0.29,NLP / Computational Linguistics,False
+Findings of the Association for Computational Linguistics: EMNLP 2024,1,0.29,NLP / Computational Linguistics,False
+Food and Bioprocess Technology,1,0.29,Other / Unclassified,True
+"Foods (Basel, Switzerland)",1,0.29,Other / Unclassified,True
+Forecasting,1,0.29,Other / Unclassified,True
+Frontiers in Education,1,0.29,Education / Social Science / Other Applied,False
+Frontiers in digital health,1,0.29,Biomedical / Health,False
+Frontiers in medicine,1,0.29,Biomedical / Health,False
+Frontiers in psychology,1,0.29,Education / Social Science / Other Applied,False
+Frontiers in public health,1,0.29,Biomedical / Health,False
+Future Internet,1,0.29,Other / Unclassified,True
+Grail of Science,1,0.29,Other / Unclassified,True
+"Healthcare (Basel, Switzerland)",1,0.29,Biomedical / Health,False
+"Highlights in Science, Engineering and Technology",1,0.29,Engineering / Computer Science,False
+IAES International Journal of Artificial Intelligence (IJ-AI),1,0.29,General AI / ML / Data Mining,False
+IEEE Geoscience and Remote Sensing Letters,1,0.29,Engineering / Computer Science,False
+IEEE Transactions on Affective Computing,1,0.29,Engineering / Computer Science,False
+IEEE Transactions on Technology and Society,1,0.29,Engineering / Computer Science,False
+IEEE transactions on image processing : a publication of the IEEE Signal Processing Society,1,0.29,Engineering / Computer Science,False
+IGARSS 2023 - 2023 IEEE International Geoscience and Remote Sensing Symposium,1,0.29,Engineering / Computer Science,False
+INTERNATIONAL JOURNAL OF ADVANCES IN SIGNAL AND IMAGE SCIENCES,1,0.29,Other / Unclassified,True
+Image and Vision Computing,1,0.29,Engineering / Computer Science,False
+Imperial College Research Computing Service Data Repository,1,0.29,Engineering / Computer Science,False
+Indonesian Journal of Electrical Engineering and Computer Science,1,0.29,Engineering / Computer Science,False
+Informatics in Medicine Unlocked,1,0.29,Biomedical / Health,False
+Information Systems Frontiers,1,0.29,Engineering / Computer Science,False
+International Joint Conference on Autonomous Agents and Multiagent Systems,1,0.29,Engineering / Computer Science,False
+International Journal for Research Publication and Seminar,1,0.29,Other / Unclassified,True
+International Journal for Research in Applied Science and Engineering Technology,1,0.29,Engineering / Computer Science,False
+International Journal of Academic Medicine,1,0.29,Biomedical / Health,False
+International Journal of Advanced Research in Science Communication and Technology,1,0.29,Other / Unclassified,True
+"International Journal of Advanced Research in Science, Communication and Technology",1,0.29,Other / Unclassified,True
+International Journal of Applied Mathematics,1,0.29,Other / Unclassified,True
+International Journal of Basic and Applied Sciences,1,0.29,Engineering / Computer Science,False
+International Journal of Computational and Experimental Science and Engineering,1,0.29,Engineering / Computer Science,False
+International Journal of Computing and Artificial Intelligence,1,0.29,General AI / ML / Data Mining,False
+"International Journal of Economics, Commerce, and Management",1,0.29,Education / Social Science / Other Applied,False
+International Journal of Health Services Research and Policy,1,0.29,Biomedical / Health,False
+International Journal of Research Publication and Reviews,1,0.29,Other / Unclassified,True
+"International Journal of Research and Review in Applied Science, Humanities, and Technology",1,0.29,Other / Unclassified,True
+International Journal of Science and Research (IJSR),1,0.29,Other / Unclassified,True
+International Journal of Scientific Research and Modern Technology,1,0.29,Other / Unclassified,True
+International Journal of Scientific Research in Humanities and Social Sciences,1,0.29,Education / Social Science / Other Applied,False
+"International Journal of Scientific Research in Science, Engineering and Technology",1,0.29,Engineering / Computer Science,False
+International Journal on Science and Technology,1,0.29,Other / Unclassified,True
+International Scientific Journal of Engineering and Management,1,0.29,Engineering / Computer Science,False
+International journal of molecular sciences,1,0.29,Other / Unclassified,True
+JCO clinical cancer informatics,1,0.29,Biomedical / Health,False
+"Journal of Advanced Artificial Intelligence, Engineering and Technology",1,0.29,General AI / ML / Data Mining,False
+Journal of Artificial Intelligence Research,1,0.29,General AI / ML / Data Mining,False
+Journal of Artificial Intelligence and Big Data Disciplines,1,0.29,General AI / ML / Data Mining,False
+Journal of Computer Science and Technology Studies,1,0.29,Engineering / Computer Science,False
+Journal of Cyber Security and Risk Auditing,1,0.29,Engineering / Computer Science,False
+Journal of Cybersecurity and Privacy,1,0.29,Engineering / Computer Science,False
+Journal of Educational Measurement,1,0.29,Education / Social Science / Other Applied,False
+"Journal of Electronics, Electromedical Engineering, and Medical Informatics",1,0.29,Biomedical / Health,False
+Journal of Engineering Education,1,0.29,Engineering / Computer Science,False
+Journal of Informatics and Web Engineering,1,0.29,Engineering / Computer Science,False
+Journal of Integrated Health Sciences,1,0.29,Biomedical / Health,False
+Journal of Literature and Linguistics Studies,1,0.29,Education / Social Science / Other Applied,False
+Journal of Property Investment & Finance,1,0.29,Education / Social Science / Other Applied,False
+"Journal of Research, Innovation and Technologies (JoRIT)",1,0.29,Other / Unclassified,True
+Journal of cheminformatics,1,0.29,Engineering / Computer Science,False
+Journal of medical systems,1,0.29,Biomedical / Health,False
+Latin American Journal of European Studies,1,0.29,Other / Unclassified,True
+Mathematics,1,0.29,Other / Unclassified,True
+Multidisciplinary Reviews,1,0.29,Other / Unclassified,True
+Nature,1,0.29,Other / Unclassified,True
+Neural Computing and Applications,1,0.29,General AI / ML / Data Mining,False
+Neural Processing Letters,1,0.29,Other / Unclassified,True
+"One health (Amsterdam, Netherlands)",1,0.29,Biomedical / Health,False
+Open Research Europe,1,0.29,Other / Unclassified,True
+PLoS computational biology,1,0.29,Other / Unclassified,True
+PeerJ. Computer science,1,0.29,Engineering / Computer Science,False
+Pharmaceuticals,1,0.29,Other / Unclassified,True
+Physiotherapy Practice and Research,1,0.29,Other / Unclassified,True
+"Plants (Basel, Switzerland)",1,0.29,Other / Unclassified,True
+"Proceedings of The International Conference on Advanced Research in Management, Business and Finance",1,0.29,Education / Social Science / Other Applied,False
+"Proceedings of the 12th International Conference on Next Generation Computing, Communication, Systems and Security",1,0.29,Engineering / Computer Science,False
+Proceedings of the 18th Conference of the European Chapter of the Association for Computational Linguistics (Volume 1: Long Papers),1,0.29,NLP / Computational Linguistics,False
+Proceedings of the 2024 Conference on Empirical Methods in Natural Language Processing,1,0.29,NLP / Computational Linguistics,False
+"Proceedings of the 2025 ACM Conference on Fairness, Accountability, and Transparency",1,0.29,Responsible AI / HCI / Ethics,False
+Proceedings of the 2025 Conference on Empirical Methods in Natural Language Processing,1,0.29,NLP / Computational Linguistics,False
+Proceedings of the 2025 International ACM SIGIR Conference on Innovative Concepts and Theories in Information Retrieval (ICTIR),1,0.29,Engineering / Computer Science,False
+Proceedings of the 2025 International Conference on Artificial Intelligence and Digital Finance,1,0.29,General AI / ML / Data Mining,False
+Proceedings of the 2025 International Conference on Artificial Intelligence and its Applications,1,0.29,General AI / ML / Data Mining,False
+Proceedings of the 2025 International Symposium on Machine Learning and Social Computing,1,0.29,General AI / ML / Data Mining,False
+Proceedings of the 31st International Conference on Intelligent User Interfaces,1,0.29,Responsible AI / HCI / Ethics,False
+"Proceedings of the 33rd ACM Conference on User Modeling, Adaptation and Personalization",1,0.29,Engineering / Computer Science,False
+Proceedings of the 5th Workshop on Gender Bias in Natural Language Processing (GeBNLP),1,0.29,NLP / Computational Linguistics,False
+Proceedings of the 61st Annual Meeting of the Association for Computational Linguistics (Volume 1: Long Papers),1,0.29,NLP / Computational Linguistics,False
+Proceedings of the 61st Annual Meeting of the Association for Computational Linguistics (Volume 3: System Demonstrations),1,0.29,NLP / Computational Linguistics,False
+Proceedings of the 6th Workshop on Gender Bias in Natural Language Processing (GeBNLP),1,0.29,NLP / Computational Linguistics,False
+Proceedings of the Association for Information Science and Technology,1,0.29,Other / Unclassified,True
+Proceedings of the Design Society,1,0.29,Other / Unclassified,True
+Proceedings of the Fourth BlackboxNLP Workshop on Analyzing and Interpreting Neural Networks for NLP,1,0.29,Other / Unclassified,True
+Proceedings of the IV International Scientific and Practical Conference,1,0.29,Other / Unclassified,True
+Proceedings of the Nineteenth ACM International Conference on Web Search and Data Mining,1,0.29,General AI / ML / Data Mining,False
+Proceedings of the Nineteenth International Conference on Artificial Intelligence and Law,1,0.29,General AI / ML / Data Mining,False
+Proceedings of the The 17th International Workshop on Semantic Evaluation (SemEval-2023),1,0.29,NLP / Computational Linguistics,False
+"Progress in biomedical engineering (Bristol, England)",1,0.29,Biomedical / Health,False
+Remote Sensing of Environment,1,0.29,Other / Unclassified,True
+Research Journal for Social Affairs,1,0.29,Education / Social Science / Other Applied,False
+Revista Internacional Consinter de Direito,1,0.29,Other / Unclassified,True
+SOFT MEASUREMENTS AND COMPUTING,1,0.29,Engineering / Computer Science,False
+SSRN Electronic Journal,1,0.29,Other / Unclassified,True
+Science advances,1,0.29,Multidisciplinary / General Science,False
+Science and engineering ethics,1,0.29,Engineering / Computer Science,False
+"Scientia. Technology, Science and Society",1,0.29,Other / Unclassified,True
+"Second International Conference on Communication, Information, and Digital Technologies (CIDT 2025)",1,0.29,Information Systems / Data / Digital Society,False
+Seminars in hematology,1,0.29,Other / Unclassified,True
+Seminars in ophthalmology,1,0.29,Other / Unclassified,True
+"Signal, Image Processing and Multimedia Trends 2025",1,0.29,Other / Unclassified,True
+Smart Agricultural Technology,1,0.29,Other / Unclassified,True
+Social Network Analysis and Mining,1,0.29,Education / Social Science / Other Applied,False
+Technology in Society,1,0.29,Other / Unclassified,True
+The 2024 ACM Conference on Fairness Accountability and Transparency,1,0.29,Responsible AI / HCI / Ethics,False
+The Asian Bulletin of Big Data Management,1,0.29,Information Systems / Data / Digital Society,False
+The British journal of ophthalmology,1,0.29,Other / Unclassified,True
+The Eastasouth Journal of Information System and Computer Science,1,0.29,Engineering / Computer Science,False
+The Lancet regional health. Western Pacific,1,0.29,Biomedical / Health,False
+The Scientific Temper,1,0.29,Other / Unclassified,True
+University of Wah Journal of Computer Science,1,0.29,Engineering / Computer Science,False
+Urban Governance,1,0.29,Other / Unclassified,True
+Water,1,0.29,Other / Unclassified,True
+World Journal of Advanced Engineering Technology and Sciences,1,0.29,Engineering / Computer Science,False
+Медицинская этика,1,0.29,Other / Unclassified,True

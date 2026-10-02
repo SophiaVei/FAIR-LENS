@@ -1,0 +1,33 @@
+author,n_papers,n_venues,n_venue_groups,venue_diversity_norm,venue_group_diversity_norm,multi_venue,multi_group
+Mohamed Bader-El-Den,3,3,1,1.0,0.0,True,False
+Omer Faruk Sari,3,3,1,1.0,0.0,True,False
+Volkan Ince,3,3,1,1.0,0.0,True,False
+Jing Yang,3,1,1,0.0,0.0,False,False
+Muhammad Attique Khan,3,1,1,0.0,0.0,False,False
+Zaffar Ahmed Shaikh,3,1,1,0.0,0.0,False,False
+Al Shahriar Uddin Khondakar Pranta,2,2,2,1.0,1.0,True,True
+Alessandra Lumini,2,2,2,1.0,1.0,True,True
+Craig Leadley,2,2,1,1.0,0.0,True,False
+Francisco Herrera,2,2,2,1.0,1.0,True,True
+Hamdadur Rahman,2,2,2,1.0,1.0,True,True
+Maarten de Rijke,2,2,2,1.0,1.0,True,True
+Md Redwan Ahmed,2,2,2,1.0,1.0,True,True
+Panudech Tipauksorn,2,2,2,1.0,1.0,True,True
+Prasert Luekhong,2,2,2,1.0,1.0,True,True
+Prasert Teppap,2,2,2,1.0,1.0,True,True
+Qinghe Zhang,2,2,1,1.0,0.0,True,False
+René Palacios Garita,2,2,1,1.0,0.0,True,False
+Rezaul Haque,2,2,2,1.0,1.0,True,True
+S M Masfequier Rahman Swapno,2,2,2,1.0,1.0,True,True
+Santosh Kumar,2,2,1,1.0,0.0,True,False
+Xiaojun Xiao,2,2,1,1.0,0.0,True,False
+Ammar Habeeb Jahlool,2,1,1,0.0,0.0,False,False
+Berk Buzcu,2,1,1,0.0,0.0,False,False
+Davide Calvaresi,2,1,1,0.0,0.0,False,False
+Kostas Lampropoulos,2,1,1,0.0,0.0,False,False
+Lip Yee Por,2,1,1,0.0,0.0,False,False
+Nurmyrat Amanmadov,2,1,1,0.0,0.0,False,False
+Shareeful Islam,2,1,1,0.0,0.0,False,False
+Spyridon Papastergiou,2,1,1,0.0,0.0,False,False
+Tarlan Abdullayev,2,1,1,0.0,0.0,False,False
+Vijay Govindarajan,2,1,1,0.0,0.0,False,False

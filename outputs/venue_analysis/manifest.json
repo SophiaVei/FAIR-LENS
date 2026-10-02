@@ -1,0 +1,18 @@
+{
+  "script": "analyze_venue_structure.py",
+  "master_input": "outputs\\tri_results_master.csv",
+  "metadata_input": "outputs\\prefilter_kept.csv",
+  "master_sha256": "735bdedbcaaa70228c0cd87e73e0af9675323d5a83ff5dc169a16da1ce2d1f0b",
+  "metadata_sha256": "2f098b72df07b02be35f98540863bfdc7d474329709fc37417adacec3c2ebe6e",
+  "directionally_relevant_unique_papers": 340,
+  "distinct_venue_labels": 259,
+  "output_directory": "outputs\\venue_analysis",
+  "outputs": [
+    "venue_counts.csv",
+    "venue_long_tail.csv",
+    "venue_group_mapping.csv",
+    "venue_groups.csv",
+    "author_venue_breadth.csv",
+    "venue_analysis.md"
+  ]
+}
