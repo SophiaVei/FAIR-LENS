@@ -678,15 +678,22 @@ def fig4_diagnostic_vs_proactive(rel: pd.DataFrame):
 # Figure 5 — Top venues (horizontal bar)
 # ═══════════════════════════════════════════════════════════════════════
 def fig5_top_venues(rel: pd.DataFrame, top_n: int = 10):
-    # Deduplicate: count each unique paper per venue only once
+    # Count unique papers, normalizing venue labels case-insensitively.
     papers = rel.drop_duplicates(subset=["title"]).copy()
-    venue_counts = (papers["venue"]
-                    .dropna()
-                    .loc[lambda s: s != "nan"]
-                    .str.strip()
-                    .value_counts()
-                    .head(top_n)
-                    .iloc[::-1])  # reverse for horizontal bar
+    papers["venue"] = papers["venue"].astype("string").str.strip()
+    papers = papers[papers["venue"].notna() & papers["venue"].str.casefold().ne("nan")]
+    papers["venue_key"] = papers["venue"].str.casefold()
+    venue_counts = (
+        papers.groupby("venue_key")
+        .agg(
+            venue=("venue", lambda values: sorted(values)[0]),
+            paper_count=("title", "size"),
+        )
+        .sort_values(["paper_count", "venue"], ascending=[False, True])
+        .head(top_n)
+        .set_index("venue")["paper_count"]
+        .iloc[::-1]
+    )
 
     fig, ax = plt.subplots(figsize=(12, 6), facecolor=BG_TRANSPARENT)
     colors = plt.cm.viridis(np.linspace(0.3, 0.85, len(venue_counts)))
