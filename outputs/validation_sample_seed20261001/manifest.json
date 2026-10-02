@@ -1,6 +1,6 @@
 {
   "script_version": "1.1.0",
-  "created_utc": "2026-10-02T07:09:43.285075+00:00",
+  "created_utc": "2026-10-02T07:24:49.054035+00:00",
   "purpose": "Reproducible sampling and documentation of the FAIR-LENS pathway-coding validation sample.",
   "design": "Equal-allocation stratified simple random sampling without replacement of positive paper-pathway assignments.",
   "sampling_unit": "paper-pathway assignment",
@@ -11,10 +11,10 @@
   "stratum_seed_derivation": "SHA256(FAIR-LENS-positive-audit-v1|<seed>|<question_id>), interpreted as an integer",
   "python_version": "3.12.6",
   "python_implementation": "CPython",
-  "script_sha256": "0fc8ac4cd352f5f3f7d1200670d57e2a5be2353ce2b9a62a3426eff90da40b56",
+  "script_sha256": "ae40bdca45bfb6520ec2b27ec15d55118e9377633a5b10111ad62e8abb1ce3d8",
   "source_ref_supplied": null,
-  "local_git_commit": "6ec6c4200f4777abe8456a79e7570523a79ef3a5",
-  "input_directory": "C:\\Users\\sophi\\FAIR-LEARN\\outputs",
+  "local_git_commit": "800ff99f35709fce3a64ac2a10bfe78717a735a8",
+  "input_directory": "outputs",
   "input_files": [
     {
       "file": "tri_results_Q1.csv",
