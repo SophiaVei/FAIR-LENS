@@ -517,6 +517,10 @@ def fig3_edge_distribution(rel: pd.DataFrame):
     edge_names = list(edges.keys())
     edge_totals = [sum(counts.get(q, 0) for q in e["qs"]) for e in edges.values()]
     edge_colors = [EDGE_COLORS[e["cluster"]] for e in edges.values()]
+    # Patterns preserve the distinctions when the figure is printed in greyscale.
+    edge_hatches = ["|", "/", "\\"]
+    original_hatch_linewidth = plt.rcParams["hatch.linewidth"]
+    plt.rcParams["hatch.linewidth"] = 0.55
 
     fig, axes = plt.subplots(
         1, 2, figsize=(12, 5), gridspec_kw={"width_ratios": [1.5, 1]}, facecolor=BG_TRANSPARENT
@@ -532,13 +536,22 @@ def fig3_edge_distribution(rel: pd.DataFrame):
         c_a = counts.get(q_a, 0)
         c_b = counts.get(q_b, 0)
 
-        ax.barh(i - bar_h / 2, c_a, bar_h, color=Q_COLORS[q_a], edgecolor="none", zorder=3)
-        ax.barh(i + bar_h / 2, c_b, bar_h, color=Q_COLORS[q_b], edgecolor="none", zorder=3)
+        outline = EDGE_COLORS[info["cluster"]]
+        ax.barh(
+            i - bar_h / 2, c_a, bar_h,
+            color=Q_COLORS[q_a], edgecolor=outline, linewidth=0.65,
+            zorder=3,
+        )
+        ax.barh(
+            i + bar_h / 2, c_b, bar_h,
+            color=Q_COLORS[q_b], edgecolor=outline, linewidth=0.65,
+            zorder=3,
+        )
 
         ax.text(c_a + 3, i - bar_h/2, f"{rp_short_label(q_a)}: {c_a}",
                 va="center", fontsize=9, color=TEXT_MAIN)
         ax.text(c_b + 3, i + bar_h/2, f"{rp_short_label(q_b)}: {c_b}",
-                va="center", fontsize=9, color=TEXT_MUTED)
+                va="center", fontsize=9, color=TEXT_MAIN)
 
     ax.set_yticks(y_positions)
     ax.set_yticklabels([""] * len(edge_names))
@@ -555,11 +568,21 @@ def fig3_edge_distribution(rel: pd.DataFrame):
         ax.scatter(
             marker_x,
             i,
-            s=220,
+            s=320,
             color=EDGE_COLORS[info["cluster"]],
-            edgecolors=TEXT_MAIN,
-            linewidths=1.0,
+            edgecolors="#ffffff",
+            linewidths=0.55,
+            hatch=edge_hatches[i],
             zorder=4,
+        )
+        ax.scatter(
+            marker_x,
+            i,
+            s=320,
+            facecolors="none",
+            edgecolors=TEXT_MAIN,
+            linewidths=1.1,
+            zorder=5,
         )
 
     # Right: donut chart of total edge distribution
@@ -567,13 +590,16 @@ def fig3_edge_distribution(rel: pd.DataFrame):
     wedges, texts, autotexts = ax2.pie(
         edge_totals, labels=None,
         colors=edge_colors, autopct="%1.0f%%",
-        startangle=90, pctdistance=0.78,
-        wedgeprops=dict(width=0.45, edgecolor="none", linewidth=0),
+        startangle=90, pctdistance=0.76,
+        wedgeprops=dict(width=0.45, edgecolor="#ffffff", linewidth=0.9),
     )
-    for t in autotexts:
-        t.set_fontsize(11)
+    for wedge, hatch in zip(wedges, edge_hatches):
+        wedge.set_hatch(hatch)
+    for t, wedge in zip(autotexts, wedges):
+        t.set_fontsize(12)
         t.set_fontweight("bold")
         t.set_color("#ffffff")
+        t.set_bbox({"facecolor": wedge.get_facecolor(), "edgecolor": "none", "pad": 0.3})
 
     # Center text
     ax2.text(0, 0, f"{sum(edge_totals)}\nassignments",
@@ -581,14 +607,21 @@ def fig3_edge_distribution(rel: pd.DataFrame):
              color=TEXT_MAIN)
 
     leg = ax2.legend(
+        wedges,
         [f"{n}  ({t})" for n, t in zip(edge_names, edge_totals)],
         loc="lower center", bbox_to_anchor=(0.5, -0.15),
         fontsize=11, frameon=False, ncol=1
     )
     _style_legend(leg)
+    legend_handles = getattr(leg, "legend_handles", None) or getattr(leg, "legendHandles", [])
+    for handle, hatch in zip(legend_handles, edge_hatches):
+        handle.set_edgecolor("#ffffff")
+        handle.set_linewidth(0.8)
+        handle.set_hatch(hatch)
 
     fig.tight_layout()
     save(fig, "fig3_edge_distribution")
+    plt.rcParams["hatch.linewidth"] = original_hatch_linewidth
 
 
 # ═══════════════════════════════════════════════════════════════════════
